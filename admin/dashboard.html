@@ -124,18 +124,42 @@
               Fonte do cardápio
               <select name="fonte_key">
                 <option value="sora" selected>Padrão (Sora)</option>
+                <option value="inter">Inter (moderna)</option>
+                <option value="poppins">Poppins (arredondada)</option>
+                <option value="montserrat">Montserrat (títulos fortes)</option>
+                <option value="nunito">Nunito (suave)</option>
+                <option value="rubik">Rubik (geométrica)</option>
+                <option value="outfit">Outfit (clean)</option>
+                <option value="dm_sans">DM Sans (neutra)</option>
+                <option value="work_sans">Work Sans (corporativa)</option>
+                <option value="lora">Lora (serif elegante)</option>
+                <option value="merriweather">Merriweather (serif clássica)</option>
                 <option value="system">Sistema</option>
-                <option value="segoe">Segoe UI (Windows)</option>
-                <option value="arial">Arial</option>
-                <option value="trebuchet">Trebuchet</option>
-                <option value="verdana">Verdana</option>
-                <option value="tahoma">Tahoma</option>
-                <option value="georgia">Georgia</option>
-                <option value="times">Times New Roman</option>
-                <option value="palatino">Palatino</option>
-                <option value="courier">Courier New (mono)</option>
               </select>
             </label>
+
+            <div class="two-cols">
+              <label>
+                Peso do texto
+                <select name="fonte_peso_texto">
+                  <option value="300">Fina (300)</option>
+                  <option value="400" selected>Normal (400)</option>
+                  <option value="500">Média (500)</option>
+                  <option value="600">Semi-negrita (600)</option>
+                  <option value="700">Negrita (700)</option>
+                </select>
+              </label>
+
+              <label>
+                Peso do título
+                <select name="fonte_peso_titulo">
+                  <option value="600">600</option>
+                  <option value="700">700</option>
+                  <option value="800" selected>800</option>
+                  <option value="900">900</option>
+                </select>
+              </label>
+            </div>
 
             <label>
               Horário de funcionamento (opcional)
@@ -287,6 +311,6 @@
       </section>
     </main>
 
-    <script type="module" src="/admin/script.js?v=6"></script>
+    <script type="module" src="/admin/script.js?v=7"></script>
   </body>
 </html>

@@ -300,6 +300,8 @@ function fillCardapioForm(item) {
   if (form.cor_borda) form.cor_borda.value = item.cor_borda || "#f0dfd1";
   if (form.slogan) form.slogan.value = item.slogan || "";
   if (form.fonte_key) form.fonte_key.value = item.fonte_key || "sora";
+  if (form.fonte_peso_texto) form.fonte_peso_texto.value = String(item.fonte_peso_texto ?? 400);
+  if (form.fonte_peso_titulo) form.fonte_peso_titulo.value = String(item.fonte_peso_titulo ?? 800);
   if (form.horario_funcionamento) form.horario_funcionamento.value = item.horario_funcionamento || "";
   if (form.abre_em) form.abre_em.value = item.abre_em ? String(item.abre_em).slice(0, 5) : "";
   if (form.fecha_em) form.fecha_em.value = item.fecha_em ? String(item.fecha_em).slice(0, 5) : "";
@@ -422,6 +424,10 @@ async function setupDashboardPage() {
     const cor_borda = String(formData.get("cor_borda") || "").trim();
     const slogan = String(formData.get("slogan") || "").trim();
     const fonte_key = String(formData.get("fonte_key") || "sora").trim() || "sora";
+    const fonte_peso_texto_raw = String(formData.get("fonte_peso_texto") || "400").trim();
+    const fonte_peso_titulo_raw = String(formData.get("fonte_peso_titulo") || "800").trim();
+    const fonte_peso_texto = Number.parseInt(fonte_peso_texto_raw || "400", 10) || 400;
+    const fonte_peso_titulo = Number.parseInt(fonte_peso_titulo_raw || "800", 10) || 800;
     const horario_funcionamento = String(formData.get("horario_funcionamento") || "").trim();
     const abre_em = String(formData.get("abre_em") || "").trim();
     const fecha_em = String(formData.get("fecha_em") || "").trim();
@@ -462,6 +468,8 @@ async function setupDashboardPage() {
       cor_borda: cor_borda || null,
       slogan: slogan || null,
       fonte_key,
+      fonte_peso_texto,
+      fonte_peso_titulo,
       horario_funcionamento: horario_funcionamento || null,
       abre_em: abre_em || null,
       fecha_em: fecha_em || null,

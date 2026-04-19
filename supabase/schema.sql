@@ -11,6 +11,8 @@ create table if not exists public.cardapios (
   cor_tema text not null default '#ff6a00',
   cor_secundaria text,
   fonte_key text,
+  fonte_peso_texto integer,
+  fonte_peso_titulo integer,
   abre_em time,
   fecha_em time,
   fundo_estilo text not null default 'padrao' check (fundo_estilo in ('padrao','solido','degrade_linear','degrade_radial')),
@@ -42,6 +44,8 @@ create table if not exists public.cardapios (
 -- Se você já executou este schema antes, rode também este patch (não quebra se já existir).
 alter table public.cardapios add column if not exists cor_secundaria text;
 alter table public.cardapios add column if not exists fonte_key text;
+alter table public.cardapios add column if not exists fonte_peso_texto integer;
+alter table public.cardapios add column if not exists fonte_peso_titulo integer;
 alter table public.cardapios add column if not exists abre_em time;
 alter table public.cardapios add column if not exists fecha_em time;
 alter table public.cardapios add column if not exists fundo_estilo text;
@@ -77,6 +81,8 @@ update public.cardapios set whatsapp_botao = 'flutuante' where whatsapp_botao is
 update public.cardapios set fundo_estilo = 'padrao' where fundo_estilo is null;
 update public.cardapios set fundo_angulo = 135 where fundo_angulo is null;
 update public.cardapios set fonte_key = 'sora' where fonte_key is null;
+update public.cardapios set fonte_peso_texto = 400 where fonte_peso_texto is null;
+update public.cardapios set fonte_peso_titulo = 800 where fonte_peso_titulo is null;
 
 create table if not exists public.produtos (
   id uuid primary key default gen_random_uuid(),

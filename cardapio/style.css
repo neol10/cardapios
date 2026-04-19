@@ -2,6 +2,8 @@
   --theme: #ff6a00;
   --theme2: #c8945b;
   --font: "Sora", sans-serif;
+  --font-weight: 400;
+  --heading-weight: 800;
   --bg: #fffaf3;
   --surface: #ffffff;
   --text: #2a211d;
@@ -18,6 +20,7 @@
 body {
   margin: 0;
   font-family: var(--font);
+  font-weight: var(--font-weight);
   color: var(--text);
   background:
     radial-gradient(circle at 10% 10%, color-mix(in srgb, var(--theme) 24%, #fff) 0%, transparent 42%),
@@ -86,6 +89,7 @@ body.bg-radial {
   font-size: clamp(1.9rem, 4.2vw, 2.8rem);
   line-height: 1.05;
   letter-spacing: -0.02em;
+  font-weight: var(--heading-weight);
 }
 
 .hero p {
@@ -299,6 +303,7 @@ p {
   margin: 0;
   font-size: 1.02rem;
   line-height: 1.15;
+  font-weight: var(--heading-weight);
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;

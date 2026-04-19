@@ -61,22 +61,35 @@ function setSecondaryColor(color) {
 
 const FONT_STACKS = {
   sora: '"Sora", system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif',
-  system: 'system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif',
-  segoe: '"Segoe UI", system-ui, -apple-system, Arial, sans-serif',
-  arial: 'Arial, Helvetica, system-ui, -apple-system, "Segoe UI", sans-serif',
-  trebuchet: '"Trebuchet MS", Trebuchet, Arial, sans-serif',
-  verdana: 'Verdana, Geneva, Tahoma, sans-serif',
-  tahoma: 'Tahoma, Verdana, Geneva, sans-serif',
-  georgia: 'Georgia, "Times New Roman", Times, serif',
-  times: '"Times New Roman", Times, serif',
-  palatino: '"Palatino Linotype", Palatino, Georgia, serif',
-  courier: '"Courier New", Courier, monospace'
+  inter: '"Inter", system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif',
+  poppins: '"Poppins", system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif',
+  montserrat: '"Montserrat", system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif',
+  nunito: '"Nunito", system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif',
+  rubik: '"Rubik", system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif',
+  outfit: '"Outfit", system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif',
+  dm_sans: '"DM Sans", system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif',
+  work_sans: '"Work Sans", system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif',
+  lora: '"Lora", Georgia, "Times New Roman", Times, serif',
+  merriweather: '"Merriweather", Georgia, "Times New Roman", Times, serif',
+  system: 'system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif'
 };
 
-function applyFontKey(fontKey) {
-  const key = safeText(fontKey) || "sora";
+function toFontWeight(value, fallback) {
+  const n = Number.parseInt(String(value || ""), 10);
+  if (!Number.isFinite(n)) return fallback;
+  if (n < 200 || n > 900) return fallback;
+  return n;
+}
+
+function applyFontSettings(cardapio) {
+  const key = safeText(cardapio?.fonte_key) || "sora";
   const stack = FONT_STACKS[key] || FONT_STACKS.sora;
   document.documentElement.style.setProperty("--font", stack);
+
+  const pesoTexto = toFontWeight(cardapio?.fonte_peso_texto, 400);
+  const pesoTitulo = toFontWeight(cardapio?.fonte_peso_titulo, 800);
+  document.documentElement.style.setProperty("--font-weight", String(pesoTexto));
+  document.documentElement.style.setProperty("--heading-weight", String(pesoTitulo));
 }
 
 function setOptionalVar(name, value) {
@@ -468,7 +481,7 @@ async function loadCardapio() {
   document.querySelector("#cardapio-nome").textContent = data.nome;
   setThemeColor(data.cor_tema);
   setSecondaryColor(data.cor_secundaria);
-  applyFontKey(data.fonte_key);
+  applyFontSettings(data);
 
   // Overrides de cores (opcional)
   setOptionalVar("--bg", data.cor_fundo);
