@@ -23,19 +23,26 @@ const state = {
   isEditingCardapio: false
 };
 
-const DEFAULT_WHATSAPP_TEMPLATE = `*Novo pedido - {LOJA}*
-*Tipo:* {TIPO_PEDIDO}
-*Pagamento:* {PAGAMENTO}
+const DEFAULT_WHATSAPP_TEMPLATE = `*✅ Novo pedido — {LOJA}*
+━━━━━━━━━━━━━━━━
+*Resumo*
+• Tipo: {TIPO_PEDIDO}
+• Pagamento: {PAGAMENTO}
 
-*Cliente:* {NOME} | {TELEFONE}
-*Endereço:* {ENDERECO}
+*Cliente*
+{NOME}
+{TELEFONE}
 
-*Itens:*
+*Endereço*
+{ENDERECO}
+
+*Itens*
 {ITENS}
 
-*Subtotal:* {SUBTOTAL}
-*Taxa:* {TAXA_ENTREGA}
-*Total:* {TOTAL}`;
+*Valores*
+Subtotal: {SUBTOTAL}
+Taxa de entrega: {TAXA_ENTREGA}
+*Total: {TOTAL}*`;
 
 function escapeHtml(value) {
   const str = String(value ?? "");
