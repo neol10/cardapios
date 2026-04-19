@@ -1,4 +1,30 @@
-import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm";
+const SUPABASE_IMPORT_URLS = [
+  "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm",
+  "https://esm.sh/@supabase/supabase-js@2"
+];
+
+async function importSupabaseModule() {
+  let lastError;
+  for (const url of SUPABASE_IMPORT_URLS) {
+    try {
+      return await import(url);
+    } catch (error) {
+      lastError = error;
+    }
+  }
+  throw lastError || new Error("Falha ao importar @supabase/supabase-js");
+}
+
+let createClientFn = null;
+let supabaseImportError = null;
+
+try {
+  const mod = await importSupabaseModule();
+  createClientFn = mod?.createClient || null;
+  if (!createClientFn) throw new Error("createClient não encontrado no módulo do Supabase");
+} catch (error) {
+  supabaseImportError = error;
+}
 
 const PLACEHOLDER_URL = "https://SEU-PROJETO.supabase.co";
 const PLACEHOLDER_ANON_KEY = "SUA_CHAVE_ANON_PUBLICA";
@@ -32,15 +58,22 @@ function resolveSupabaseConfig() {
 
 const { url: supabaseUrl, anonKey: supabaseAnonKey } = resolveSupabaseConfig();
 
-export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
-  auth: {
-    persistSession: true,
-    autoRefreshToken: true,
-    detectSessionInUrl: true
-  }
-});
+export const supabase = createClientFn
+  ? createClientFn(supabaseUrl, supabaseAnonKey, {
+      auth: {
+        persistSession: true,
+        autoRefreshToken: true,
+        detectSessionInUrl: true
+      }
+    })
+  : null;
 
 export function assertSupabaseConfig() {
+  if (supabaseImportError || !createClientFn) {
+    throw new Error(
+      "Falha ao carregar a biblioteca do Supabase. Verifique sua conexão ou bloqueadores (adblock/firewall) e tente novamente."
+    );
+  }
   if (
     supabaseUrl === PLACEHOLDER_URL ||
     supabaseAnonKey === PLACEHOLDER_ANON_KEY

@@ -44,6 +44,13 @@ const enderecoWrap = document.querySelector("#endereco-wrap");
 const pagamentoWrap = document.querySelector("#pagamento-wrap");
 const pagamentoSelect = document.querySelector("#pagamento");
 
+const cardapioNomeEl = document.querySelector("#cardapio-nome");
+
+function setHeaderState(title, subtitle) {
+  if (cardapioNomeEl) cardapioNomeEl.textContent = title;
+  if (typeof subtitle === "string" && cardapioSubtitle) cardapioSubtitle.textContent = subtitle;
+}
+
 function getSlugFromUrl() {
   const segments = window.location.pathname.split("/").filter(Boolean);
   const cardapioIndex = segments.findIndex((segment) => segment === "cardapio");
@@ -546,7 +553,14 @@ async function loadCardapio() {
   slug = slug.trim().toLowerCase();
 
   if (!slug) {
+    setHeaderState("Cardápio inválido", "Acesse este cardápio por /cardapio/seu-slug.");
     produtosContainer.innerHTML = '<p class="muted">Acesse este cardápio por /cardapio/seu-slug</p>';
+    return;
+  }
+
+  if (!supabase) {
+    setHeaderState("Falha ao carregar", "Não foi possível iniciar o Supabase neste navegador.");
+    produtosContainer.innerHTML = '<p class="muted">Falha ao carregar a biblioteca do Supabase. Verifique sua conexão e bloqueadores (adblock/firewall) e recarregue.</p>';
     return;
   }
 
@@ -557,6 +571,7 @@ async function loadCardapio() {
     .single();
 
   if (error || !data) {
+    setHeaderState("Cardápio não encontrado", "Verifique o link e tente novamente.");
     produtosContainer.innerHTML = '<p class="muted">Cardápio não encontrado para o slug informado.</p>';
     return;
   }
@@ -713,6 +728,7 @@ async function loadCardapio() {
     .order("nome");
 
   if (produtosError) {
+    setHeaderState(data.nome, "Não foi possível carregar os produtos.");
     produtosContainer.innerHTML = `<p class="muted">Erro ao carregar produtos: ${produtosError.message}</p>`;
     return;
   }
@@ -832,12 +848,20 @@ async function init() {
   try {
     assertSupabaseConfig();
   } catch (error) {
+    setHeaderState("Falha ao carregar", "Verifique a configuração e tente novamente.");
     produtosContainer.innerHTML = `<p class="muted">${error.message}</p>`;
     return;
   }
 
   attachEvents();
-  await loadCardapio();
+
+  try {
+    await loadCardapio();
+  } catch (error) {
+    setHeaderState("Erro ao carregar", "Tente recarregar a página.");
+    const msg = error?.message ? String(error.message) : "Erro desconhecido";
+    produtosContainer.innerHTML = `<p class="muted">Erro ao carregar cardápio: ${msg}</p>`;
+  }
 }
 
 init();
