@@ -731,7 +731,7 @@ button:disabled {
 .whatsapp-fab {
   position: fixed;
   right: 16px;
-  bottom: 16px;
+  bottom: calc(16px + env(safe-area-inset-bottom, 0px));
   z-index: 50;
   text-decoration: none;
   font-weight: 900;
@@ -757,6 +757,17 @@ button:disabled {
 
 .whatsapp-fab:active {
   transform: translateY(1px);
+}
+
+@media (max-width: 859px) {
+  .cart-box {
+    position: static;
+    bottom: auto;
+  }
+
+  .cart-items {
+    max-height: 240px;
+  }
 }
 
 .theme-dark .produto-card,

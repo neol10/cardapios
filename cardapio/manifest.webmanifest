@@ -1,0 +1,17 @@
+{
+  "name": "Cardápio Digital",
+  "short_name": "Cardápio",
+  "start_url": "/cardapio/",
+  "scope": "/cardapio/",
+  "display": "standalone",
+  "background_color": "#fffaf3",
+  "theme_color": "#ff6a00",
+  "icons": [
+    {
+      "src": "/pwa/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

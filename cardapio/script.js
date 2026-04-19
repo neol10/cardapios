@@ -5,6 +5,12 @@ import {
   supabase
 } from "../shared/supabase.js";
 
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", () => {
+    navigator.serviceWorker.register("/sw.js").catch(() => undefined);
+  });
+}
+
 const cart = [];
 let activeCardapio = null;
 let activeProdutos = [];
@@ -181,6 +187,28 @@ function safeText(value) {
   return String(value || "").trim();
 }
 
+function escapeHtml(value) {
+  const str = String(value ?? "");
+  return str
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#39;");
+}
+
+function safeHttpUrl(value) {
+  const raw = String(value ?? "").trim();
+  if (!raw) return "";
+  try {
+    const url = new URL(raw);
+    if (url.protocol !== "http:" && url.protocol !== "https:") return "";
+    return url.toString();
+  } catch {
+    return "";
+  }
+}
+
 function parsePayments(text) {
   return safeText(text)
     .split(",")
@@ -314,18 +342,23 @@ function renderProdutos() {
 
   produtosContainer.innerHTML = activeProdutos
     .map(
-      (produto) => `
+      (produto) => {
+        const nome = escapeHtml(produto.nome);
+        const imageUrl = safeHttpUrl(produto.imagem_url) ||
+          "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=800&q=80";
+        return `
       <article class="produto-card">
         <div class="produto-media">
-          <img src="${produto.imagem_url || "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=800&q=80"}" alt="${produto.nome}" />
+          <img src="${imageUrl}" alt="${nome}" loading="lazy" />
         </div>
         <div class="produto-body">
-          <h3>${produto.nome}</h3>
+          <h3>${nome}</h3>
           <p class="price">${formatPriceBRL(produto.preco)}</p>
           <button class="btn btn-primary add-to-cart" data-id="${produto.id}">Adicionar ao pedido</button>
         </div>
       </article>
-    `
+    `;
+      }
     )
     .join("");
 }
@@ -356,13 +389,13 @@ function renderCart() {
         <div class="cart-item-main">
           <div class="cart-item-title">
             <span class="cart-qty">${item.quantidade}x</span>
-            <span class="cart-name">${item.nome}</span>
+            <span class="cart-name">${escapeHtml(item.nome)}</span>
           </div>
           <div class="cart-item-sub">
             <span class="cart-price">${formatPriceBRL(item.preco * item.quantidade)}</span>
           </div>
         </div>
-        <button class="btn btn-ghost remove-item" data-id="${item.id}" aria-label="Remover ${item.nome}">Remover</button>
+        <button class="btn btn-ghost remove-item" data-id="${item.id}" aria-label="Remover ${escapeHtml(item.nome)}">Remover</button>
       </div>
     `
     )

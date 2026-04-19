@@ -10,6 +10,7 @@ const MIME = {
   ".css": "text/css; charset=utf-8",
   ".js": "text/javascript; charset=utf-8",
   ".json": "application/json; charset=utf-8",
+  ".webmanifest": "application/manifest+json; charset=utf-8",
   ".png": "image/png",
   ".jpg": "image/jpeg",
   ".jpeg": "image/jpeg",
@@ -52,7 +53,12 @@ function serveFile(res, filePath) {
   const contentType = MIME[ext] || "application/octet-stream";
   const stream = fs.createReadStream(filePath);
 
-  res.writeHead(200, { "Content-Type": contentType });
+  const headers = { "Content-Type": contentType };
+  if (path.basename(filePath) === "sw.js" || ext === ".webmanifest") {
+    headers["Cache-Control"] = "no-cache";
+  }
+
+  res.writeHead(200, headers);
   stream.pipe(res);
 
   stream.on("error", () => {

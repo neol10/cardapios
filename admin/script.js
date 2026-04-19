@@ -7,6 +7,12 @@ import {
   supabase
 } from "../shared/supabase.js";
 
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", () => {
+    navigator.serviceWorker.register("/sw.js").catch(() => undefined);
+  });
+}
+
 const loginForm = document.querySelector("#login-form");
 const authMessage = document.querySelector("#auth-message");
 
@@ -16,6 +22,28 @@ const state = {
   produtos: [],
   isEditingCardapio: false
 };
+
+function escapeHtml(value) {
+  const str = String(value ?? "");
+  return str
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#39;");
+}
+
+function safeHttpUrl(value) {
+  const raw = String(value ?? "").trim();
+  if (!raw) return "";
+  try {
+    const url = new URL(raw);
+    if (url.protocol !== "http:" && url.protocol !== "https:") return "";
+    return url.toString();
+  } catch {
+    return "";
+  }
+}
 
 function refreshColorPreviewForInput(input) {
   const row = input.closest(".color-row");
@@ -252,23 +280,29 @@ function renderCardapios() {
   }
 
   container.innerHTML = state.cardapios
-    .map(
-      (item) => `
+    .map((item) => {
+      const nome = escapeHtml(item.nome);
+      const slugText = escapeHtml(item.slug);
+      const slugHref = encodeURIComponent(String(item.slug || ""));
+      const whatsapp = escapeHtml(item.whatsapp);
+      const fotoUrl = safeHttpUrl(item.foto_url);
+
+      return `
       <article class="list-item" data-id="${item.id}">
         <div style="display:flex; gap:12px; align-items:center;">
-          ${item.foto_url ? `<img src="${item.foto_url}" alt="${item.nome}" style="width:52px; height:52px; border-radius:50%; object-fit:cover; border:1px solid var(--border);" />` : ""}
-          <h3 style="margin:0;">${item.nome}</h3>
+          ${fotoUrl ? `<img src="${fotoUrl}" alt="${nome}" style="width:52px; height:52px; border-radius:50%; object-fit:cover; border:1px solid var(--border);" />` : ""}
+          <h3 style="margin:0;">${nome}</h3>
         </div>
-        <p class="muted">Slug: /cardapio/${item.slug}</p>
-        <p class="muted">WhatsApp: ${item.whatsapp}</p>
+        <p class="muted">Slug: /cardapio/${slugText}</p>
+        <p class="muted">WhatsApp: ${whatsapp}</p>
         <div class="list-actions">
-          <a class="btn" href="/cardapio/${item.slug}" target="_blank" rel="noopener">Abrir cardápio</a>
+          <a class="btn" href="/cardapio/${slugHref}" target="_blank" rel="noopener">Abrir cardápio</a>
           <button class="btn js-manage-cardapio" data-id="${item.id}">Gerenciar</button>
           <button class="btn js-edit-cardapio" data-id="${item.id}">Editar dados</button>
         </div>
       </article>
-    `
-    )
+    `;
+    })
     .join("");
 }
 
@@ -287,19 +321,21 @@ function renderProdutos() {
   }
 
   container.innerHTML = state.produtos
-    .map(
-      (item) => `
+    .map((item) => {
+      const nome = escapeHtml(item.nome);
+      const imageUrl = safeHttpUrl(item.imagem_url);
+      return `
       <article class="list-item" data-id="${item.id}">
-        <h3>${item.nome}</h3>
+        <h3>${nome}</h3>
         <p>${formatPriceBRL(item.preco)}</p>
-        ${item.imagem_url ? `<img src="${item.imagem_url}" alt="${item.nome}" style="width: 100%; max-height: 180px; object-fit: cover; border-radius: 10px;" />` : ""}
+        ${imageUrl ? `<img src="${imageUrl}" alt="${nome}" style="width: 100%; max-height: 180px; object-fit: cover; border-radius: 10px;" />` : ""}
         <div class="list-actions">
           <button class="btn js-edit-produto" data-id="${item.id}">Editar</button>
           <button class="btn js-delete-produto" data-id="${item.id}">Excluir</button>
         </div>
       </article>
-    `
-    )
+    `;
+    })
     .join("");
 }
 
@@ -316,14 +352,18 @@ function renderPedidos(pedidos) {
     .map((pedido) => {
       const itens = Array.isArray(pedido.itens) ? pedido.itens : [];
       const itensText = itens
-        .map((item) => `${item.quantidade}x ${item.nome} (${formatPriceBRL(item.preco_unitario)})`)
+        .map((item) => `${escapeHtml(item.quantidade)}x ${escapeHtml(item.nome)} (${formatPriceBRL(item.preco_unitario)})`)
         .join(" | ");
+
+      const nomeCliente = escapeHtml(pedido.nome_cliente);
+      const telefone = escapeHtml(pedido.telefone);
+      const endereco = escapeHtml(pedido.endereco);
 
       return `
       <article class="list-item">
-        <h3>${pedido.nome_cliente}</h3>
-        <p><strong>Telefone:</strong> ${pedido.telefone}</p>
-        <p><strong>Endereço:</strong> ${pedido.endereco}</p>
+        <h3>${nomeCliente}</h3>
+        <p><strong>Telefone:</strong> ${telefone}</p>
+        <p><strong>Endereço:</strong> ${endereco}</p>
         <p><strong>Itens:</strong> ${itensText || "Sem itens"}</p>
         <p class="muted"><strong>Data:</strong> ${new Date(pedido.created_at).toLocaleString("pt-BR")}</p>
       </article>
