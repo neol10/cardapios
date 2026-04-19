@@ -23,6 +23,20 @@ const state = {
   isEditingCardapio: false
 };
 
+const DEFAULT_WHATSAPP_TEMPLATE = `*Novo pedido - {LOJA}*
+*Tipo:* {TIPO_PEDIDO}
+*Pagamento:* {PAGAMENTO}
+
+*Cliente:* {NOME} | {TELEFONE}
+*Endereço:* {ENDERECO}
+
+*Itens:*
+{ITENS}
+
+*Subtotal:* {SUBTOTAL}
+*Taxa:* {TAXA_ENTREGA}
+*Total:* {TOTAL}`;
+
 function escapeHtml(value) {
   const str = String(value ?? "");
   return str
@@ -473,7 +487,8 @@ function fillCardapioForm(item) {
   if (form.densidade) form.densidade.value = item.densidade || "confortavel";
   if (form.whatsapp_botao) form.whatsapp_botao.value = item.whatsapp_botao || "flutuante";
   if (form.mensagem_whatsapp_template) {
-    form.mensagem_whatsapp_template.value = item.mensagem_whatsapp_template || "";
+    const current = String(item.mensagem_whatsapp_template || "").trim();
+    form.mensagem_whatsapp_template.value = current || DEFAULT_WHATSAPP_TEMPLATE;
   }
 
   refreshAllColorPreviews(form);

@@ -356,7 +356,25 @@
 
             <label>
               Template da mensagem do WhatsApp (opcional)
-              <textarea name="mensagem_whatsapp_template" rows="4" placeholder="Use {LOJA}, {TOTAL}, {NOME}, {TELEFONE}, {ENDERECO}, {ITENS}, {TAXA_ENTREGA}"></textarea>
+              <textarea name="mensagem_whatsapp_template" rows="7" placeholder="Exemplo (pode editar):
+*Novo pedido - {LOJA}*
+*Tipo:* {TIPO_PEDIDO}
+*Pagamento:* {PAGAMENTO}
+
+*Cliente:* {NOME} | {TELEFONE}
+*Endereço:* {ENDERECO}
+
+*Itens:*
+{ITENS}
+
+*Subtotal:* {SUBTOTAL}
+*Taxa:* {TAXA_ENTREGA}
+*Total:* {TOTAL}
+
+Tags: {LOJA} {ITENS} {SUBTOTAL} {TAXA_ENTREGA} {TOTAL} {NOME} {TELEFONE} {ENDERECO} {TIPO_PEDIDO} {PAGAMENTO}"></textarea>
+              <small class="hint">
+                Dica: você pode usar tags como <strong>{LOJA}</strong>, <strong>{ITENS}</strong>, <strong>{TOTAL}</strong> (também aceita <strong>{{LOJA}}</strong>). Se deixar em branco, o sistema usa um modelo padrão.
+              </small>
             </label>
           </details>
 
@@ -411,6 +429,6 @@
       </section>
     </main>
 
-    <script type="module" src="/admin/script.js?v=10"></script>
+    <script type="module" src="/admin/script.js?v=11"></script>
   </body>
 </html>

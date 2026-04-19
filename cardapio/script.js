@@ -491,43 +491,52 @@ function buildWhatsappMessage({ nome, telefone, endereco }) {
 
   const template = safeText(activeCardapio?.mensagem_whatsapp_template);
   if (template) {
-    const resolvedEndereco = endereco || "Retirada no balcão";
-    return template
-      .replaceAll("{LOJA}", activeCardapio.nome)
-      .replaceAll("{ITENS}", itensTexto)
-      .replaceAll("{SUBTOTAL}", formatPriceBRL(subtotal))
-      .replaceAll("{TAXA_ENTREGA}", formatPriceBRL(taxaEntrega))
-      .replaceAll("{TOTAL}", formatPriceBRL(total))
-      .replaceAll("{NOME}", nome)
-      .replaceAll("{TELEFONE}", telefone)
-      .replaceAll("{ENDERECO}", resolvedEndereco)
-      .replaceAll("{TIPO_PEDIDO}", tipoPedido)
-      .replaceAll("{PAGAMENTO}", pagamento || "Não informado");
+    const resolvedEndereco = tipoPedido === "retirada" ? "Retirada no balcão" : endereco;
+    const vars = {
+      LOJA: activeCardapio.nome,
+      ITENS: itensTexto,
+      SUBTOTAL: formatPriceBRL(subtotal),
+      TAXA_ENTREGA: formatPriceBRL(taxaEntrega),
+      TOTAL: formatPriceBRL(total),
+      NOME: nome,
+      TELEFONE: telefone,
+      ENDERECO: resolvedEndereco || "Não informado",
+      TIPO_PEDIDO: tipoPedido,
+      PAGAMENTO: pagamento || "Não informado"
+    };
+
+    let out = template.replaceAll("\\n", "\n");
+    Object.entries(vars).forEach(([key, value]) => {
+      out = out.replaceAll(`{${key}}`, String(value));
+      out = out.replaceAll(`{{${key}}}`, String(value));
+    });
+
+    return out;
   }
 
   const enderecoLinha = tipoPedido === "retirada" ? "Retirada no balcão" : endereco;
 
-  const linhas = [
+  const defaultTemplate = [
     `*Novo pedido - ${activeCardapio.nome}*`,
     "",
     `*Tipo:* ${tipoPedido === "retirada" ? "Retirada" : "Entrega"}`,
+    `*Pagamento:* ${pagamento || "Não informado"}`,
+    "",
+    "*Cliente:*",
+    `${nome} | ${telefone}`,
+    `*Endereço:* ${enderecoLinha || "Não informado"}`,
     "",
     "*Itens:*",
     itensTexto,
     "",
-    `*Subtotal:* ${formatPriceBRL(subtotal)}`
+    `*Subtotal:* ${formatPriceBRL(subtotal)}`,
+    `*Taxa:* ${formatPriceBRL(taxaEntrega)}`,
+    `*Total:* ${formatPriceBRL(total)}`
   ];
 
-  if (taxaEntrega > 0) linhas.push(`*Taxa de entrega:* ${formatPriceBRL(taxaEntrega)}`);
-  linhas.push(`*Total:* ${formatPriceBRL(total)}`);
+  return defaultTemplate.join("\n");
 
-  if (pagamento) linhas.push(`*Pagamento:* ${pagamento}`);
-
-  linhas.push(`*Nome:* ${nome}`);
-  linhas.push(`*Telefone:* ${telefone}`);
-  linhas.push(`*Endereço:* ${enderecoLinha}`);
-
-  return linhas.join("\n");
+  // (template padrão acima já retorna)
 }
 
 async function savePedido({ nome, telefone, endereco }) {
