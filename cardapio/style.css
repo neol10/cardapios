@@ -52,7 +52,7 @@ body.bg-radial {
   position: relative;
   overflow: hidden;
   padding: 28px 16px 16px;
-  border-bottom: 1px solid color-mix(in srgb, var(--border) 70%, transparent);
+  border-bottom: none;
   background:
     linear-gradient(
       180deg,

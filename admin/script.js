@@ -47,6 +47,85 @@ function setupColorPreviewListeners(root) {
   refreshAllColorPreviews(root);
 }
 
+function updateFundoVisibility(form) {
+  if (!form) return;
+  const estilo = String(form.fundo_estilo?.value || "padrao");
+  const showSolido = estilo === "solido";
+  const showDegrade = estilo === "degrade_linear" || estilo === "degrade_radial";
+  const showAngulo = estilo === "degrade_linear";
+
+  form.querySelectorAll(".js-fundo-solido").forEach((el) => el.classList.toggle("is-hidden", !showSolido));
+  form.querySelectorAll(".js-fundo-degrade").forEach((el) => el.classList.toggle("is-hidden", !showDegrade));
+  form.querySelectorAll(".js-fundo-angulo").forEach((el) => el.classList.toggle("is-hidden", !showAngulo));
+}
+
+function updateThemePreview(form) {
+  if (!form) return;
+  const preview = document.querySelector("#theme-preview");
+  if (!preview) return;
+
+  const surfaceEl = preview.querySelector(".theme-preview-surface");
+  const cardEl = preview.querySelector(".theme-preview-card");
+  const titleEl = preview.querySelector(".theme-preview-title");
+  const textEl = preview.querySelector(".theme-preview-text");
+  const mutedEl = preview.querySelector(".theme-preview-muted");
+  const btnEl = preview.querySelector(".theme-preview-btn");
+
+  const theme = String(form.cor_tema?.value || "#ff6a00");
+  const secondary = String(form.cor_secundaria?.value || "#c8945b");
+  const fundoEstilo = String(form.fundo_estilo?.value || "padrao");
+  const bg = String(form.cor_fundo?.value || "#fffaf3");
+  const bg1 = String(form.fundo_cor_1?.value || theme);
+  const bg2 = String(form.fundo_cor_2?.value || "#ffe6ce");
+  const angle = String(form.fundo_angulo?.value || "135");
+
+  const surface = String(form.cor_surface?.value || "#ffffff");
+  const text = String(form.cor_texto?.value || "#2a211d");
+  const muted = String(form.cor_muted?.value || "#756960");
+  const border = String(form.cor_borda?.value || "#f0dfd1");
+
+  if (surfaceEl instanceof HTMLElement) {
+    if (fundoEstilo === "solido") {
+      surfaceEl.style.background = bg;
+    } else if (fundoEstilo === "degrade_linear") {
+      surfaceEl.style.background = `linear-gradient(${Number.parseInt(angle || "135", 10) || 135}deg, ${bg1}, ${bg2})`;
+    } else if (fundoEstilo === "degrade_radial") {
+      surfaceEl.style.background = `radial-gradient(circle at 18% 18%, ${bg1}, transparent 55%), radial-gradient(circle at 85% 0%, ${bg2}, transparent 55%), ${bg}`;
+    } else {
+      surfaceEl.style.background = `radial-gradient(circle at 18% 18%, ${theme}55, transparent 55%), radial-gradient(circle at 85% 0%, ${secondary}55, transparent 60%), ${bg}`;
+    }
+  }
+
+  if (cardEl instanceof HTMLElement) {
+    cardEl.style.background = surface;
+    cardEl.style.borderColor = border;
+    cardEl.style.boxShadow = "0 18px 42px rgba(0,0,0,0.35)";
+  }
+  if (titleEl instanceof HTMLElement) titleEl.style.color = text;
+  if (textEl instanceof HTMLElement) textEl.style.color = text;
+  if (mutedEl instanceof HTMLElement) mutedEl.style.color = muted;
+  if (btnEl instanceof HTMLElement) {
+    btnEl.style.background = `linear-gradient(135deg, ${theme}, ${secondary || theme})`;
+    btnEl.style.borderColor = border;
+    btnEl.style.color = "#0f0d0b";
+  }
+}
+
+function setupThemeControls(form) {
+  if (!form) return;
+  const updateAll = () => {
+    updateFundoVisibility(form);
+    updateThemePreview(form);
+  };
+
+  form.querySelectorAll('input[type="color"], input[type="number"], select[name="fundo_estilo"]').forEach((el) => {
+    el.addEventListener("input", updateAll);
+    el.addEventListener("change", updateAll);
+  });
+
+  updateAll();
+}
+
 function maskTelefone(value) {
   const digits = onlyDigits(value).slice(0, 11);
 
@@ -357,6 +436,8 @@ function fillCardapioForm(item) {
   }
 
   refreshAllColorPreviews(form);
+  updateFundoVisibility(form);
+  updateThemePreview(form);
 }
 
 function fillProdutoForm(item) {
@@ -380,6 +461,8 @@ function resetForms() {
   if (produtoIdField) produtoIdField.value = "";
 
   refreshAllColorPreviews(cardapioForm);
+  updateFundoVisibility(cardapioForm);
+  updateThemePreview(cardapioForm);
 }
 
 async function uploadProductImage(cardapioId, file) {
@@ -429,6 +512,7 @@ async function setupDashboardPage() {
   const cardapioForm = document.querySelector("#cardapio-form");
 
   setupColorPreviewListeners(cardapioForm);
+  setupThemeControls(cardapioForm);
 
   const whatsappInput = cardapioForm?.querySelector('input[name="whatsapp"]');
   whatsappInput?.addEventListener("input", (event) => {
@@ -616,6 +700,8 @@ async function setupDashboardPage() {
     const idField = getHiddenIdField(form);
     if (idField) idField.value = "";
     refreshAllColorPreviews(form);
+    updateFundoVisibility(form);
+    updateThemePreview(form);
     setSelectedCardapio(null);
     setEditingMode(false);
   });

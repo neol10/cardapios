@@ -355,6 +355,64 @@ select:disabled {
   text-transform: uppercase;
 }
 
+.theme-preview {
+  margin-top: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 16px;
+  overflow: hidden;
+  background: rgba(0, 0, 0, 0.18);
+}
+
+.theme-preview-surface {
+  padding: 14px;
+  background: radial-gradient(circle at 20% 20%, rgba(200, 148, 91, 0.16), transparent 55%),
+    rgba(0, 0, 0, 0.18);
+}
+
+.theme-preview-card {
+  border-radius: 14px;
+  padding: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(18, 16, 14, 0.92);
+  display: grid;
+  gap: 8px;
+}
+
+.theme-preview-title {
+  font-weight: 900;
+  font-size: 0.95rem;
+}
+
+.theme-preview-text {
+  font-weight: 800;
+  font-size: 0.88rem;
+}
+
+.theme-preview-muted {
+  font-weight: 700;
+  font-size: 0.82rem;
+  color: var(--muted);
+}
+
+.theme-preview-btn {
+  margin-top: 2px;
+  width: fit-content;
+  padding: 8px 10px;
+  border-radius: 12px;
+  font-weight: 900;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: linear-gradient(135deg, rgba(200, 148, 91, 0.85), rgba(111, 78, 55, 0.85));
+  color: #14110f;
+}
+
+.theme-preview-hint {
+  padding: 10px 12px;
+  font-size: 0.8rem;
+  color: var(--muted);
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  background: rgba(0, 0, 0, 0.2);
+}
+
 @media (min-width: 640px) {
   .two-cols {
     grid-template-columns: 1fr 1fr;

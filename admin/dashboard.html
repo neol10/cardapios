@@ -78,7 +78,7 @@
               </label>
 
               <div class="two-cols">
-                <label>
+                <label class="js-fundo-solido">
                   Cor do fundo (para "Cor sólida")
                   <div class="color-row">
                     <input type="color" name="cor_fundo" value="#fffaf3" />
@@ -87,14 +87,14 @@
                   </div>
                 </label>
 
-                <label>
+                <label class="js-fundo-angulo">
                   Ângulo do degradê (0 a 360)
                   <input type="number" name="fundo_angulo" min="0" max="360" step="1" value="135" />
                 </label>
               </div>
 
               <div class="two-cols">
-                <label>
+                <label class="js-fundo-degrade">
                   Degradê - cor 1
                   <div class="color-row">
                     <input type="color" name="fundo_cor_1" value="#ff6a00" />
@@ -103,7 +103,7 @@
                   </div>
                 </label>
 
-                <label>
+                <label class="js-fundo-degrade">
                   Degradê - cor 2
                   <div class="color-row">
                     <input type="color" name="fundo_cor_2" value="#ffe6ce" />
@@ -164,6 +164,18 @@
                     <span class="color-hex" aria-label="Cor selecionada"></span>
                   </div>
                 </label>
+              </div>
+
+              <div id="theme-preview" class="theme-preview" aria-label="Prévia do tema">
+                <div class="theme-preview-surface">
+                  <div class="theme-preview-card">
+                    <div class="theme-preview-title">Prévia</div>
+                    <div class="theme-preview-text">Texto principal</div>
+                    <div class="theme-preview-muted">Texto secundário</div>
+                    <div class="theme-preview-btn">Botão</div>
+                  </div>
+                </div>
+                <div class="theme-preview-hint">Mostra como o card/textos/botão ficam com essas cores.</div>
               </div>
             </details>
 
@@ -393,6 +405,6 @@
       </section>
     </main>
 
-    <script type="module" src="/admin/script.js?v=8"></script>
+    <script type="module" src="/admin/script.js?v=9"></script>
   </body>
 </html>
