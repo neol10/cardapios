@@ -59,6 +59,26 @@ function setSecondaryColor(color) {
   root.style.setProperty("--theme2", color || "#c8945b");
 }
 
+const FONT_STACKS = {
+  sora: '"Sora", system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif',
+  system: 'system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif',
+  segoe: '"Segoe UI", system-ui, -apple-system, Arial, sans-serif',
+  arial: 'Arial, Helvetica, system-ui, -apple-system, "Segoe UI", sans-serif',
+  trebuchet: '"Trebuchet MS", Trebuchet, Arial, sans-serif',
+  verdana: 'Verdana, Geneva, Tahoma, sans-serif',
+  tahoma: 'Tahoma, Verdana, Geneva, sans-serif',
+  georgia: 'Georgia, "Times New Roman", Times, serif',
+  times: '"Times New Roman", Times, serif',
+  palatino: '"Palatino Linotype", Palatino, Georgia, serif',
+  courier: '"Courier New", Courier, monospace'
+};
+
+function applyFontKey(fontKey) {
+  const key = safeText(fontKey) || "sora";
+  const stack = FONT_STACKS[key] || FONT_STACKS.sora;
+  document.documentElement.style.setProperty("--font", stack);
+}
+
 function setOptionalVar(name, value) {
   const v = safeText(value);
   if (!v) return;
@@ -448,6 +468,7 @@ async function loadCardapio() {
   document.querySelector("#cardapio-nome").textContent = data.nome;
   setThemeColor(data.cor_tema);
   setSecondaryColor(data.cor_secundaria);
+  applyFontKey(data.fonte_key);
 
   // Overrides de cores (opcional)
   setOptionalVar("--bg", data.cor_fundo);

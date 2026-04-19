@@ -299,6 +299,7 @@ function fillCardapioForm(item) {
   if (form.cor_muted) form.cor_muted.value = item.cor_muted || "#756960";
   if (form.cor_borda) form.cor_borda.value = item.cor_borda || "#f0dfd1";
   if (form.slogan) form.slogan.value = item.slogan || "";
+  if (form.fonte_key) form.fonte_key.value = item.fonte_key || "sora";
   if (form.horario_funcionamento) form.horario_funcionamento.value = item.horario_funcionamento || "";
   if (form.abre_em) form.abre_em.value = item.abre_em ? String(item.abre_em).slice(0, 5) : "";
   if (form.fecha_em) form.fecha_em.value = item.fecha_em ? String(item.fecha_em).slice(0, 5) : "";
@@ -420,6 +421,7 @@ async function setupDashboardPage() {
     const cor_muted = String(formData.get("cor_muted") || "").trim();
     const cor_borda = String(formData.get("cor_borda") || "").trim();
     const slogan = String(formData.get("slogan") || "").trim();
+    const fonte_key = String(formData.get("fonte_key") || "sora").trim() || "sora";
     const horario_funcionamento = String(formData.get("horario_funcionamento") || "").trim();
     const abre_em = String(formData.get("abre_em") || "").trim();
     const fecha_em = String(formData.get("fecha_em") || "").trim();
@@ -459,6 +461,7 @@ async function setupDashboardPage() {
       cor_muted: cor_muted || null,
       cor_borda: cor_borda || null,
       slogan: slogan || null,
+      fonte_key,
       horario_funcionamento: horario_funcionamento || null,
       abre_em: abre_em || null,
       fecha_em: fecha_em || null,

@@ -1,6 +1,7 @@
 :root {
   --theme: #ff6a00;
   --theme2: #c8945b;
+  --font: "Sora", sans-serif;
   --bg: #fffaf3;
   --surface: #ffffff;
   --text: #2a211d;
@@ -14,41 +15,9 @@
   box-sizing: border-box;
 }
 
-  padding: 12px 12px;
-  border-radius: 16px;
-  border: 1px solid color-mix(in srgb, var(--border) 75%, transparent);
-  background: color-mix(in srgb, var(--surface) 55%, transparent);
-  box-shadow: 0 10px 30px color-mix(in srgb, var(--theme2) 10%, transparent);
 body {
-.btn-ghost.remove-item:hover {
-  border-color: color-mix(in srgb, var(--theme) 22%, var(--border));
-  color: color-mix(in srgb, var(--theme) 65%, black);
-}
-
-.btn-ghost.remove-item:active {
-  transform: translateY(0);
-}
-
-.cart-box.cart-pulse {
-  animation: cartPulse 320ms ease-out;
-}
-
-@keyframes cartPulse {
-  0% {
-    transform: translateY(0);
-    box-shadow: 0 0 0 0 color-mix(in srgb, var(--theme2) 0%, transparent);
-  }
-  40% {
-    transform: translateY(-1px);
-    box-shadow: 0 14px 38px color-mix(in srgb, var(--theme2) 12%, transparent);
-  }
-  100% {
-    transform: translateY(0);
-    box-shadow: 0 10px 30px color-mix(in srgb, var(--theme2) 10%, transparent);
-  }
-}
   margin: 0;
-  font-family: "Sora", sans-serif;
+  font-family: var(--font);
   color: var(--text);
   background:
     radial-gradient(circle at 10% 10%, color-mix(in srgb, var(--theme) 24%, #fff) 0%, transparent 42%),
@@ -95,7 +64,6 @@ body.bg-radial {
   max-width: 1100px;
   margin: 0 auto;
 }
-  transform: translateY(-1px);
 
 .hero-media {
   display: flex;
@@ -493,6 +461,34 @@ p {
   filter: none;
   background: color-mix(in srgb, var(--surface) 70%, transparent);
   border-color: color-mix(in srgb, var(--theme2) 18%, var(--border));
+}
+
+.btn-ghost.remove-item:hover {
+  border-color: color-mix(in srgb, var(--theme) 22%, var(--border));
+  color: color-mix(in srgb, var(--theme) 65%, black);
+}
+
+.btn-ghost.remove-item:active {
+  transform: translateY(0);
+}
+
+.cart-box.cart-pulse {
+  animation: cartPulse 320ms ease-out;
+}
+
+@keyframes cartPulse {
+  0% {
+    transform: translateY(0);
+    box-shadow: 0 0 0 0 color-mix(in srgb, var(--theme2) 0%, transparent);
+  }
+  40% {
+    transform: translateY(-1px);
+    box-shadow: 0 14px 38px color-mix(in srgb, var(--theme2) 12%, transparent);
+  }
+  100% {
+    transform: translateY(0);
+    box-shadow: 0 10px 30px color-mix(in srgb, var(--theme2) 10%, transparent);
+  }
 }
 
 .cart-total {
