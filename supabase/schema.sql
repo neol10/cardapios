@@ -3,6 +3,31 @@
 
 create extension if not exists pgcrypto;
 
+-- Allowlist de admins (melhora segurança: não basta estar autenticado)
+-- Para liberar o seu usuário como admin, rode no SQL Editor:
+--   insert into public.admins (user_id) values ('<SEU_AUTH_UID>');
+-- Dica: pegue o UID em Authentication > Users.
+
+create table if not exists public.admins (
+  user_id uuid primary key,
+  created_at timestamptz not null default now()
+);
+
+alter table public.admins enable row level security;
+
+drop policy if exists "admin read own row" on public.admins;
+create policy "admin read own row"
+on public.admins
+for select
+using (auth.uid() = user_id);
+
+drop policy if exists "admin manage admins" on public.admins;
+create policy "admin manage admins"
+on public.admins
+for all
+using (exists (select 1 from public.admins a where a.user_id = auth.uid()))
+with check (exists (select 1 from public.admins a where a.user_id = auth.uid()));
+
 create table if not exists public.cardapios (
   id uuid primary key default gen_random_uuid(),
   nome text not null,
@@ -134,21 +159,21 @@ drop policy if exists "auth manage cardapios" on public.cardapios;
 create policy "auth manage cardapios"
 on public.cardapios
 for all
-using (auth.role() = 'authenticated')
-with check (auth.role() = 'authenticated');
+using (exists (select 1 from public.admins a where a.user_id = auth.uid()))
+with check (exists (select 1 from public.admins a where a.user_id = auth.uid()));
 
 drop policy if exists "auth manage produtos" on public.produtos;
 create policy "auth manage produtos"
 on public.produtos
 for all
-using (auth.role() = 'authenticated')
-with check (auth.role() = 'authenticated');
+using (exists (select 1 from public.admins a where a.user_id = auth.uid()))
+with check (exists (select 1 from public.admins a where a.user_id = auth.uid()));
 
 drop policy if exists "auth read pedidos" on public.pedidos;
 create policy "auth read pedidos"
 on public.pedidos
 for select
-using (auth.role() = 'authenticated');
+using (exists (select 1 from public.admins a where a.user_id = auth.uid()));
 
 -- Storage para imagens de produtos.
 insert into storage.buckets (id, name, public)
@@ -178,34 +203,52 @@ drop policy if exists "auth insert produtos bucket" on storage.objects;
 create policy "auth insert produtos bucket"
 on storage.objects
 for insert
-with check (bucket_id = 'produtos' and auth.role() = 'authenticated');
+with check (
+  bucket_id = 'produtos'
+  and exists (select 1 from public.admins a where a.user_id = auth.uid())
+);
 
 drop policy if exists "auth insert cardapios bucket" on storage.objects;
 create policy "auth insert cardapios bucket"
 on storage.objects
 for insert
-with check (bucket_id = 'cardapios' and auth.role() = 'authenticated');
+with check (
+  bucket_id = 'cardapios'
+  and exists (select 1 from public.admins a where a.user_id = auth.uid())
+);
 
 drop policy if exists "auth update produtos bucket" on storage.objects;
 create policy "auth update produtos bucket"
 on storage.objects
 for update
-using (bucket_id = 'produtos' and auth.role() = 'authenticated');
+using (
+  bucket_id = 'produtos'
+  and exists (select 1 from public.admins a where a.user_id = auth.uid())
+);
 
 drop policy if exists "auth update cardapios bucket" on storage.objects;
 create policy "auth update cardapios bucket"
 on storage.objects
 for update
-using (bucket_id = 'cardapios' and auth.role() = 'authenticated');
+using (
+  bucket_id = 'cardapios'
+  and exists (select 1 from public.admins a where a.user_id = auth.uid())
+);
 
 drop policy if exists "auth delete produtos bucket" on storage.objects;
 create policy "auth delete produtos bucket"
 on storage.objects
 for delete
-using (bucket_id = 'produtos' and auth.role() = 'authenticated');
+using (
+  bucket_id = 'produtos'
+  and exists (select 1 from public.admins a where a.user_id = auth.uid())
+);
 
 drop policy if exists "auth delete cardapios bucket" on storage.objects;
 create policy "auth delete cardapios bucket"
 on storage.objects
 for delete
-using (bucket_id = 'cardapios' and auth.role() = 'authenticated');
+using (
+  bucket_id = 'cardapios'
+  and exists (select 1 from public.admins a where a.user_id = auth.uid())
+);
