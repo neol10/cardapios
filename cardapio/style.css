@@ -280,7 +280,7 @@ p {
 .produto-card {
   background: linear-gradient(
     180deg,
-    color-mix(in srgb, var(--surface) 92%, white),
+    color-mix(in srgb, var(--surface) 92%, var(--bg)),
     var(--surface)
   );
   border: 1px solid var(--border);
@@ -329,12 +329,18 @@ p {
 
 .produto-body {
   padding: 14px;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  grid-template-areas:
+    "title price"
+    "btn btn";
+  gap: 10px 10px;
+  align-items: start;
+  min-width: 0;
 }
 
 .produto-body h3 {
+  grid-area: title;
   margin: 0;
   font-size: 1.02rem;
   line-height: 1.15;
@@ -346,13 +352,20 @@ p {
 }
 
 .price {
+  grid-area: price;
+  justify-self: end;
+  margin: 0;
+  white-space: nowrap;
   font-weight: 800;
   color: color-mix(in srgb, var(--theme) 80%, black);
   font-size: 1.02rem;
 }
 
 .produto-body .btn {
-  margin-top: 6px;
+  grid-area: btn;
+  margin-top: 0;
+  padding: 12px 13px;
+  border-radius: 14px;
 }
 
 .btn {
@@ -405,7 +418,7 @@ p {
   align-self: end;
   background: linear-gradient(
     180deg,
-    color-mix(in srgb, var(--surface) 92%, white),
+    color-mix(in srgb, var(--surface) 92%, var(--bg)),
     var(--surface)
   );
   border: 1px solid var(--border);
@@ -566,8 +579,8 @@ p {
   border: 1px solid color-mix(in srgb, var(--border) 80%, transparent);
   background: linear-gradient(
     135deg,
-    color-mix(in srgb, var(--surface) 78%, white),
-    color-mix(in srgb, var(--surface) 92%, white)
+    color-mix(in srgb, var(--surface) 82%, var(--bg)),
+    color-mix(in srgb, var(--surface) 94%, var(--bg))
   );
 }
 
@@ -575,13 +588,13 @@ p {
   margin: 6px 0 0;
   padding: 10px 12px;
   border-radius: 12px;
-  border: 1px solid color-mix(in srgb, var(--theme) 22%, var(--border));
+  border: 1px solid color-mix(in srgb, var(--theme) 28%, var(--border));
   background: linear-gradient(
     135deg,
-    color-mix(in srgb, var(--theme) 20%, white),
-    color-mix(in srgb, var(--theme2) 18%, white)
+    color-mix(in srgb, var(--theme) 18%, var(--surface)),
+    color-mix(in srgb, var(--theme2) 16%, var(--surface))
   );
-  color: color-mix(in srgb, var(--text) 92%, black);
+  color: var(--text);
   box-shadow: 0 12px 30px color-mix(in srgb, var(--theme2) 12%, transparent);
 }
 
@@ -636,7 +649,7 @@ textarea {
   border: 1px solid var(--border);
   padding: 11px;
   font: inherit;
-  background: color-mix(in srgb, var(--surface) 92%, #fff);
+  background: color-mix(in srgb, var(--surface) 92%, var(--bg));
   color: var(--text);
 }
 
@@ -648,7 +661,7 @@ select {
   border: 1px solid var(--border);
   padding: 11px;
   font: inherit;
-  background: color-mix(in srgb, var(--surface) 92%, #fff);
+  background: color-mix(in srgb, var(--surface) 92%, var(--bg));
   color: var(--text);
 }
 
