@@ -482,12 +482,12 @@ function buildWhatsappMessage({ nome, telefone, endereco }) {
   const pagamento = String(pagamentoSelect?.value || "").trim();
 
   const itensTexto = cart
-    .map(
-      (item) =>
-        `- ${item.quantidade}x ${item.nome} | Unit: ${formatPriceBRL(item.preco)} | Subtotal: ${formatPriceBRL(
-          item.preco * item.quantidade
-        )}`
-    )
+    .map((item) => {
+      const totalItem = item.preco * item.quantidade;
+      const unit = formatPriceBRL(item.preco);
+      const totalLine = formatPriceBRL(totalItem);
+      return `- ${item.quantidade}x ${item.nome} (${unit}) = ${totalLine}`;
+    })
     .join("\n");
 
   const template = safeText(activeCardapio?.mensagem_whatsapp_template);
