@@ -17,6 +17,36 @@ const state = {
   isEditingCardapio: false
 };
 
+function refreshColorPreviewForInput(input) {
+  const row = input.closest(".color-row");
+  if (!row) return;
+  const swatch = row.querySelector(".color-swatch");
+  const hex = row.querySelector(".color-hex");
+  const value = String(input.value || "").trim();
+  if (hex) hex.textContent = value ? value.toUpperCase() : "";
+  if (swatch instanceof HTMLElement) {
+    swatch.style.backgroundColor = value || "transparent";
+  }
+}
+
+function refreshAllColorPreviews(root) {
+  if (!root) return;
+  root.querySelectorAll('input[type="color"]').forEach((input) => {
+    if (input instanceof HTMLInputElement) refreshColorPreviewForInput(input);
+  });
+}
+
+function setupColorPreviewListeners(root) {
+  if (!root) return;
+  root.querySelectorAll('input[type="color"]').forEach((input) => {
+    if (!(input instanceof HTMLInputElement)) return;
+    const handler = () => refreshColorPreviewForInput(input);
+    input.addEventListener("input", handler);
+    input.addEventListener("change", handler);
+  });
+  refreshAllColorPreviews(root);
+}
+
 function maskTelefone(value) {
   const digits = onlyDigits(value).slice(0, 11);
 
@@ -324,6 +354,8 @@ function fillCardapioForm(item) {
   if (form.mensagem_whatsapp_template) {
     form.mensagem_whatsapp_template.value = item.mensagem_whatsapp_template || "";
   }
+
+  refreshAllColorPreviews(form);
 }
 
 function fillProdutoForm(item) {
@@ -345,6 +377,8 @@ function resetForms() {
   const produtoIdField = getHiddenIdField(produtoForm);
   if (cardapioIdField) cardapioIdField.value = "";
   if (produtoIdField) produtoIdField.value = "";
+
+  refreshAllColorPreviews(cardapioForm);
 }
 
 async function uploadProductImage(cardapioId, file) {
@@ -392,6 +426,8 @@ async function setupDashboardPage() {
   setEditingMode(false);
 
   const cardapioForm = document.querySelector("#cardapio-form");
+
+  setupColorPreviewListeners(cardapioForm);
 
   const whatsappInput = cardapioForm?.querySelector('input[name="whatsapp"]');
   whatsappInput?.addEventListener("input", (event) => {
@@ -546,6 +582,7 @@ async function setupDashboardPage() {
     form?.reset();
     const idField = getHiddenIdField(form);
     if (idField) idField.value = "";
+    refreshAllColorPreviews(form);
     setSelectedCardapio(null);
     setEditingMode(false);
   });
