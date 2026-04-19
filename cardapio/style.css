@@ -517,6 +517,10 @@ p {
   gap: 10px;
 }
 
+.form-row > * {
+  min-width: 0;
+}
+
 label {
   display: grid;
   gap: 6px;
@@ -526,6 +530,9 @@ label {
 
 input,
 textarea {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
   border-radius: 12px;
   border: 1px solid var(--border);
   padding: 11px;
@@ -535,6 +542,9 @@ textarea {
 }
 
 select {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
   border-radius: 12px;
   border: 1px solid var(--border);
   padding: 11px;
@@ -667,7 +677,7 @@ button:disabled {
   }
 
   .form-row {
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
     align-items: end;
   }
 }
