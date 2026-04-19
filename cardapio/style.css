@@ -368,14 +368,28 @@ p {
   position: sticky;
   bottom: 0;
   align-self: end;
-  background: var(--surface);
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--surface) 92%, white),
+    var(--surface)
+  );
   border: 1px solid var(--border);
   border-radius: 18px;
-  padding: 14px;
+  padding: 16px;
   box-shadow:
     var(--shadow),
     0 0 0 1px color-mix(in srgb, var(--theme2) 18%, transparent),
     0 10px 34px color-mix(in srgb, var(--theme) 10%, transparent);
+}
+
+.cart-box h2 {
+  margin: 0 0 10px;
+  font-size: 1.35rem;
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+  padding-bottom: 10px;
+  border-bottom: 1px solid color-mix(in srgb, var(--border) 80%, transparent);
+  font-weight: var(--heading-weight);
 }
 
 .cart-items {
@@ -505,11 +519,18 @@ p {
   display: grid;
   gap: 6px;
   margin: 10px 0 12px;
+  padding: 10px 12px;
+  border-radius: 14px;
+  border: 1px solid color-mix(in srgb, var(--border) 80%, transparent);
+  background: color-mix(in srgb, var(--surface) 88%, white);
 }
 
 .checkout-form {
   display: grid;
   gap: 10px;
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid color-mix(in srgb, var(--border) 80%, transparent);
 }
 
 .form-row {
@@ -526,6 +547,10 @@ label {
   gap: 6px;
   font-size: 0.9rem;
   font-weight: 700;
+}
+
+.checkout-form label {
+  color: color-mix(in srgb, var(--text) 88%, var(--muted));
 }
 
 input,
@@ -601,6 +626,13 @@ button:disabled {
   border: 1px solid color-mix(in srgb, var(--theme) 40%, white);
   box-shadow: var(--shadow);
   transition: transform 160ms ease, filter 160ms ease;
+}
+
+@media (min-width: 860px) {
+  .whatsapp-fab {
+    right: auto;
+    left: 16px;
+  }
 }
 
 .whatsapp-fab:hover {
