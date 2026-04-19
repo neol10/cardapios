@@ -127,6 +127,56 @@ function applyBackgroundStyle(cardapio) {
   }
 }
 
+function hexToRgb(hex) {
+  const raw = safeText(hex);
+  if (!raw.startsWith("#")) return null;
+  const h = raw.slice(1);
+  if (h.length === 3) {
+    const r = Number.parseInt(h[0] + h[0], 16);
+    const g = Number.parseInt(h[1] + h[1], 16);
+    const b = Number.parseInt(h[2] + h[2], 16);
+    if ([r, g, b].some((n) => Number.isNaN(n))) return null;
+    return { r, g, b };
+  }
+  if (h.length === 6) {
+    const r = Number.parseInt(h.slice(0, 2), 16);
+    const g = Number.parseInt(h.slice(2, 4), 16);
+    const b = Number.parseInt(h.slice(4, 6), 16);
+    if ([r, g, b].some((n) => Number.isNaN(n))) return null;
+    return { r, g, b };
+  }
+  return null;
+}
+
+function relativeLuminance({ r, g, b }) {
+  const srgb = [r, g, b].map((v) => {
+    const c = v / 255;
+    return c <= 0.03928 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4);
+  });
+  return 0.2126 * srgb[0] + 0.7152 * srgb[1] + 0.0722 * srgb[2];
+}
+
+function applyAutoContrastClass() {
+  const root = document.documentElement;
+  const styles = window.getComputedStyle(root);
+  const surface = hexToRgb(styles.getPropertyValue("--surface").trim());
+  const bg = hexToRgb(styles.getPropertyValue("--bg").trim());
+
+  const surfaceLum = surface ? relativeLuminance(surface) : 1;
+  const bgLum = bg ? relativeLuminance(bg) : 1;
+  const isDark = Math.min(surfaceLum, bgLum) < 0.22;
+  document.body.classList.toggle("theme-dark", isDark);
+}
+
+function setTotalLineValue(el, label, valueText) {
+  if (!el) return;
+  const labelEl = el.querySelector("[data-label]");
+  const valueEl = el.querySelector("[data-value]");
+  if (labelEl) labelEl.textContent = label;
+  if (valueEl) valueEl.textContent = valueText;
+  if (!labelEl || !valueEl) el.textContent = `${label}: ${valueText}`;
+}
+
 function safeText(value) {
   return String(value || "").trim();
 }
@@ -266,7 +316,9 @@ function renderProdutos() {
     .map(
       (produto) => `
       <article class="produto-card">
-        <img src="${produto.imagem_url || "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=800&q=80"}" alt="${produto.nome}" />
+        <div class="produto-media">
+          <img src="${produto.imagem_url || "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=800&q=80"}" alt="${produto.nome}" />
+        </div>
         <div class="produto-body">
           <h3>${produto.nome}</h3>
           <p class="price">${formatPriceBRL(produto.preco)}</p>
@@ -290,10 +342,10 @@ function calculateSubtotal() {
 function renderCart() {
   if (!cart.length) {
     cartItemsContainer.innerHTML = '<p class="muted">Seu carrinho está vazio.</p>';
-    if (cartSubtotal) cartSubtotal.textContent = "Subtotal: R$ 0,00";
+    setTotalLineValue(cartSubtotal, "Subtotal", "R$ 0,00");
     if (cartTaxa) cartTaxa.classList.add("is-hidden");
     if (cartMinimo) cartMinimo.classList.add("is-hidden");
-    cartTotal.textContent = "Total: R$ 0,00";
+    setTotalLineValue(cartTotal, "Total", "R$ 0,00");
     return;
   }
 
@@ -318,11 +370,11 @@ function renderCart() {
 
   const subtotal = calculateSubtotal();
   const taxa = getTaxaEntregaAtual();
-  if (cartSubtotal) cartSubtotal.textContent = `Subtotal: ${formatPriceBRL(subtotal)}`;
+  setTotalLineValue(cartSubtotal, "Subtotal", formatPriceBRL(subtotal));
 
   if (cartTaxa) {
     if (taxa > 0) {
-      cartTaxa.textContent = `Taxa de entrega: ${formatPriceBRL(taxa)}`;
+      setTotalLineValue(cartTaxa, "Taxa de entrega", formatPriceBRL(taxa));
       cartTaxa.classList.remove("is-hidden");
     } else {
       cartTaxa.classList.add("is-hidden");
@@ -339,7 +391,7 @@ function renderCart() {
     }
   }
 
-  cartTotal.textContent = `Total: ${formatPriceBRL(calculateTotal())}`;
+  setTotalLineValue(cartTotal, "Total", formatPriceBRL(calculateTotal()));
 }
 
 function addToCart(produtoId, buttonElement) {
@@ -490,6 +542,7 @@ async function loadCardapio() {
   setOptionalVar("--muted", data.cor_muted);
   setOptionalVar("--border", data.cor_borda);
   applyBackgroundStyle(data);
+  applyAutoContrastClass();
 
   if (cardapioSubtitle) {
     const slogan = safeText(data.slogan);

@@ -277,6 +277,23 @@ p {
   gap: 12px;
 }
 
+.produto-media {
+  position: relative;
+  width: 100%;
+  height: clamp(156px, 26vw, 200px);
+  background:
+    radial-gradient(circle at 20% 20%, color-mix(in srgb, var(--theme) 22%, transparent) 0%, transparent 55%),
+    linear-gradient(180deg, color-mix(in srgb, var(--surface) 92%, var(--bg)), var(--surface));
+}
+
+.produto-media::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, transparent 35%, color-mix(in srgb, var(--surface) 70%, transparent) 100%);
+  pointer-events: none;
+}
+
 .produto-card {
   background: linear-gradient(
     180deg,
@@ -316,7 +333,7 @@ p {
 
 .produto-card img {
   width: 100%;
-  height: clamp(168px, 28vw, 210px);
+  height: 100%;
   object-fit: cover;
   background: color-mix(in srgb, var(--surface) 80%, transparent);
   transition: transform 220ms ease, filter 220ms ease;
@@ -584,6 +601,18 @@ p {
   );
 }
 
+.total-line {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.total-value {
+  font-weight: 900;
+  letter-spacing: -0.01em;
+}
+
 .cart-total {
   margin: 6px 0 0;
   padding: 10px 12px;
@@ -730,6 +759,24 @@ button:disabled {
   transform: translateY(1px);
 }
 
+.theme-dark .produto-card,
+.theme-dark .cart-box {
+  border-color: color-mix(in srgb, var(--border) 55%, white);
+  box-shadow:
+    0 18px 54px color-mix(in srgb, black 60%, transparent),
+    0 0 0 1px color-mix(in srgb, var(--theme2) 20%, transparent);
+}
+
+.theme-dark input,
+.theme-dark textarea,
+.theme-dark select {
+  border-color: color-mix(in srgb, var(--border) 55%, white);
+}
+
+.theme-dark .totals {
+  border-color: color-mix(in srgb, var(--border) 55%, white);
+}
+
 .layout-lista .produtos-grid {
   grid-template-columns: 1fr !important;
 }
@@ -741,13 +788,13 @@ button:disabled {
     align-items: stretch;
   }
 
-  .layout-lista .produto-card img {
+  .layout-lista .produto-media {
     height: 100%;
     min-height: 140px;
   }
 
-  .produto-card img {
-    height: 220px;
+  .layout-lista .produto-media img {
+    height: 100%;
   }
 }
 
@@ -794,6 +841,16 @@ button:disabled {
 
   .produtos-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .produto-media {
+    height: 186px;
+  }
+
+  .produto-card .btn {
+    width: fit-content;
+    justify-self: end;
+    padding: 11px 14px;
   }
 
   .form-row {

@@ -10,7 +10,7 @@
       href="https://fonts.googleapis.com/css2?family=Sora:wght@200;300;400;500;600;700;800&family=Inter:wght@200;300;400;500;600;700;800;900&family=Poppins:wght@200;300;400;500;600;700;800;900&family=Montserrat:wght@200;300;400;500;600;700;800;900&family=Nunito:wght@200;300;400;500;600;700;800;900&family=Rubik:wght@300;400;500;600;700;800;900&family=Outfit:wght@200;300;400;500;600;700;800;900&family=DM+Sans:wght@200;300;400;500;600;700;800;900&family=Work+Sans:wght@200;300;400;500;600;700;800;900&family=Lora:wght@400;500;600;700&family=Merriweather:wght@300;400;700;900&display=swap"
       rel="stylesheet"
     />
-    <link rel="stylesheet" href="./style.css?v=18" />
+    <link rel="stylesheet" href="./style.css?v=19" />
     <script>
       window.__SUPABASE_CONFIG__ = {
         url: "https://uapwitkmxuoepnjlffqy.supabase.co",
@@ -55,9 +55,18 @@
         <h2>Seu pedido</h2>
         <div id="cart-items" class="cart-items"></div>
         <div class="totals">
-          <p id="cart-subtotal" class="muted">Subtotal: R$ 0,00</p>
-          <p id="cart-taxa" class="muted is-hidden">Taxa de entrega: R$ 0,00</p>
-          <p id="cart-total" class="cart-total">Total: R$ 0,00</p>
+          <p id="cart-subtotal" class="muted total-line">
+            <span class="total-label" data-label>Subtotal</span>
+            <span class="total-value" data-value>R$ 0,00</span>
+          </p>
+          <p id="cart-taxa" class="muted total-line is-hidden">
+            <span class="total-label" data-label>Taxa de entrega</span>
+            <span class="total-value" data-value>R$ 0,00</span>
+          </p>
+          <p id="cart-total" class="cart-total total-line">
+            <span class="total-label" data-label>Total</span>
+            <span class="total-value" data-value>R$ 0,00</span>
+          </p>
           <p id="cart-minimo" class="muted is-hidden"></p>
         </div>
 
@@ -103,6 +112,6 @@
 
     <a id="whatsapp-fab" class="whatsapp-fab is-hidden" target="_blank" rel="noopener">WhatsApp</a>
 
-    <script type="module" src="./script.js?v=11"></script>
+    <script type="module" src="./script.js?v=12"></script>
   </body>
 </html>
