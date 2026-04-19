@@ -286,9 +286,10 @@ function renderCardapios() {
       const slugHref = encodeURIComponent(String(item.slug || ""));
       const whatsapp = escapeHtml(item.whatsapp);
       const fotoUrl = safeHttpUrl(item.foto_url);
+      const isSelected = state.selectedCardapioId === item.id;
 
       return `
-      <article class="list-item" data-id="${item.id}">
+      <article class="list-item${isSelected ? " is-selected" : ""}" data-id="${item.id}">
         <div style="display:flex; gap:12px; align-items:center;">
           ${fotoUrl ? `<img src="${fotoUrl}" alt="${nome}" style="width:52px; height:52px; border-radius:50%; object-fit:cover; border:1px solid var(--border);" />` : ""}
           <h3 style="margin:0;">${nome}</h3>
@@ -297,7 +298,7 @@ function renderCardapios() {
         <p class="muted">WhatsApp: ${whatsapp}</p>
         <div class="list-actions">
           <a class="btn" href="/cardapio/${slugHref}" target="_blank" rel="noopener">Abrir cardápio</a>
-          <button class="btn js-manage-cardapio" data-id="${item.id}">Gerenciar</button>
+          <button class="btn js-manage-cardapio" data-id="${item.id}">${isSelected ? "Gerenciando" : "Gerenciar"}</button>
           <button class="btn js-edit-cardapio" data-id="${item.id}">Editar dados</button>
         </div>
       </article>
@@ -652,6 +653,8 @@ async function setupDashboardPage() {
       banner_url: banner_url || null
     };
 
+    let savedId = id;
+
     if (id) {
       if (fotoFile instanceof File && fotoFile.size > 0) {
         try {
@@ -691,6 +694,8 @@ async function setupDashboardPage() {
         return;
       }
 
+      savedId = inserted.id;
+
       if (fotoFile instanceof File && fotoFile.size > 0) {
         try {
           foto_url = await uploadCardapioImage(inserted.id, fotoFile);
@@ -728,8 +733,29 @@ async function setupDashboardPage() {
       }
     }
 
-    resetForms();
+    // Mantém o contexto de gerenciamento após salvar
+    // (não força o usuário a clicar em "Gerenciar" novamente)
+    const produtoFormEl = document.querySelector("#produto-form");
+    produtoFormEl?.reset();
+    const produtoIdField = getHiddenIdField(produtoFormEl);
+    if (produtoIdField) produtoIdField.value = "";
+
+    // Limpa apenas os inputs de arquivo do cardápio
+    const fotoInput = cardapioForm?.querySelector('input[name="foto"]');
+    const bannerInput = cardapioForm?.querySelector('input[name="banner"]');
+    if (fotoInput instanceof HTMLInputElement) fotoInput.value = "";
+    if (bannerInput instanceof HTMLInputElement) bannerInput.value = "";
+
     await loadCardapios();
+    if (savedId) {
+      setSelectedCardapio(savedId);
+      setEditingMode(true);
+      const fresh = state.cardapios.find((c) => c.id === savedId);
+      if (fresh) fillCardapioForm(fresh);
+      await loadProdutos();
+      await loadPedidos();
+    }
+
     toast("Concluído.", "success");
   });
 
