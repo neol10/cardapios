@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Dashboard | Cardápio Digital</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&family=Playfair+Display:wght@600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="./style.css?v=6" />
+    <script>
+      window.__SUPABASE_CONFIG__ = {
+        url: "https://uapwitkmxuoepnjlffqy.supabase.co",
+        anonKey:
+          "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVhcHdpdGtteHVvZXBuamxmZnF5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ4OTcxMjUsImV4cCI6MjA5MDQ3MzEyNX0.YTz_EqzK4m0CMM25n3QJC1b3Nj9bikIrDDEEFi5n6ps"
+      };
+    </script>
+  </head>
+  <body class="admin-body">
+    <header class="topbar">
+      <h1>Cardápio Digital</h1>
+      <div class="topbar-actions">
+        <span id="session-email" class="pill"></span>
+        <button id="logout-btn" class="btn">Sair</button>
+      </div>
+    </header>
+
+    <div id="toast-container" class="toast-container" aria-live="polite" aria-atomic="true"></div>
+
+    <main class="dashboard-grid">
+      <section class="panel" id="cardapios-panel">
+        <h2>Cardápios</h2>
+
+        <form id="cardapio-form" class="stack-gap compact">
+          <input type="hidden" name="id" />
+
+          <label>
+            Nome
+            <input type="text" name="nome" placeholder="Pizzaria do João" required />
+          </label>
+
+          <label>
+            Slug
+            <input type="text" name="slug" placeholder="pizzaria-do-joao" required />
+          </label>
+
+          <label>
+            WhatsApp (somente números)
+            <input type="text" name="whatsapp" placeholder="5511999999999" required />
+          </label>
+
+          <label>
+            Cor do tema
+            <input type="color" name="cor_tema" value="#ff6a00" required />
+          </label>
+
+          <details class="details">
+            <summary>Personalização da loja</summary>
+
+            <label>
+              Cor secundária (opcional)
+              <input type="color" name="cor_secundaria" value="#c8945b" />
+            </label>
+
+            <label>
+              Fundo da loja
+              <select name="fundo_estilo">
+                <option value="padrao" selected>Padrão</option>
+                <option value="solido">Cor sólida</option>
+                <option value="degrade_linear">Degradê linear</option>
+                <option value="degrade_radial">Degradê radial</option>
+              </select>
+            </label>
+
+            <label>
+              Cor do fundo (para "Cor sólida")
+              <input type="color" name="cor_fundo" value="#fffaf3" />
+            </label>
+
+            <label>
+              Degradê - cor 1
+              <input type="color" name="fundo_cor_1" value="#ff6a00" />
+            </label>
+
+            <label>
+              Degradê - cor 2
+              <input type="color" name="fundo_cor_2" value="#ffe6ce" />
+            </label>
+
+            <label>
+              Ângulo do degradê (0 a 360)
+              <input type="number" name="fundo_angulo" min="0" max="360" step="1" value="135" />
+            </label>
+
+            <label>
+              Cor dos cards (opcional)
+              <input type="color" name="cor_surface" value="#ffffff" />
+            </label>
+
+            <label>
+              Cor do texto (opcional)
+              <input type="color" name="cor_texto" value="#2a211d" />
+            </label>
+
+            <label>
+              Cor do texto secundário (opcional)
+              <input type="color" name="cor_muted" value="#756960" />
+            </label>
+
+            <label>
+              Cor da borda (opcional)
+              <input type="color" name="cor_borda" value="#f0dfd1" />
+            </label>
+
+            <label>
+              Slogan (opcional)
+              <input type="text" name="slogan" placeholder="Ex.: Forno a lenha desde 2008" />
+            </label>
+
+            <label>
+              Horário de funcionamento (opcional)
+              <input type="text" name="horario_funcionamento" placeholder="Ex.: Seg-Dom 18h às 23h" />
+            </label>
+
+            <div class="two-cols">
+              <label>
+                Abre (opcional)
+                <input type="time" name="abre_em" />
+              </label>
+
+              <label>
+                Fecha (opcional)
+                <input type="time" name="fecha_em" />
+              </label>
+            </div>
+
+            <label>
+              Endereço (opcional)
+              <input type="text" name="endereco" placeholder="Ex.: Rua X, 123 - Centro" />
+            </label>
+
+            <label>
+              Instagram (opcional)
+              <input type="url" name="instagram_url" placeholder="https://instagram.com/seuperfil" />
+            </label>
+
+            <label>
+              Taxa de entrega (R$)
+              <input type="text" name="taxa_entrega" placeholder="0,00" />
+            </label>
+
+            <label>
+              Pedido mínimo (R$)
+              <input type="text" name="pedido_minimo" placeholder="0,00" />
+            </label>
+
+            <label>
+              Formas de pagamento (opcional)
+              <input type="text" name="formas_pagamento" placeholder="Ex.: Pix, Cartão, Dinheiro" />
+            </label>
+
+            <label>
+              Aceita entrega
+              <select name="aceita_entrega">
+                <option value="true" selected>Sim</option>
+                <option value="false">Não</option>
+              </select>
+            </label>
+
+            <label>
+              Aceita retirada
+              <select name="aceita_retirada">
+                <option value="true" selected>Sim</option>
+                <option value="false">Não</option>
+              </select>
+            </label>
+
+            <label>
+              Layout dos produtos
+              <select name="layout_produtos">
+                <option value="grid" selected>Grade</option>
+                <option value="lista">Lista</option>
+              </select>
+            </label>
+
+            <label>
+              Densidade
+              <select name="densidade">
+                <option value="confortavel" selected>Confortável</option>
+                <option value="compacta">Compacta</option>
+              </select>
+            </label>
+
+            <label>
+              Botão do WhatsApp
+              <select name="whatsapp_botao">
+                <option value="flutuante" selected>Flutuante</option>
+                <option value="topo">No topo</option>
+                <option value="nenhum">Nenhum</option>
+              </select>
+            </label>
+
+            <label>
+              Template da mensagem do WhatsApp (opcional)
+              <textarea name="mensagem_whatsapp_template" rows="4" placeholder="Use {LOJA}, {TOTAL}, {NOME}, {TELEFONE}, {ENDERECO}, {ITENS}, {TAXA_ENTREGA}"></textarea>
+            </label>
+          </details>
+
+          <label>
+            Foto do cardápio (perfil)
+            <input type="file" name="foto" accept="image/*" />
+          </label>
+
+          <label>
+            URL da foto (opcional)
+            <input type="url" name="foto_url" placeholder="https://..." />
+          </label>
+
+          <button class="btn btn-primary" type="submit">Salvar cardápio</button>
+          <button class="btn" type="button" id="cancel-cardapio-edit">Cancelar edição</button>
+        </form>
+      </section>
+
+      <section class="panel" id="cardapios-criados-panel">
+        <h2>Cardápios criados</h2>
+        <div id="cardapios-list" class="list"></div>
+      </section>
+
+      <section class="panel is-hidden" id="produtos-panel">
+        <h2>Produtos</h2>
+        <p id="produto-contexto" class="muted">Selecione um cardápio para gerenciar produtos.</p>
+
+        <form id="produto-form" class="stack-gap compact" enctype="multipart/form-data">
+          <input type="hidden" name="id" />
+
+          <label>
+            Nome
+            <input type="text" name="nome" required />
+          </label>
+
+          <label>
+            Preço (R$)
+            <input type="text" name="preco" placeholder="49,90" required />
+          </label>
+
+          <label>
+            Imagem do produto
+            <input type="file" name="imagem" accept="image/*" />
+          </label>
+
+          <label>
+            URL da imagem (opcional)
+            <input type="url" name="imagem_url" placeholder="https://..." />
+          </label>
+
+          <button class="btn btn-primary" type="submit">Salvar produto</button>
+          <button class="btn" type="button" id="cancel-produto-edit">Cancelar edição</button>
+        </form>
+
+        <div id="produtos-list" class="list"></div>
+      </section>
+
+      <section class="panel panel-full is-hidden" id="pedidos-panel">
+        <h2>Pedidos</h2>
+        <p class="muted">Mostra pedidos do cardápio selecionado. Se nada estiver selecionado, lista todos.</p>
+        <div id="pedidos-list" class="list"></div>
+      </section>
+    </main>
+
+    <script type="module" src="./script.js?v=5"></script>
+  </body>
+</html>

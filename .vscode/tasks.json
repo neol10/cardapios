@@ -1,0 +1,13 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"label": "Localhost Cardapios",
+			"type": "shell",
+			"command": "node",
+			"args": ["tools/keepalive.js"],
+			"isBackground": true,
+			"group": "build"
+		}
+	]
+}

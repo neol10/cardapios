@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Cardápio Digital</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="./style.css?v=10" />
+    <script>
+      window.__SUPABASE_CONFIG__ = {
+        url: "https://uapwitkmxuoepnjlffqy.supabase.co",
+        anonKey:
+          "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVhcHdpdGtteHVvZXBuamxmZnF5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ4OTcxMjUsImV4cCI6MjA5MDQ3MzEyNX0.YTz_EqzK4m0CMM25n3QJC1b3Nj9bikIrDDEEFi5n6ps"
+      };
+    </script>
+  </head>
+  <body>
+    <header class="hero">
+      <div class="hero-content">
+        <div>
+          <p class="chip">Pedido Rápido por WhatsApp</p>
+          <h1 id="cardapio-nome">Carregando cardápio...</h1>
+          <p id="cardapio-subtitle">Escolha seus itens e finalize em poucos passos.</p>
+
+          <div id="cardapio-info" class="cardapio-info is-hidden" aria-label="Informações da loja">
+            <div id="cardapio-status" class="status is-hidden"></div>
+            <p id="cardapio-horario" class="muted is-hidden"></p>
+            <p id="cardapio-endereco" class="muted is-hidden"></p>
+            <p id="cardapio-pagamentos" class="muted is-hidden"></p>
+
+            <div class="info-links">
+              <a id="cardapio-instagram" class="link is-hidden" target="_blank" rel="noopener">Instagram</a>
+              <a id="cardapio-maps" class="link is-hidden" target="_blank" rel="noopener">Como chegar</a>
+              <a id="cardapio-whatsapp-top" class="link is-hidden" target="_blank" rel="noopener">WhatsApp</a>
+            </div>
+          </div>
+        </div>
+        <div class="hero-media">
+          <img id="cardapio-foto" class="is-hidden" alt="" />
+        </div>
+      </div>
+    </header>
+
+    <main class="content-grid">
+      <section>
+        <div id="produtos" class="produtos-grid"></div>
+      </section>
+
+      <aside class="cart-box">
+        <h2>Seu pedido</h2>
+        <div id="cart-items" class="cart-items"></div>
+        <div class="totals">
+          <p id="cart-subtotal" class="muted">Subtotal: R$ 0,00</p>
+          <p id="cart-taxa" class="muted is-hidden">Taxa de entrega: R$ 0,00</p>
+          <p id="cart-total" class="cart-total">Total: R$ 0,00</p>
+          <p id="cart-minimo" class="muted is-hidden"></p>
+        </div>
+
+        <form id="checkout-form" class="checkout-form">
+          <div class="form-row">
+            <label id="tipo-pedido-wrap" class="is-hidden">
+              Tipo de pedido
+              <select name="tipo_pedido" id="tipo_pedido">
+                <option value="entrega">Entrega</option>
+                <option value="retirada">Retirada</option>
+              </select>
+            </label>
+
+            <label id="pagamento-wrap" class="is-hidden">
+              Forma de pagamento
+              <select name="pagamento" id="pagamento"></select>
+            </label>
+          </div>
+
+          <div class="form-row">
+            <label>
+              Nome completo
+              <input type="text" name="nome" placeholder="Ex.: João da Silva" required />
+            </label>
+
+            <label>
+              Telefone
+              <input type="text" name="telefone" id="telefone" placeholder="(11) 99999-9999" required />
+            </label>
+          </div>
+
+          <label id="endereco-wrap">
+            Endereço completo
+            <textarea name="endereco" rows="3" placeholder="Rua, número, bairro, complemento" required></textarea>
+          </label>
+
+          <button class="btn btn-primary" type="submit">Finalizar pedido</button>
+        </form>
+
+        <p id="checkout-message" class="checkout-message" aria-live="polite"></p>
+      </aside>
+    </main>
+
+    <a id="whatsapp-fab" class="whatsapp-fab is-hidden" target="_blank" rel="noopener">WhatsApp</a>
+
+    <script type="module" src="./script.js?v=8"></script>
+  </body>
+</html>

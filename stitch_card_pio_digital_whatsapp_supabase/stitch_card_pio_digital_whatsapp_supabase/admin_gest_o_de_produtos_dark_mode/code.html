@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="pt-br"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>L'Épicurien - Gestão de Produtos</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;700;800&amp;family=Manrope:wght@400;600&amp;family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "on-background": "#e2e3e4",
+                    "inverse-surface": "#f5f6f7",
+                    "on-surface": "#e2e3e4",
+                    "inverse-primary": "#b12300",
+                    "secondary-fixed-dim": "#4a5153",
+                    "surface-bright": "#2c2f30",
+                    "primary-dim": "#ff7859",
+                    "primary-container": "#9b1e00",
+                    "background": "#121415",
+                    "tertiary-container": "#5a1778",
+                    "secondary-fixed": "#394043",
+                    "surface-container-lowest": "#0c0f10",
+                    "on-tertiary-container": "#feeeff",
+                    "surface-dim": "#0c0f10",
+                    "outline-variant": "#444748",
+                    "on-tertiary-fixed": "#feeeff",
+                    "tertiary-fixed": "#dc95fb",
+                    "on-tertiary": "#2c0040",
+                    "on-secondary": "#2c2f30",
+                    "primary-fixed-dim": "#ff5c38",
+                    "on-error-container": "#ffefef",
+                    "tertiary": "#ce88ec",
+                    "inverse-on-surface": "#2c2f30",
+                    "on-secondary-fixed-variant": "#dde4e6",
+                    "tertiary-fixed-dim": "#ce88ec",
+                    "on-primary-container": "#ffefec",
+                    "on-primary-fixed-variant": "#ff7859",
+                    "surface": "#121415",
+                    "on-secondary-container": "#dde4e6",
+                    "surface-container-high": "#282a2c",
+                    "surface-container": "#1a1c1e",
+                    "on-tertiary-fixed-variant": "#dc95fb",
+                    "secondary-dim": "#cfd6d8",
+                    "surface-container-low": "#161819",
+                    "outline": "#8e9192",
+                    "on-primary": "#ffffff",
+                    "secondary": "#cfd6d8",
+                    "surface-container-highest": "#333537",
+                    "on-primary-fixed": "#ffffff",
+                    "surface-tint": "#ff5630",
+                    "surface-variant": "#444748",
+                    "primary-fixed": "#ffefec",
+                    "tertiary-dim": "#ce88ec",
+                    "error-container": "#a70138",
+                    "primary": "#ff5630",
+                    "error": "#f74b6d",
+                    "on-surface-variant": "#c4c7c8",
+                    "on-error": "#510017",
+                    "on-secondary-fixed": "#ffffff",
+                    "error-dim": "#f74b6d",
+                    "secondary-container": "#4a5153"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "fontFamily": {
+                    "headline": ["Plus Jakarta Sans"],
+                    "body": ["Manrope"],
+                    "label": ["Manrope"]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        body { font-family: 'Manrope', sans-serif; }
+        h1, h2, h3, .headline { font-family: 'Plus Jakarta Sans', sans-serif; }
+    </style>
+</head>
+<body class="bg-surface text-on-surface antialiased flex min-h-screen">
+<!-- SideNavBar (Admin) -->
+<aside class="hidden lg:flex flex-col p-4 space-y-2 bg-surface-container h-screen w-64 border-r border-outline-variant/10 font-['Manrope'] font-semibold text-sm">
+<div class="mb-10 px-2 pt-4">
+<h1 class="font-['Plus_Jakarta_Sans'] font-extrabold text-primary text-xl tracking-tight">Admin Gastronômico</h1>
+<p class="text-on-surface-variant text-xs font-normal">Gestão de Restaurante</p>
+</div>
+<nav class="flex-1 space-y-1">
+<a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container-high hover:translate-x-1 transition-transform duration-200" href="#">
+<span class="material-symbols-outlined" data-icon="dashboard">dashboard</span>
+<span>Dashboard</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container-high hover:translate-x-1 transition-transform duration-200" href="#">
+<span class="material-symbols-outlined" data-icon="restaurant_menu">restaurant_menu</span>
+<span>Pedidos</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 bg-surface-container-highest text-primary rounded-lg scale-100 active:scale-98 transition-all" href="#">
+<span class="material-symbols-outlined" data-icon="inventory_2">inventory_2</span>
+<span>Cardápio</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container-high hover:translate-x-1 transition-transform duration-200" href="#">
+<span class="material-symbols-outlined" data-icon="group">group</span>
+<span>Clientes</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container-high hover:translate-x-1 transition-transform duration-200" href="#">
+<span class="material-symbols-outlined" data-icon="settings">settings</span>
+<span>Configurações</span>
+</a>
+</nav>
+<div class="pt-6 mt-6 border-t border-outline-variant/20">
+<div class="flex items-center gap-3 px-2">
+<img alt="Chef Profile" class="w-10 h-10 rounded-full object-cover border border-outline-variant/30" data-alt="Professional chef portrait in clean white uniform with a friendly expression in a modern kitchen background" src="https://lh3.googleusercontent.com/aida-public/AB6AXuD1qGw9eZak24XuddmL-H9Rea8Tb_qd6aAmqxnLMo23lt6BDz-rcsaidrUoYALrojuP0nbG0fGOVM_Yju4Z__GZKfG8Im_yk3onwvrSDAIXuH2Q973fpEfN36q-7YCs9tdtS-k41cA5VnqCK76oJhjaCtM9Trg04AoDcQf0SWA6T64EOJp96S84nD4q9yZPL9TB3YE0PmlTyYn6HDhyTEKMxpsQoGFFo_3DkbuUz-kz8Lrcxl7nOgG_yqdv4jvQ7R1E7I82WAA5xm1t"/>
+<div>
+<p class="font-bold text-xs text-on-surface">Chef Auguste</p>
+<p class="text-[10px] text-on-surface-variant uppercase tracking-tighter">Executive Chef</p>
+</div>
+</div>
+</div>
+</aside>
+<!-- Main Content Canvas -->
+<main class="flex-1 overflow-y-auto bg-surface">
+<!-- Top Header for Desktop Content -->
+<header class="h-20 px-8 flex justify-between items-center bg-surface border-b border-outline-variant/10 sticky top-0 z-10">
+<div>
+<h2 class="text-2xl font-bold headline text-on-surface tracking-tight">Gestão de Produtos</h2>
+<p class="text-sm text-on-surface-variant">Gerencie seu menu gastronômico com precisão.</p>
+</div>
+<button class="bg-primary text-on-primary px-6 py-2.5 rounded-full font-bold flex items-center gap-2 hover:opacity-90 transition-opacity shadow-sm active:scale-95 duration-150">
+<span class="material-symbols-outlined text-xl" data-icon="add">add</span>
+                Novo Produto
+            </button>
+</header>
+<div class="p-8 max-w-7xl mx-auto space-y-8">
+<!-- Filters & Stats -->
+<div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+<div class="col-span-1 bg-surface-container p-5 rounded-xl flex items-center justify-between border border-outline-variant/10">
+<div>
+<p class="text-[10px] uppercase font-bold text-on-surface-variant tracking-widest mb-1">Total de Itens</p>
+<h3 class="text-3xl font-bold headline text-on-surface">124</h3>
+</div>
+<div class="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center text-primary">
+<span class="material-symbols-outlined" data-icon="list_alt">list_alt</span>
+</div>
+</div>
+<div class="col-span-1 bg-surface-container p-5 rounded-xl flex items-center justify-between border border-outline-variant/10">
+<div>
+<p class="text-[10px] uppercase font-bold text-on-surface-variant tracking-widest mb-1">Ativos</p>
+<h3 class="text-3xl font-bold headline text-on-surface">118</h3>
+</div>
+<div class="w-12 h-12 rounded-full bg-green-500/10 flex items-center justify-center text-green-400">
+<span class="material-symbols-outlined" data-icon="check_circle">check_circle</span>
+</div>
+</div>
+<div class="col-span-2 bg-surface-container p-4 rounded-xl flex items-center gap-4 border border-outline-variant/10">
+<div class="flex-1 relative">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant" data-icon="search">search</span>
+<input class="w-full pl-10 pr-4 py-3 bg-surface-container-high border-none rounded-lg text-sm text-on-surface focus:ring-1 focus:ring-primary/40 focus:outline-none placeholder-on-surface-variant/50" placeholder="Buscar por nome ou categoria..." type="text"/>
+</div>
+<button class="p-3 bg-surface-container-high rounded-lg text-on-surface-variant hover:text-primary transition-colors">
+<span class="material-symbols-outlined" data-icon="filter_list">filter_list</span>
+</button>
+</div>
+</div>
+<!-- Product Management Table -->
+<div class="bg-surface-container rounded-xl overflow-hidden border border-outline-variant/10">
+<div class="overflow-x-auto">
+<table class="w-full text-left border-collapse">
+<thead>
+<tr class="bg-surface-container-highest/30 text-on-surface-variant">
+<th class="px-6 py-4 text-[11px] font-bold uppercase tracking-wider">Produto</th>
+<th class="px-6 py-4 text-[11px] font-bold uppercase tracking-wider">Categoria</th>
+<th class="px-6 py-4 text-[11px] font-bold uppercase tracking-wider">Preço</th>
+<th class="px-6 py-4 text-[11px] font-bold uppercase tracking-wider">Status</th>
+<th class="px-6 py-4 text-[11px] font-bold uppercase tracking-wider text-right">Ações</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-outline-variant/10">
+<!-- Row 1 -->
+<tr class="hover:bg-surface-container-high transition-colors group">
+<td class="px-6 py-4">
+<div class="flex items-center gap-4">
+<div class="w-12 h-12 rounded-lg bg-surface-container-highest overflow-hidden ring-1 ring-outline-variant/20">
+<img alt="Salmão Grelhado" class="w-full h-full object-cover" data-alt="Gourmet grilled salmon fillet with asparagus and lemon garnish on a minimalist white ceramic plate" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDOE_O4Dyn6hGiijepXj4NGKQYmn03FjN7hzUMaYSCNNTUNuPFdQPaZj0QUU_GiK3UBjZJLh0nyiTvopzKDAeQnnOs-Auh6dHSyhvgvz4PsLG16prltKU9AnTA28kCeOuvYAgV9BfPWCF9W9S3HTjLhJlU-EqlMJyy5wzc7BEPST0nZKIECWBNC2g8gCD-fxvGyoAQxXH7sV7hyJHaA8Mz80bkvkLO8OY7G3vPGVAis4RuV7kKY36Z8LT5ypw7got8tZ5sSvnaJoOE3"/>
+</div>
+<div>
+<p class="font-bold text-on-surface">Salmão Grelhado com Aspargos</p>
+<p class="text-xs text-on-surface-variant truncate max-w-[200px]">Salmão fresco com manteiga de ervas...</p>
+</div>
+</div>
+</td>
+<td class="px-6 py-4">
+<span class="px-3 py-1 rounded-full text-xs font-semibold bg-surface-container-highest text-on-surface-variant">Pratos Principais</span>
+</td>
+<td class="px-6 py-4">
+<span class="font-bold text-primary">R$ 89,90</span>
+</td>
+<td class="px-6 py-4">
+<div class="flex items-center gap-1.5 text-green-400 font-bold text-xs uppercase tracking-tighter">
+<span class="w-2 h-2 rounded-full bg-green-400"></span>
+                                        Ativo
+                                    </div>
+</td>
+<td class="px-6 py-4 text-right">
+<div class="flex justify-end gap-2">
+<button class="p-2 hover:bg-primary/10 text-on-surface-variant hover:text-primary transition-colors rounded-lg">
+<span class="material-symbols-outlined text-lg" data-icon="edit">edit</span>
+</button>
+<button class="p-2 hover:bg-error/10 text-on-surface-variant hover:text-error transition-colors rounded-lg">
+<span class="material-symbols-outlined text-lg" data-icon="delete">delete</span>
+</button>
+</div>
+</td>
+</tr>
+<!-- Row 2 -->
+<tr class="hover:bg-surface-container-high transition-colors group">
+<td class="px-6 py-4">
+<div class="flex items-center gap-4">
+<div class="w-12 h-12 rounded-lg bg-surface-container-highest overflow-hidden ring-1 ring-outline-variant/20">
+<img alt="Fondue de Chocolate" class="w-full h-full object-cover" data-alt="Rich chocolate lava cake with melting center and fresh strawberry garnish on a dark plate" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAE0ju2H0MPv7AofCNhEw0jsft8xR6d8M_aqAqGKu4Z_HNexuoxYAtGuW2sQziw48fspQsWHekZJUsAE2PsrwZBuyC_K_BoGaQWohB-1JK33kpxu6gpt1LID6BKaGRuok1OGUkQNkjJzgFX8gbLPMJIlVuK3KbPhnVsPmXYEJxX9RIb1nMIcUU1jpgN5i-ASumPmPMDYaHwgZ-oHM6DEUSq8afWObh71JrgcGjf0N-029T3P7J87ZHOhhJFpEkPIWRizs-wPtYMHsa8"/>
+</div>
+<div>
+<p class="font-bold text-on-surface">Fondue de Chocolate Belga</p>
+<p class="text-xs text-on-surface-variant truncate max-w-[200px]">Acompanha frutas da estação e marshmallow.</p>
+</div>
+</div>
+</td>
+<td class="px-6 py-4">
+<span class="px-3 py-1 rounded-full text-xs font-semibold bg-surface-container-highest text-on-surface-variant">Sobremesas</span>
+</td>
+<td class="px-6 py-4">
+<span class="font-bold text-primary">R$ 45,00</span>
+</td>
+<td class="px-6 py-4">
+<div class="flex items-center gap-1.5 text-green-400 font-bold text-xs uppercase tracking-tighter">
+<span class="w-2 h-2 rounded-full bg-green-400"></span>
+                                        Ativo
+                                    </div>
+</td>
+<td class="px-6 py-4 text-right">
+<div class="flex justify-end gap-2">
+<button class="p-2 hover:bg-primary/10 text-on-surface-variant hover:text-primary transition-colors rounded-lg">
+<span class="material-symbols-outlined text-lg" data-icon="edit">edit</span>
+</button>
+<button class="p-2 hover:bg-error/10 text-on-surface-variant hover:text-error transition-colors rounded-lg">
+<span class="material-symbols-outlined text-lg" data-icon="delete">delete</span>
+</button>
+</div>
+</td>
+</tr>
+<!-- Row 3 -->
+<tr class="hover:bg-surface-container-high transition-colors group">
+<td class="px-6 py-4">
+<div class="flex items-center gap-4">
+<div class="w-12 h-12 rounded-lg bg-surface-container-highest overflow-hidden ring-1 ring-outline-variant/20">
+<img alt="Negroni" class="w-full h-full object-cover" data-alt="Classic Negroni cocktail in a crystal glass with a large clear ice cube and orange peel twist" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAOwtDLT8ODy7NHiBFy6tjekl5XZ6aIH8dlciuDNXBfv4WbmQ60PwFPWzLlVkQWIcFC37rw7pBH0vGaoV8kyYv3rFP_V3zfmTSDFc8rHOl9F3BLfAXT7UM8zkWgviWqA8x24hKHQ27YEvJKuuYpy8z7sA74O4yOtQY1tfjprP6AfeLNleeD8Su-i07VkMkUnwo-tBeQkE5j8QTFgqYmUDs6ugfSBj10cLBilsRr0-FHpMpe9IEoP0mzxZjAgGBjwWuRf8Jyim0s1n7u"/>
+</div>
+<div>
+<p class="font-bold text-on-surface">Negroni Signature</p>
+<p class="text-xs text-on-surface-variant truncate max-w-[200px]">Gin premium, Vermute e Campari.</p>
+</div>
+</div>
+</td>
+<td class="px-6 py-4">
+<span class="px-3 py-1 rounded-full text-xs font-semibold bg-surface-container-highest text-on-surface-variant">Bebidas</span>
+</td>
+<td class="px-6 py-4">
+<span class="font-bold text-primary">R$ 38,00</span>
+</td>
+<td class="px-6 py-4">
+<div class="flex items-center gap-1.5 text-on-surface-variant font-bold text-xs uppercase tracking-tighter opacity-60">
+<span class="w-2 h-2 rounded-full bg-outline-variant"></span>
+                                        Inativo
+                                    </div>
+</td>
+<td class="px-6 py-4 text-right">
+<div class="flex justify-end gap-2">
+<button class="p-2 hover:bg-primary/10 text-on-surface-variant hover:text-primary transition-colors rounded-lg">
+<span class="material-symbols-outlined text-lg" data-icon="edit">edit</span>
+</button>
+<button class="p-2 hover:bg-error/10 text-on-surface-variant hover:text-error transition-colors rounded-lg">
+<span class="material-symbols-outlined text-lg" data-icon="delete">delete</span>
+</button>
+</div>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<!-- Pagination Footer -->
+<div class="px-6 py-4 flex items-center justify-between border-t border-outline-variant/10 text-sm text-on-surface-variant">
+<p>Mostrando 3 de 124 produtos</p>
+<div class="flex gap-2">
+<button class="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-surface-container-highest transition-colors">
+<span class="material-symbols-outlined text-sm" data-icon="chevron_left">chevron_left</span>
+</button>
+<button class="w-8 h-8 flex items-center justify-center rounded-lg bg-primary text-on-primary font-bold">1</button>
+<button class="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-surface-container-highest transition-colors">2</button>
+<button class="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-surface-container-highest transition-colors">3</button>
+<button class="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-surface-container-highest transition-colors">
+<span class="material-symbols-outlined text-sm" data-icon="chevron_right">chevron_right</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+</main>
+<!-- Right Side Panel: Add/Edit Product (Drawer) -->
+<aside class="fixed right-0 top-0 h-screen w-[400px] bg-surface-container shadow-2xl z-50 flex flex-col transform transition-transform duration-300 border-l border-outline-variant/20">
+<div class="p-6 border-b border-outline-variant/10 flex items-center justify-between">
+<h3 class="text-xl font-bold headline text-on-surface tracking-tight">Editar Produto</h3>
+<button class="p-2 hover:bg-surface-container-highest rounded-full transition-colors text-on-surface-variant">
+<span class="material-symbols-outlined" data-icon="close">close</span>
+</button>
+</div>
+<div class="flex-1 overflow-y-auto p-6 space-y-6">
+<!-- Image Upload Area -->
+<div class="space-y-2">
+<label class="text-[11px] font-bold uppercase tracking-widest text-on-surface-variant px-1">Imagem do Produto</label>
+<div class="relative group aspect-video rounded-xl overflow-hidden bg-surface-container-high border-2 border-dashed border-outline-variant/20 flex flex-col items-center justify-center text-on-surface-variant hover:border-primary/50 transition-colors cursor-pointer">
+<img alt="Edit Salmão" class="absolute inset-0 w-full h-full object-cover group-hover:opacity-40 transition-opacity ring-1 ring-white/5" data-alt="Artisan food plating close up with vibrant colors and professional studio lighting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCKD7DrCWX-i9uhwqX24H0rVxUGhhjHehlIZRpXwQwBSf5LVeLpHL4DL_k_RKNhcmu-P94L-AcvF-EWyQJOrtMDLLfYaTBCvHlXoqKMUDrSeA6NSXPQCraGA6QriPxDvyEvNSXpFqjIL5587hclshw7itxY3RbGu65cTRLhVjZg2enG1E-xklFOJzcBqurvSZ_SwXzCSjucbt37GaPmo586ecoVWoqjNixVpH2HEtN6Bbt1b6UUp3qnncpW2A9lfTBbLqHhYqj3AsVm"/>
+<div class="relative z-10 flex flex-col items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+<span class="material-symbols-outlined text-3xl" data-icon="add_a_photo">add_a_photo</span>
+<span class="text-xs font-bold">Alterar Imagem</span>
+</div>
+</div>
+</div>
+<!-- Fields -->
+<div class="space-y-4">
+<div class="space-y-1">
+<label class="text-[11px] font-bold uppercase tracking-widest text-on-surface-variant px-1">Nome do Produto</label>
+<input class="w-full bg-surface-container-high border-none rounded-lg px-4 py-3 focus:ring-1 focus:ring-primary/40 focus:outline-none text-sm font-medium text-on-surface placeholder-on-surface-variant/50" type="text" value="Salmão Grelhado com Aspargos"/>
+</div>
+<div class="grid grid-cols-2 gap-4">
+<div class="space-y-1">
+<label class="text-[11px] font-bold uppercase tracking-widest text-on-surface-variant px-1">Preço (R$)</label>
+<input class="w-full bg-surface-container-high border-none rounded-lg px-4 py-3 focus:ring-1 focus:ring-primary/40 focus:outline-none text-sm font-medium text-on-surface placeholder-on-surface-variant/50" type="text" value="89,90"/>
+</div>
+<div class="space-y-1">
+<label class="text-[11px] font-bold uppercase tracking-widest text-on-surface-variant px-1">Categoria</label>
+<div class="relative">
+<select class="w-full bg-surface-container-high border-none rounded-lg px-4 py-3 focus:ring-1 focus:ring-primary/40 focus:outline-none text-sm font-medium text-on-surface appearance-none">
+<option>Pratos Principais</option>
+<option>Entradas</option>
+<option>Sobremesas</option>
+<option>Bebidas</option>
+</select>
+<span class="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-on-surface-variant pointer-events-none text-lg" data-icon="expand_more">expand_more</span>
+</div>
+</div>
+</div>
+<div class="space-y-1">
+<label class="text-[11px] font-bold uppercase tracking-widest text-on-surface-variant px-1">Descrição</label>
+<textarea class="w-full bg-surface-container-high border-none rounded-lg px-4 py-3 focus:ring-1 focus:ring-primary/40 focus:outline-none text-sm font-medium text-on-surface placeholder-on-surface-variant/50 resize-none" rows="4">Salmão fresco grelhado acompanhado de aspargos salteados no azeite de oliva e finalizado com manteiga noisette de ervas finas.</textarea>
+</div>
+<div class="flex items-center gap-3 py-2">
+<div class="relative inline-block w-12 h-6 rounded-full bg-primary/20 cursor-pointer">
+<div class="absolute right-1 top-1 w-4 h-4 bg-primary rounded-full transition-all"></div>
+</div>
+<span class="text-sm font-bold text-on-surface">Produto Visível no Cardápio</span>
+</div>
+</div>
+</div>
+<div class="p-6 border-t border-outline-variant/10 grid grid-cols-2 gap-4">
+<button class="px-6 py-3 border border-outline-variant/30 text-on-surface-variant rounded-full font-bold text-sm hover:bg-surface-container-highest transition-colors">Descartar</button>
+<button class="px-6 py-3 bg-primary text-on-primary rounded-full font-bold text-sm hover:opacity-90 transition-opacity shadow-lg active:scale-95 duration-150">Salvar Alterações</button>
+</div>
+</aside>
+<!-- Overlay (for Drawer/Modal) -->
+<div class="fixed inset-0 bg-surface-container-lowest/80 backdrop-blur-sm z-40 transition-opacity"></div>
+</body></html>

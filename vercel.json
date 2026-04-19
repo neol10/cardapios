@@ -1,0 +1,9 @@
+{
+  "routes": [
+    { "handle": "filesystem" },
+    { "src": "^/admin/?$", "dest": "/admin/index.html" },
+    { "src": "^/admin/dashboard/?$", "dest": "/admin/dashboard.html" },
+    { "src": "^/cardapio/?$", "dest": "/cardapio/index.html" },
+    { "src": "^/cardapio/(.*)$", "dest": "/cardapio/index.html" }
+  ]
+}
