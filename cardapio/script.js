@@ -478,6 +478,7 @@ function buildWhatsappMessage({ nome, telefone, endereco }) {
   const taxaEntrega = getTaxaEntregaAtual();
   const total = subtotal + taxaEntrega;
   const tipoPedido = getTipoPedido();
+  const tipoPedidoLabel = tipoPedido === "retirada" ? "Retirada" : "Entrega";
   const pagamento = String(pagamentoSelect?.value || "").trim();
 
   const itensTexto = cart
@@ -501,17 +502,23 @@ function buildWhatsappMessage({ nome, telefone, endereco }) {
       NOME: nome,
       TELEFONE: telefone,
       ENDERECO: resolvedEndereco || "Não informado",
-      TIPO_PEDIDO: tipoPedido,
+      TIPO_PEDIDO: tipoPedidoLabel,
       PAGAMENTO: pagamento || "Não informado"
     };
 
-    let out = template.replaceAll("\\n", "\n");
-    Object.entries(vars).forEach(([key, value]) => {
-      out = out.replaceAll(`{${key}}`, String(value));
-      out = out.replaceAll(`{{${key}}}`, String(value));
-    });
+    const replaceVars = (input) =>
+      String(input)
+        .replaceAll("\\n", "\n")
+        .replaceAll("\r\n", "\n")
+        .replace(/\{\{\s*([a-z0-9_]+)\s*\}\}|\{\s*([a-z0-9_]+)\s*\}/gi, (match, p1, p2) => {
+          const rawKey = String(p1 || p2 || "");
+          const key = rawKey.trim().toUpperCase();
+          if (!key) return match;
+          if (!(key in vars)) return match;
+          return String(vars[key]);
+        });
 
-    return out;
+    return replaceVars(template);
   }
 
   const enderecoLinha = tipoPedido === "retirada" ? "Retirada no balcão" : endereco;
@@ -519,7 +526,7 @@ function buildWhatsappMessage({ nome, telefone, endereco }) {
   const defaultTemplate = [
     `*Novo pedido - ${activeCardapio.nome}*`,
     "",
-    `*Tipo:* ${tipoPedido === "retirada" ? "Retirada" : "Entrega"}`,
+    `*Tipo:* ${tipoPedidoLabel}`,
     `*Pagamento:* ${pagamento || "Não informado"}`,
     "",
     "*Cliente:*",
@@ -855,21 +862,25 @@ function attachEvents() {
 
 async function init() {
   try {
-    assertSupabaseConfig();
-  } catch (error) {
-    setHeaderState("Falha ao carregar", "Verifique a configuração e tente novamente.");
-    produtosContainer.innerHTML = `<p class="muted">${error.message}</p>`;
-    return;
-  }
+    try {
+      assertSupabaseConfig();
+    } catch (error) {
+      setHeaderState("Falha ao carregar", "Verifique a configuração e tente novamente.");
+      produtosContainer.innerHTML = `<p class="muted">${error.message}</p>`;
+      return;
+    }
 
-  attachEvents();
+    attachEvents();
 
-  try {
-    await loadCardapio();
-  } catch (error) {
-    setHeaderState("Erro ao carregar", "Tente recarregar a página.");
-    const msg = error?.message ? String(error.message) : "Erro desconhecido";
-    produtosContainer.innerHTML = `<p class="muted">Erro ao carregar cardápio: ${msg}</p>`;
+    try {
+      await loadCardapio();
+    } catch (error) {
+      setHeaderState("Erro ao carregar", "Tente recarregar a página.");
+      const msg = error?.message ? String(error.message) : "Erro desconhecido";
+      produtosContainer.innerHTML = `<p class="muted">Erro ao carregar cardápio: ${msg}</p>`;
+    }
+  } finally {
+    document.body.classList.remove("is-loading");
   }
 }
 

@@ -21,7 +21,19 @@
       href="https://fonts.googleapis.com/css2?family=Sora:wght@200;300;400;500;600;700;800&family=Inter:wght@200;300;400;500;600;700;800;900&family=Poppins:wght@200;300;400;500;600;700;800;900&family=Montserrat:wght@200;300;400;500;600;700;800;900&family=Nunito:wght@200;300;400;500;600;700;800;900&family=Rubik:wght@300;400;500;600;700;800;900&family=Outfit:wght@200;300;400;500;600;700;800;900&family=DM+Sans:wght@200;300;400;500;600;700;800;900&family=Work+Sans:wght@200;300;400;500;600;700;800;900&family=Lora:wght@400;500;600;700&family=Merriweather:wght@300;400;700;900&display=swap"
       rel="stylesheet"
     />
-    <link rel="stylesheet" href="./style.css?v=20" />
+    <link rel="preload" as="style" href="./style.css?v=21" />
+    <link rel="stylesheet" href="./style.css?v=21" />
+    <style>
+      body.is-loading main,
+      body.is-loading aside,
+      body.is-loading #whatsapp-fab {
+        visibility: hidden;
+      }
+
+      body {
+        background: #fffaf3;
+      }
+    </style>
     <script>
       window.__SUPABASE_CONFIG__ = {
         url: "https://uapwitkmxuoepnjlffqy.supabase.co",
@@ -30,7 +42,7 @@
       };
     </script>
   </head>
-  <body>
+  <body class="is-loading">
     <header class="hero">
       <div class="hero-content">
         <div>
@@ -125,7 +137,7 @@
 
     <a id="whatsapp-fab" class="whatsapp-fab is-hidden" target="_blank" rel="noopener">WhatsApp</a>
 
-    <link rel="modulepreload" href="./script.js?v=15" />
-    <script type="module" src="./script.js?v=15"></script>
+    <link rel="modulepreload" href="./script.js?v=16" />
+    <script type="module" src="./script.js?v=16"></script>
   </body>
 </html>
