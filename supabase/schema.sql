@@ -15,6 +15,24 @@ create table if not exists public.admins (
 
 alter table public.admins enable row level security;
 
+-- Helper para checar admin sem causar recursao infinita de RLS.
+-- (Policies que fazem subquery em public.admins dentro de public.admins geram
+--  "infinite recursion detected in policy for relation 'admins'")
+create or replace function public.is_admin(p_user_id uuid)
+returns boolean
+language sql
+stable
+security definer
+set search_path = public
+as $$
+  select exists (
+    select 1 from public.admins where user_id = p_user_id
+  );
+$$;
+
+revoke all on function public.is_admin(uuid) from public;
+grant execute on function public.is_admin(uuid) to anon, authenticated;
+
 drop policy if exists "admin read own row" on public.admins;
 create policy "admin read own row"
 on public.admins
@@ -22,11 +40,25 @@ for select
 using (auth.uid() = user_id);
 
 drop policy if exists "admin manage admins" on public.admins;
-create policy "admin manage admins"
+
+drop policy if exists "admin insert admins" on public.admins;
+create policy "admin insert admins"
 on public.admins
-for all
-using (exists (select 1 from public.admins a where a.user_id = auth.uid()))
-with check (exists (select 1 from public.admins a where a.user_id = auth.uid()));
+for insert
+with check (public.is_admin(auth.uid()));
+
+drop policy if exists "admin update admins" on public.admins;
+create policy "admin update admins"
+on public.admins
+for update
+using (public.is_admin(auth.uid()))
+with check (public.is_admin(auth.uid()));
+
+drop policy if exists "admin delete admins" on public.admins;
+create policy "admin delete admins"
+on public.admins
+for delete
+using (public.is_admin(auth.uid()));
 
 create table if not exists public.cardapios (
   id uuid primary key default gen_random_uuid(),
@@ -159,21 +191,21 @@ drop policy if exists "auth manage cardapios" on public.cardapios;
 create policy "auth manage cardapios"
 on public.cardapios
 for all
-using (exists (select 1 from public.admins a where a.user_id = auth.uid()))
-with check (exists (select 1 from public.admins a where a.user_id = auth.uid()));
+using (public.is_admin(auth.uid()))
+with check (public.is_admin(auth.uid()));
 
 drop policy if exists "auth manage produtos" on public.produtos;
 create policy "auth manage produtos"
 on public.produtos
 for all
-using (exists (select 1 from public.admins a where a.user_id = auth.uid()))
-with check (exists (select 1 from public.admins a where a.user_id = auth.uid()));
+using (public.is_admin(auth.uid()))
+with check (public.is_admin(auth.uid()));
 
 drop policy if exists "auth read pedidos" on public.pedidos;
 create policy "auth read pedidos"
 on public.pedidos
 for select
-using (exists (select 1 from public.admins a where a.user_id = auth.uid()));
+using (public.is_admin(auth.uid()));
 
 -- Storage para imagens de produtos.
 insert into storage.buckets (id, name, public)
@@ -205,7 +237,7 @@ on storage.objects
 for insert
 with check (
   bucket_id = 'produtos'
-  and exists (select 1 from public.admins a where a.user_id = auth.uid())
+  and public.is_admin(auth.uid())
 );
 
 drop policy if exists "auth insert cardapios bucket" on storage.objects;
@@ -214,7 +246,7 @@ on storage.objects
 for insert
 with check (
   bucket_id = 'cardapios'
-  and exists (select 1 from public.admins a where a.user_id = auth.uid())
+  and public.is_admin(auth.uid())
 );
 
 drop policy if exists "auth update produtos bucket" on storage.objects;
@@ -223,7 +255,7 @@ on storage.objects
 for update
 using (
   bucket_id = 'produtos'
-  and exists (select 1 from public.admins a where a.user_id = auth.uid())
+  and public.is_admin(auth.uid())
 );
 
 drop policy if exists "auth update cardapios bucket" on storage.objects;
@@ -232,7 +264,7 @@ on storage.objects
 for update
 using (
   bucket_id = 'cardapios'
-  and exists (select 1 from public.admins a where a.user_id = auth.uid())
+  and public.is_admin(auth.uid())
 );
 
 drop policy if exists "auth delete produtos bucket" on storage.objects;
@@ -241,7 +273,7 @@ on storage.objects
 for delete
 using (
   bucket_id = 'produtos'
-  and exists (select 1 from public.admins a where a.user_id = auth.uid())
+  and public.is_admin(auth.uid())
 );
 
 drop policy if exists "auth delete cardapios bucket" on storage.objects;
@@ -250,5 +282,5 @@ on storage.objects
 for delete
 using (
   bucket_id = 'cardapios'
-  and exists (select 1 from public.admins a where a.user_id = auth.uid())
+  and public.is_admin(auth.uid())
 );
