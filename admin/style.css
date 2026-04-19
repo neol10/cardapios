@@ -276,6 +276,24 @@ select:disabled {
   background: rgba(255, 255, 255, 0.02);
 }
 
+.details-sub {
+  margin-top: 10px;
+  padding: 10px;
+  border-radius: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  background: rgba(0, 0, 0, 0.12);
+}
+
+.details-sub summary {
+  font-weight: 900;
+  font-size: 0.88rem;
+  padding: 6px 8px;
+}
+
+.details-sub[open] summary {
+  margin-bottom: 10px;
+}
+
 .details summary {
   cursor: pointer;
   font-weight: 800;

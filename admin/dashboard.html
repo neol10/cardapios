@@ -64,196 +64,252 @@
           <details class="details">
             <summary>Personalização da loja</summary>
 
-            <label>
-              Cor secundária (opcional)
-              <div class="color-row">
-                <input type="color" name="cor_secundaria" value="#c8945b" />
-                <span class="color-swatch" aria-hidden="true"></span>
-                <span class="color-hex" aria-label="Cor selecionada"></span>
-              </div>
-            </label>
+            <details class="details details-sub" open>
+              <summary>Fundo</summary>
 
-            <label>
-              Fundo da loja
-              <select name="fundo_estilo">
-                <option value="padrao" selected>Padrão</option>
-                <option value="solido">Cor sólida</option>
-                <option value="degrade_linear">Degradê linear</option>
-                <option value="degrade_radial">Degradê radial</option>
-              </select>
-            </label>
-
-            <label>
-              Cor do fundo (para "Cor sólida")
-              <div class="color-row">
-                <input type="color" name="cor_fundo" value="#fffaf3" />
-                <span class="color-swatch" aria-hidden="true"></span>
-                <span class="color-hex" aria-label="Cor selecionada"></span>
-              </div>
-            </label>
-
-            <label>
-              Degradê - cor 1
-              <div class="color-row">
-                <input type="color" name="fundo_cor_1" value="#ff6a00" />
-                <span class="color-swatch" aria-hidden="true"></span>
-                <span class="color-hex" aria-label="Cor selecionada"></span>
-              </div>
-            </label>
-
-            <label>
-              Degradê - cor 2
-              <div class="color-row">
-                <input type="color" name="fundo_cor_2" value="#ffe6ce" />
-                <span class="color-swatch" aria-hidden="true"></span>
-                <span class="color-hex" aria-label="Cor selecionada"></span>
-              </div>
-            </label>
-
-            <label>
-              Ângulo do degradê (0 a 360)
-              <input type="number" name="fundo_angulo" min="0" max="360" step="1" value="135" />
-            </label>
-
-            <label>
-              Cor dos cards (opcional)
-              <div class="color-row">
-                <input type="color" name="cor_surface" value="#ffffff" />
-                <span class="color-swatch" aria-hidden="true"></span>
-                <span class="color-hex" aria-label="Cor selecionada"></span>
-              </div>
-            </label>
-
-            <label>
-              Cor do texto (opcional)
-              <div class="color-row">
-                <input type="color" name="cor_texto" value="#2a211d" />
-                <span class="color-swatch" aria-hidden="true"></span>
-                <span class="color-hex" aria-label="Cor selecionada"></span>
-              </div>
-            </label>
-
-            <label>
-              Cor do texto secundário (opcional)
-              <div class="color-row">
-                <input type="color" name="cor_muted" value="#756960" />
-                <span class="color-swatch" aria-hidden="true"></span>
-                <span class="color-hex" aria-label="Cor selecionada"></span>
-              </div>
-            </label>
-
-            <label>
-              Cor da borda (opcional)
-              <div class="color-row">
-                <input type="color" name="cor_borda" value="#f0dfd1" />
-                <span class="color-swatch" aria-hidden="true"></span>
-                <span class="color-hex" aria-label="Cor selecionada"></span>
-              </div>
-            </label>
-
-            <label>
-              Slogan (opcional)
-              <input type="text" name="slogan" placeholder="Ex.: Forno a lenha desde 2008" />
-            </label>
-
-            <label>
-              Fonte do cardápio
-              <select name="fonte_key">
-                <option value="sora" selected>Padrão (Sora)</option>
-                <option value="inter">Inter (moderna)</option>
-                <option value="poppins">Poppins (arredondada)</option>
-                <option value="montserrat">Montserrat (títulos fortes)</option>
-                <option value="nunito">Nunito (suave)</option>
-                <option value="rubik">Rubik (geométrica)</option>
-                <option value="outfit">Outfit (clean)</option>
-                <option value="dm_sans">DM Sans (neutra)</option>
-                <option value="work_sans">Work Sans (corporativa)</option>
-                <option value="lora">Lora (serif elegante)</option>
-                <option value="merriweather">Merriweather (serif clássica)</option>
-                <option value="system">Sistema</option>
-              </select>
-            </label>
-
-            <div class="two-cols">
               <label>
-                Peso do texto
-                <select name="fonte_peso_texto">
-                  <option value="300">Fina (300)</option>
-                  <option value="400" selected>Normal (400)</option>
-                  <option value="500">Média (500)</option>
-                  <option value="600">Semi-negrita (600)</option>
-                  <option value="700">Negrita (700)</option>
+                Fundo da loja
+                <select name="fundo_estilo">
+                  <option value="padrao" selected>Padrão</option>
+                  <option value="solido">Cor sólida</option>
+                  <option value="degrade_linear">Degradê linear</option>
+                  <option value="degrade_radial">Degradê radial</option>
                 </select>
               </label>
 
+              <div class="two-cols">
+                <label>
+                  Cor do fundo (para "Cor sólida")
+                  <div class="color-row">
+                    <input type="color" name="cor_fundo" value="#fffaf3" />
+                    <span class="color-swatch" aria-hidden="true"></span>
+                    <span class="color-hex" aria-label="Cor selecionada"></span>
+                  </div>
+                </label>
+
+                <label>
+                  Ângulo do degradê (0 a 360)
+                  <input type="number" name="fundo_angulo" min="0" max="360" step="1" value="135" />
+                </label>
+              </div>
+
+              <div class="two-cols">
+                <label>
+                  Degradê - cor 1
+                  <div class="color-row">
+                    <input type="color" name="fundo_cor_1" value="#ff6a00" />
+                    <span class="color-swatch" aria-hidden="true"></span>
+                    <span class="color-hex" aria-label="Cor selecionada"></span>
+                  </div>
+                </label>
+
+                <label>
+                  Degradê - cor 2
+                  <div class="color-row">
+                    <input type="color" name="fundo_cor_2" value="#ffe6ce" />
+                    <span class="color-swatch" aria-hidden="true"></span>
+                    <span class="color-hex" aria-label="Cor selecionada"></span>
+                  </div>
+                </label>
+              </div>
+            </details>
+
+            <details class="details details-sub">
+              <summary>Cores e bordas</summary>
+
               <label>
-                Peso do título
-                <select name="fonte_peso_titulo">
-                  <option value="600">600</option>
-                  <option value="700">700</option>
-                  <option value="800" selected>800</option>
-                  <option value="900">900</option>
+                Cor secundária (opcional)
+                <div class="color-row">
+                  <input type="color" name="cor_secundaria" value="#c8945b" />
+                  <span class="color-swatch" aria-hidden="true"></span>
+                  <span class="color-hex" aria-label="Cor selecionada"></span>
+                </div>
+              </label>
+
+              <div class="two-cols">
+                <label>
+                  Cor dos cards (opcional)
+                  <div class="color-row">
+                    <input type="color" name="cor_surface" value="#ffffff" />
+                    <span class="color-swatch" aria-hidden="true"></span>
+                    <span class="color-hex" aria-label="Cor selecionada"></span>
+                  </div>
+                </label>
+
+                <label>
+                  Cor da borda (opcional)
+                  <div class="color-row">
+                    <input type="color" name="cor_borda" value="#f0dfd1" />
+                    <span class="color-swatch" aria-hidden="true"></span>
+                    <span class="color-hex" aria-label="Cor selecionada"></span>
+                  </div>
+                </label>
+              </div>
+
+              <div class="two-cols">
+                <label>
+                  Cor do texto (opcional)
+                  <div class="color-row">
+                    <input type="color" name="cor_texto" value="#2a211d" />
+                    <span class="color-swatch" aria-hidden="true"></span>
+                    <span class="color-hex" aria-label="Cor selecionada"></span>
+                  </div>
+                </label>
+
+                <label>
+                  Cor do texto secundário (opcional)
+                  <div class="color-row">
+                    <input type="color" name="cor_muted" value="#756960" />
+                    <span class="color-swatch" aria-hidden="true"></span>
+                    <span class="color-hex" aria-label="Cor selecionada"></span>
+                  </div>
+                </label>
+              </div>
+            </details>
+
+            <details class="details details-sub">
+              <summary>Tipografia</summary>
+
+              <label>
+                Fonte do cardápio
+                <select name="fonte_key">
+                  <option value="sora" selected>Padrão (Sora)</option>
+                  <option value="inter">Inter (moderna)</option>
+                  <option value="poppins">Poppins (arredondada)</option>
+                  <option value="montserrat">Montserrat (títulos fortes)</option>
+                  <option value="nunito">Nunito (suave)</option>
+                  <option value="rubik">Rubik (geométrica)</option>
+                  <option value="outfit">Outfit (clean)</option>
+                  <option value="dm_sans">DM Sans (neutra)</option>
+                  <option value="work_sans">Work Sans (corporativa)</option>
+                  <option value="lora">Lora (serif elegante)</option>
+                  <option value="merriweather">Merriweather (serif clássica)</option>
+                  <option value="system">Sistema</option>
                 </select>
               </label>
-            </div>
 
-            <label>
-              Horário de funcionamento (opcional)
-              <input type="text" name="horario_funcionamento" placeholder="Ex.: Seg-Dom 18h às 23h" />
-            </label>
+              <div class="two-cols">
+                <label>
+                  Peso do texto
+                  <select name="fonte_peso_texto">
+                    <option value="300">Fina (300)</option>
+                    <option value="400" selected>Normal (400)</option>
+                    <option value="500">Média (500)</option>
+                    <option value="600">Semi-negrita (600)</option>
+                    <option value="700">Negrita (700)</option>
+                  </select>
+                </label>
 
-            <div class="two-cols">
+                <label>
+                  Peso do título
+                  <select name="fonte_peso_titulo">
+                    <option value="600">600</option>
+                    <option value="700">700</option>
+                    <option value="800" selected>800</option>
+                    <option value="900">900</option>
+                  </select>
+                </label>
+              </div>
+            </details>
+
+            <details class="details details-sub">
+              <summary>Informações da loja</summary>
+
               <label>
-                Abre (opcional)
-                <input type="time" name="abre_em" />
+                Slogan (opcional)
+                <input type="text" name="slogan" placeholder="Ex.: Forno a lenha desde 2008" />
               </label>
 
               <label>
-                Fecha (opcional)
-                <input type="time" name="fecha_em" />
+                Horário de funcionamento (opcional)
+                <input type="text" name="horario_funcionamento" placeholder="Ex.: Seg-Dom 18h às 23h" />
               </label>
-            </div>
 
-            <label>
-              Endereço (opcional)
-              <input type="text" name="endereco" placeholder="Ex.: Rua X, 123 - Centro" />
-            </label>
+              <div class="two-cols">
+                <label>
+                  Abre (opcional)
+                  <input type="time" name="abre_em" />
+                </label>
 
-            <label>
-              Instagram (opcional)
-              <input type="url" name="instagram_url" placeholder="https://instagram.com/seuperfil" />
-            </label>
+                <label>
+                  Fecha (opcional)
+                  <input type="time" name="fecha_em" />
+                </label>
+              </div>
 
-            <label>
-              Taxa de entrega (R$)
-              <input type="text" name="taxa_entrega" placeholder="0,00" />
-            </label>
+              <label>
+                Endereço (opcional)
+                <input type="text" name="endereco" placeholder="Ex.: Rua X, 123 - Centro" />
+              </label>
 
-            <label>
-              Pedido mínimo (R$)
-              <input type="text" name="pedido_minimo" placeholder="0,00" />
-            </label>
+              <label>
+                Instagram (opcional)
+                <input type="url" name="instagram_url" placeholder="https://instagram.com/seuperfil" />
+              </label>
+            </details>
 
-            <label>
-              Formas de pagamento (opcional)
-              <input type="text" name="formas_pagamento" placeholder="Ex.: Pix, Cartão, Dinheiro" />
-            </label>
+            <details class="details details-sub">
+              <summary>Mídia (logo e banner)</summary>
 
-            <label>
-              Aceita entrega
-              <select name="aceita_entrega">
-                <option value="true" selected>Sim</option>
-                <option value="false">Não</option>
-              </select>
-            </label>
+              <label>
+                Foto do cardápio (perfil)
+                <input type="file" name="foto" accept="image/*" />
+              </label>
 
-            <label>
-              Aceita retirada
-              <select name="aceita_retirada">
-                <option value="true" selected>Sim</option>
-                <option value="false">Não</option>
-              </select>
-            </label>
+              <label>
+                URL da foto (opcional)
+                <input type="url" name="foto_url" placeholder="https://..." />
+              </label>
+
+              <label>
+                Banner do topo (opcional)
+                <input type="file" name="banner" accept="image/*" />
+              </label>
+
+              <label>
+                URL do banner (opcional)
+                <input type="url" name="banner_url" placeholder="https://..." />
+              </label>
+            </details>
+
+            <details class="details details-sub">
+              <summary>Entrega e pagamento</summary>
+
+              <div class="two-cols">
+                <label>
+                  Taxa de entrega (R$)
+                  <input type="text" name="taxa_entrega" placeholder="0,00" />
+                </label>
+
+                <label>
+                  Pedido mínimo (R$)
+                  <input type="text" name="pedido_minimo" placeholder="0,00" />
+                </label>
+              </div>
+
+              <label>
+                Formas de pagamento (opcional)
+                <input type="text" name="formas_pagamento" placeholder="Ex.: Pix, Cartão, Dinheiro" />
+              </label>
+
+              <div class="two-cols">
+                <label>
+                  Aceita entrega
+                  <select name="aceita_entrega">
+                    <option value="true" selected>Sim</option>
+                    <option value="false">Não</option>
+                  </select>
+                </label>
+
+                <label>
+                  Aceita retirada
+                  <select name="aceita_retirada">
+                    <option value="true" selected>Sim</option>
+                    <option value="false">Não</option>
+                  </select>
+                </label>
+              </div>
+            </details>
 
             <label>
               Layout dos produtos
@@ -285,26 +341,6 @@
               <textarea name="mensagem_whatsapp_template" rows="4" placeholder="Use {LOJA}, {TOTAL}, {NOME}, {TELEFONE}, {ENDERECO}, {ITENS}, {TAXA_ENTREGA}"></textarea>
             </label>
           </details>
-
-          <label>
-            Foto do cardápio (perfil)
-            <input type="file" name="foto" accept="image/*" />
-          </label>
-
-          <label>
-            URL da foto (opcional)
-            <input type="url" name="foto_url" placeholder="https://..." />
-          </label>
-
-          <label>
-            Banner do topo (opcional)
-            <input type="file" name="banner" accept="image/*" />
-          </label>
-
-          <label>
-            URL do banner (opcional)
-            <input type="url" name="banner_url" placeholder="https://..." />
-          </label>
 
           <button class="btn btn-primary" type="submit">Salvar cardápio</button>
           <button class="btn" type="button" id="cancel-cardapio-edit">Cancelar edição</button>
