@@ -612,6 +612,14 @@ async function loadCardapio() {
     }
   }
 
+  const bannerUrl = safeText(data.banner_url);
+  if (bannerUrl) {
+    document.documentElement.style.setProperty("--hero-banner", `url(\"${bannerUrl}\")`);
+    document.documentElement.style.setProperty("--hero-banner-opacity", "0.22");
+  } else {
+    document.documentElement.style.setProperty("--hero-banner", "none");
+  }
+
   const { data: produtos, error: produtosError } = await supabase
     .from("produtos")
     .select("*")

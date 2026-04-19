@@ -25,6 +25,7 @@ create table if not exists public.cardapios (
   cor_muted text,
   cor_borda text,
   foto_url text,
+  banner_url text,
   slogan text,
   horario_funcionamento text,
   endereco text,
@@ -61,6 +62,7 @@ alter table public.cardapios add column if not exists slogan text;
 alter table public.cardapios add column if not exists horario_funcionamento text;
 alter table public.cardapios add column if not exists endereco text;
 alter table public.cardapios add column if not exists instagram_url text;
+alter table public.cardapios add column if not exists banner_url text;
 alter table public.cardapios add column if not exists taxa_entrega numeric(10,2);
 alter table public.cardapios add column if not exists pedido_minimo numeric(10,2);
 alter table public.cardapios add column if not exists aceita_entrega boolean;

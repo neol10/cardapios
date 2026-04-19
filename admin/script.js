@@ -317,6 +317,7 @@ function fillCardapioForm(item) {
   form.whatsapp.value = maskTelefone(item.whatsapp || "");
   form.cor_tema.value = item.cor_tema || "#ff6a00";
   form.foto_url.value = item.foto_url || "";
+  if (form.banner_url) form.banner_url.value = item.banner_url || "";
 
   if (form.cor_secundaria) form.cor_secundaria.value = item.cor_secundaria || "#c8945b";
   if (form.fundo_estilo) form.fundo_estilo.value = item.fundo_estilo || "padrao";
@@ -482,6 +483,9 @@ async function setupDashboardPage() {
     const fotoFile = formData.get("foto");
     let foto_url = String(formData.get("foto_url") || "").trim();
 
+    const bannerFile = formData.get("banner");
+    let banner_url = String(formData.get("banner_url") || "").trim();
+
     if (!nome || !slug || !whatsapp) {
       toast("Preencha nome, slug e WhatsApp.", "error");
       return;
@@ -520,7 +524,8 @@ async function setupDashboardPage() {
       densidade,
       whatsapp_botao,
       mensagem_whatsapp_template: mensagem_whatsapp_template || null,
-      foto_url: foto_url || null
+      foto_url: foto_url || null,
+      banner_url: banner_url || null
     };
 
     if (id) {
@@ -530,6 +535,16 @@ async function setupDashboardPage() {
           basePayload.foto_url = foto_url;
         } catch (error) {
           toast(`Erro no upload da foto do cardápio: ${error.message}`, "error");
+          return;
+        }
+      }
+
+      if (bannerFile instanceof File && bannerFile.size > 0) {
+        try {
+          banner_url = await uploadCardapioImage(id, bannerFile);
+          basePayload.banner_url = banner_url;
+        } catch (error) {
+          toast(`Erro no upload do banner: ${error.message}`, "error");
           return;
         }
       }
@@ -566,6 +581,24 @@ async function setupDashboardPage() {
           }
         } catch (error) {
           toast(`Erro no upload da foto do cardápio: ${error.message}`, "error");
+          return;
+        }
+      }
+
+      if (bannerFile instanceof File && bannerFile.size > 0) {
+        try {
+          banner_url = await uploadCardapioImage(inserted.id, bannerFile);
+          const { error: updateError } = await supabase
+            .from("cardapios")
+            .update({ banner_url })
+            .eq("id", inserted.id);
+
+          if (updateError) {
+            toast(`Erro ao salvar banner: ${updateError.message}`, "error");
+            return;
+          }
+        } catch (error) {
+          toast(`Erro no upload do banner: ${error.message}`, "error");
           return;
         }
       }

@@ -49,6 +49,8 @@ body.bg-radial {
 }
 
 .hero {
+  position: relative;
+  overflow: hidden;
   padding: 28px 16px 16px;
   border-bottom: 1px solid color-mix(in srgb, var(--border) 70%, transparent);
   background:
@@ -57,6 +59,35 @@ body.bg-radial {
       color-mix(in srgb, var(--surface) 55%, transparent) 0%,
       transparent 70%
     );
+}
+
+.hero::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: var(--hero-banner, none);
+  background-size: cover;
+  background-position: center;
+  opacity: var(--hero-banner-opacity, 0.22);
+  filter: saturate(1.03) contrast(1.02);
+  pointer-events: none;
+}
+
+.hero::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--surface) 55%, transparent) 0%,
+    transparent 70%
+  );
+  pointer-events: none;
+}
+
+.hero-content {
+  position: relative;
+  z-index: 1;
 }
 
 .hero-content {
@@ -70,8 +101,11 @@ body.bg-radial {
 
 .hero-media {
   display: flex;
+  flex-direction: column;
+  gap: 10px;
   transform: translateY(0);
   justify-content: flex-start;
+  align-items: flex-start;
 }
 
 .hero-media img {
@@ -120,12 +154,13 @@ body.bg-radial {
 .cardapio-info {
   display: grid;
   gap: 6px;
-  margin-top: 10px;
-  padding: 12px 12px;
+  margin-top: 0;
+  padding: 10px 10px;
   border-radius: 16px;
   border: 1px solid color-mix(in srgb, var(--border) 75%, transparent);
   background: color-mix(in srgb, var(--surface) 55%, transparent);
   box-shadow: 0 10px 30px color-mix(in srgb, var(--theme2) 10%, transparent);
+  width: min(340px, 100%);
 }
 
 .cardapio-info .muted {
@@ -726,6 +761,7 @@ button:disabled {
 
   .hero-media {
     justify-content: flex-end;
+    align-items: flex-end;
   }
 
   .cardapio-info {
