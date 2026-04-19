@@ -392,6 +392,13 @@ p {
   font-weight: var(--heading-weight);
 }
 
+.cart-box {
+  box-shadow:
+    var(--shadow),
+    0 0 0 1px color-mix(in srgb, var(--theme) 18%, transparent),
+    0 16px 46px color-mix(in srgb, var(--theme2) 12%, transparent);
+}
+
 .cart-items {
   display: grid;
   gap: 8px;
@@ -522,7 +529,25 @@ p {
   padding: 10px 12px;
   border-radius: 14px;
   border: 1px solid color-mix(in srgb, var(--border) 80%, transparent);
-  background: color-mix(in srgb, var(--surface) 88%, white);
+  background: linear-gradient(
+    135deg,
+    color-mix(in srgb, var(--surface) 78%, white),
+    color-mix(in srgb, var(--surface) 92%, white)
+  );
+}
+
+.cart-total {
+  margin: 6px 0 0;
+  padding: 10px 12px;
+  border-radius: 12px;
+  border: 1px solid color-mix(in srgb, var(--theme) 22%, var(--border));
+  background: linear-gradient(
+    135deg,
+    color-mix(in srgb, var(--theme) 20%, white),
+    color-mix(in srgb, var(--theme2) 18%, white)
+  );
+  color: color-mix(in srgb, var(--text) 92%, black);
+  box-shadow: 0 12px 30px color-mix(in srgb, var(--theme2) 12%, transparent);
 }
 
 .checkout-form {
@@ -551,6 +576,20 @@ label {
 
 .checkout-form label {
   color: color-mix(in srgb, var(--text) 88%, var(--muted));
+}
+
+.cart-box .btn-primary {
+  border-radius: 14px;
+  padding: 14px;
+  font-weight: 900;
+  letter-spacing: 0.01em;
+  box-shadow:
+    0 16px 40px color-mix(in srgb, var(--theme) 18%, transparent),
+    0 0 0 1px color-mix(in srgb, var(--theme2) 16%, transparent);
+}
+
+.cart-box .btn-primary:hover {
+  filter: brightness(1.05);
 }
 
 input,
