@@ -9,6 +9,19 @@
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <link rel="manifest" href="/api/manifest.webmanifest" />
+    <script>
+      (function () {
+        try {
+          var segments = String(window.location.pathname || "").split("/").filter(Boolean);
+          var cardapioIndex = segments.indexOf("cardapio");
+          var slug = cardapioIndex >= 0 ? segments[cardapioIndex + 1] : "";
+          if (!slug || slug === "index.html") return;
+          var link = document.querySelector('link[rel="manifest"]');
+          if (!link) return;
+          link.setAttribute("href", "/api/manifest.webmanifest?slug=" + encodeURIComponent(slug));
+        } catch (e) {}
+      })();
+    </script>
     <link rel="icon" href="/pwa/icon.svg" type="image/svg+xml" />
     <link rel="icon" href="/pwa/icon-32.png" type="image/png" sizes="32x32" />
     <link rel="icon" href="/pwa/icon-16.png" type="image/png" sizes="16x16" />

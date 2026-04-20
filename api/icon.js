@@ -15,21 +15,20 @@ function extractSlugFromReferer(referer) {
   }
 }
 
-function json(res, status, data) {
-  res.statusCode = status;
-  res.setHeader("Content-Type", "application/manifest+json; charset=utf-8");
+function redirect(res, location) {
+  res.statusCode = 302;
+  res.setHeader("Location", location);
   res.setHeader("Cache-Control", "no-cache");
-  res.end(JSON.stringify(data, null, 2));
+  res.end();
 }
 
 async function fetchCardapioBySlug(slug) {
-  // Mantém alinhado com a config embutida no front (window.__SUPABASE_CONFIG__).
   const SUPABASE_URL = "https://uapwitkmxuoepnjlffqy.supabase.co";
   const SUPABASE_ANON_KEY =
     "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVhcHdpdGtteHVvZXBuamxmZnF5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ4OTcxMjUsImV4cCI6MjA5MDQ3MzEyNX0.YTz_EqzK4m0CMM25n3QJC1b3Nj9bikIrDDEEFi5n6ps";
 
   const url = new URL(`${SUPABASE_URL}/rest/v1/cardapios`);
-  url.searchParams.set("select", "nome,slug,foto_url,cor_tema");
+  url.searchParams.set("select", "slug,foto_url");
   url.searchParams.set("slug", `eq.${slug}`);
   url.searchParams.set("limit", "1");
 
@@ -52,22 +51,8 @@ module.exports = async (req, res) => {
   const slugFromReferer = extractSlugFromReferer(req.headers.referer);
   const slug = slugFromQuery || slugFromReferer;
 
-  const fallback = {
-    name: "Cardápio Digital",
-    short_name: "Cardápio",
-    start_url: "/cardapio/",
-    scope: "/cardapio/",
-    display: "standalone",
-    background_color: "#fffaf3",
-    theme_color: "#ff6a00",
-    icons: [
-      { src: "/pwa/icon-192.png", sizes: "192x192" },
-      { src: "/pwa/icon-512.png", sizes: "512x512" }
-    ]
-  };
-
   if (!slug) {
-    json(res, 200, fallback);
+    redirect(res, "/pwa/icon-192.png");
     return;
   }
 
@@ -78,28 +63,33 @@ module.exports = async (req, res) => {
     cardapio = null;
   }
 
-  if (!cardapio) {
-    json(res, 200, { ...fallback, start_url: `/cardapio/${slug}` });
+  const photoUrl = String(cardapio?.foto_url || "").trim();
+  if (!photoUrl) {
+    redirect(res, "/pwa/icon-192.png");
     return;
   }
 
-  const iconUrl = String(cardapio.foto_url || "").trim();
-  const themeColor = String(cardapio.cor_tema || fallback.theme_color).trim() || fallback.theme_color;
+  let upstream;
+  try {
+    upstream = await fetch(photoUrl);
+  } catch {
+    redirect(res, "/pwa/icon-192.png");
+    return;
+  }
 
-  const manifest = {
-    name: cardapio.nome || fallback.name,
-    short_name: cardapio.nome || fallback.short_name,
-    start_url: `/cardapio/${slug}`,
-    scope: "/cardapio/",
-    display: "standalone",
-    background_color: fallback.background_color,
-    theme_color: themeColor,
-    icons: iconUrl
-      ? [
-          { src: `/api/icon?slug=${slug}`, sizes: "any" }
-        ]
-      : fallback.icons
-  };
+  if (!upstream || !upstream.ok) {
+    redirect(res, "/pwa/icon-192.png");
+    return;
+  }
 
-  json(res, 200, manifest);
+  const contentType = upstream.headers.get("content-type") || "image/png";
+  const arrayBuffer = await upstream.arrayBuffer();
+  const buf = Buffer.from(arrayBuffer);
+
+  res.statusCode = 200;
+  res.setHeader("Content-Type", contentType);
+  res.setHeader("Cache-Control", "no-cache, no-store, must-revalidate");
+  res.setHeader("Pragma", "no-cache");
+  res.setHeader("Expires", "0");
+  res.end(buf);
 };

@@ -395,12 +395,32 @@ function upsertHeadLink(rel, href, extra = {}) {
   }
 }
 
-function applyBrandIcons(photoUrl) {
-  const safe = safeHttpUrl(photoUrl);
-  if (!safe) return;
+function setAllHeadIcons(href) {
+  const safeHref = safeHttpUrl(href);
+  if (!safeHref) return;
 
-  upsertHeadLink("icon", safe);
-  upsertHeadLink("apple-touch-icon", safe);
+  const head = document.head || document.querySelector("head");
+  if (!head) return;
+
+  const nodes = head.querySelectorAll('link[rel="icon"], link[rel="apple-touch-icon"]');
+  nodes.forEach((node) => {
+    node.setAttribute("href", safeHref);
+    node.removeAttribute("type");
+    node.removeAttribute("sizes");
+  });
+
+  // Garante um favicon sem type/sizes (alguns browsers preferem esse)
+  upsertHeadLink("icon", safeHref);
+  upsertHeadLink("apple-touch-icon", safeHref);
+}
+
+function applyBrandIcons(slug) {
+  const safeSlug = safeText(slug).toLowerCase();
+  if (!safeSlug) return;
+
+  const cacheBust = Date.now();
+  const iconUrl = `/api/icon?slug=${encodeURIComponent(safeSlug)}&v=${cacheBust}`;
+  setAllHeadIcons(new URL(iconUrl, window.location.origin).toString());
 }
 
 function parseGaleriaUrls(value) {
@@ -825,7 +845,7 @@ async function loadCardapio() {
 
   activeCardapio = data;
 
-  applyBrandIcons(data.foto_url);
+  applyBrandIcons(getSlugFromUrl());
   renderGaleria(parseGaleriaUrls(data.galeria_urls));
 
   document.querySelector("#cardapio-nome").textContent = data.nome;
