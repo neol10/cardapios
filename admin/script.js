@@ -414,6 +414,57 @@ function getHiddenIdField(form) {
   return form?.querySelector('input[name="id"]') || null;
 }
 
+function parseGaleriaUrls(value) {
+  if (!value) return [];
+  if (Array.isArray(value)) return value.map((v) => String(v || "").trim()).filter(Boolean);
+  const raw = String(value || "").trim();
+  if (!raw) return [];
+  try {
+    const parsed = JSON.parse(raw);
+    if (!Array.isArray(parsed)) return [];
+    return parsed.map((v) => String(v || "").trim()).filter(Boolean);
+  } catch {
+    return [];
+  }
+}
+
+function setGaleriaUrls(form, urls) {
+  const hidden = form?.querySelector('input[name="galeria_urls"]');
+  if (!(hidden instanceof HTMLInputElement)) return;
+  const safe = (Array.isArray(urls) ? urls : []).map((u) => String(u || "").trim()).filter(Boolean);
+  hidden.value = JSON.stringify(safe);
+}
+
+function getGaleriaUrls(form) {
+  const hidden = form?.querySelector('input[name="galeria_urls"]');
+  if (!(hidden instanceof HTMLInputElement)) return [];
+  return parseGaleriaUrls(hidden.value);
+}
+
+function renderGaleriaPreview(form) {
+  const container = document.querySelector("#galeria-preview");
+  if (!(container instanceof HTMLElement)) return;
+  const urls = getGaleriaUrls(form);
+  container.classList.toggle("is-hidden", urls.length === 0);
+  if (!urls.length) {
+    container.innerHTML = "";
+    return;
+  }
+
+  container.innerHTML = urls
+    .map((url, idx) => {
+      const safeUrl = safeHttpUrl(url);
+      if (!safeUrl) return "";
+      return `
+        <div class="gallery-item">
+          <img src="${safeUrl}" alt="Imagem do estabelecimento ${idx + 1}" loading="lazy" />
+          <button type="button" class="btn js-remove-gallery" data-idx="${idx}">Remover</button>
+        </div>
+      `;
+    })
+    .join("");
+}
+
 async function initLoginPage() {
   try {
     assertSupabaseConfig();
@@ -658,6 +709,11 @@ function fillCardapioForm(item) {
   form.foto_url.value = item.foto_url || "";
   if (form.banner_url) form.banner_url.value = item.banner_url || "";
 
+  if (form.galeria_urls) {
+    setGaleriaUrls(form, parseGaleriaUrls(item.galeria_urls));
+    renderGaleriaPreview(form);
+  }
+
   if (form.cor_secundaria) form.cor_secundaria.value = item.cor_secundaria || "#c8945b";
   if (form.fundo_estilo) form.fundo_estilo.value = item.fundo_estilo || "padrao";
   if (form.cor_fundo) form.cor_fundo.value = item.cor_fundo || "#fffaf3";
@@ -730,6 +786,19 @@ function fillProdutoForm(item) {
 
 function resetForms() {
   const cardapioForm = document.querySelector("#cardapio-form");
+
+  const galeriaPreview = document.querySelector("#galeria-preview");
+  galeriaPreview?.addEventListener("click", (event) => {
+    const target = event.target;
+    if (!(target instanceof HTMLElement)) return;
+    if (!target.classList.contains("js-remove-gallery")) return;
+    const idx = Number.parseInt(String(target.dataset.idx || ""), 10);
+    if (!Number.isFinite(idx)) return;
+    const urls = getGaleriaUrls(cardapioForm);
+    urls.splice(idx, 1);
+    setGaleriaUrls(cardapioForm, urls);
+    renderGaleriaPreview(cardapioForm);
+  });
   const produtoForm = document.querySelector("#produto-form");
   cardapioForm?.reset();
   produtoForm?.reset();
@@ -741,6 +810,11 @@ function resetForms() {
   refreshAllColorPreviews(cardapioForm);
   updateFundoVisibility(cardapioForm);
   updateThemePreview(cardapioForm);
+
+  if (cardapioForm) {
+    setGaleriaUrls(cardapioForm, []);
+    renderGaleriaPreview(cardapioForm);
+  }
 }
 
 async function uploadProductImage(cardapioId, file) {
@@ -760,6 +834,20 @@ async function uploadProductImage(cardapioId, file) {
 async function uploadCardapioImage(cardapioId, file) {
   const safeName = file.name.replace(/\s+/g, "-").toLowerCase();
   const filePath = `${cardapioId}/${Date.now()}-${safeName}`;
+
+  const { error: uploadError } = await supabase.storage
+    .from("cardapios")
+    .upload(filePath, file, { upsert: false, cacheControl: "3600" });
+
+  if (uploadError) throw uploadError;
+
+  const { data } = supabase.storage.from("cardapios").getPublicUrl(filePath);
+  return data.publicUrl;
+}
+
+async function uploadCardapioGalleryImage(cardapioId, file) {
+  const safeName = file.name.replace(/\s+/g, "-").toLowerCase();
+  const filePath = `${cardapioId}/galeria/${Date.now()}-${safeName}`;
 
   const { error: uploadError } = await supabase.storage
     .from("cardapios")
@@ -861,6 +949,13 @@ async function setupDashboardPage() {
     const bannerFile = formData.get("banner");
     let banner_url = String(formData.get("banner_url") || "").trim();
 
+    const galeriaUrlsBase = parseGaleriaUrls(formData.get("galeria_urls"));
+    const galeriaInput = cardapioForm?.querySelector('input[name="galeria"]');
+    const galeriaFiles =
+      galeriaInput instanceof HTMLInputElement && galeriaInput.files
+        ? Array.from(galeriaInput.files).filter((f) => f instanceof File && f.size > 0)
+        : [];
+
     if (!nome || !slug || !whatsapp) {
       toast("Preencha nome, slug e WhatsApp.", "error");
       return;
@@ -900,7 +995,8 @@ async function setupDashboardPage() {
       whatsapp_botao,
       mensagem_whatsapp_template: mensagem_whatsapp_template || null,
       foto_url: foto_url || null,
-      banner_url: banner_url || null
+      banner_url: banner_url || null,
+      galeria_urls: galeriaUrlsBase.length ? galeriaUrlsBase : null
     };
 
     let savedId = id;
@@ -926,9 +1022,27 @@ async function setupDashboardPage() {
         }
       }
 
+      if (galeriaFiles.length) {
+        try {
+          const uploaded = [];
+          for (const file of galeriaFiles) {
+            uploaded.push(await uploadCardapioGalleryImage(id, file));
+          }
+          const merged = [...galeriaUrlsBase, ...uploaded];
+          basePayload.galeria_urls = merged.length ? merged : null;
+        } catch (error) {
+          toast(`Erro no upload da galeria: ${error.message}`, "error");
+          return;
+        }
+      }
+
       const { error } = await supabase.from("cardapios").update(basePayload).eq("id", id);
 
       if (error) {
+        if (String(error.message || "").includes("galeria_urls")) {
+          toast("Seu Supabase ainda não tem a coluna galeria_urls. Rode o schema/patch do projeto.", "error");
+          return;
+        }
         toast(`Erro ao salvar cardápio: ${error.message}`, "error");
         return;
       }
@@ -940,6 +1054,10 @@ async function setupDashboardPage() {
         .single();
 
       if (insertError || !inserted) {
+        if (String(insertError?.message || "").includes("galeria_urls")) {
+          toast("Seu Supabase ainda não tem a coluna galeria_urls. Rode o schema/patch do projeto.", "error");
+          return;
+        }
         toast(`Erro ao salvar cardápio: ${insertError?.message || "Sem retorno"}`, "error");
         return;
       }
@@ -981,6 +1099,33 @@ async function setupDashboardPage() {
           return;
         }
       }
+
+      if (galeriaFiles.length) {
+        try {
+          const uploaded = [];
+          for (const file of galeriaFiles) {
+            uploaded.push(await uploadCardapioGalleryImage(inserted.id, file));
+          }
+
+          const merged = [...galeriaUrlsBase, ...uploaded];
+          const { error: updateError } = await supabase
+            .from("cardapios")
+            .update({ galeria_urls: merged.length ? merged : null })
+            .eq("id", inserted.id);
+
+          if (updateError) {
+            if (String(updateError.message || "").includes("galeria_urls")) {
+              toast("Seu Supabase ainda não tem a coluna galeria_urls. Rode o schema/patch do projeto.", "error");
+              return;
+            }
+            toast(`Erro ao salvar galeria: ${updateError.message}`, "error");
+            return;
+          }
+        } catch (error) {
+          toast(`Erro no upload da galeria: ${error.message}`, "error");
+          return;
+        }
+      }
     }
 
     // Mantém o contexto de gerenciamento após salvar
@@ -993,8 +1138,10 @@ async function setupDashboardPage() {
     // Limpa apenas os inputs de arquivo do cardápio
     const fotoInput = cardapioForm?.querySelector('input[name="foto"]');
     const bannerInput = cardapioForm?.querySelector('input[name="banner"]');
+    const galeriaInputReset = cardapioForm?.querySelector('input[name="galeria"]');
     if (fotoInput instanceof HTMLInputElement) fotoInput.value = "";
     if (bannerInput instanceof HTMLInputElement) bannerInput.value = "";
+    if (galeriaInputReset instanceof HTMLInputElement) galeriaInputReset.value = "";
 
     await loadCardapios();
     if (savedId) {
@@ -1005,6 +1152,8 @@ async function setupDashboardPage() {
       await loadProdutos();
       await loadPedidos();
     }
+
+    renderGaleriaPreview(cardapioForm);
 
     toast("Concluído.", "success");
   });
@@ -1018,6 +1167,8 @@ async function setupDashboardPage() {
     refreshAllColorPreviews(form);
     updateFundoVisibility(form);
     updateThemePreview(form);
+    setGaleriaUrls(form, []);
+    renderGaleriaPreview(form);
     setSelectedCardapio(null);
     setEditingMode(false);
   });

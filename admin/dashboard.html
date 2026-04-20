@@ -19,7 +19,7 @@
       href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&family=Playfair+Display:wght@600;700;800&display=swap"
       rel="stylesheet"
     />
-    <link rel="stylesheet" href="/admin/style.css?v=8" />
+    <link rel="stylesheet" href="/admin/style.css?v=9" />
     <script>
       window.__SUPABASE_CONFIG__ = {
         url: "https://uapwitkmxuoepnjlffqy.supabase.co",
@@ -307,6 +307,13 @@
                 URL do banner (opcional)
                 <input type="url" name="banner_url" placeholder="https://..." />
               </label>
+
+              <label>
+                Imagens do estabelecimento (galeria)
+                <input type="file" name="galeria" accept="image/*" multiple />
+                <input type="hidden" name="galeria_urls" value="[]" />
+                <div id="galeria-preview" class="gallery-preview is-hidden" aria-live="polite"></div>
+              </label>
             </details>
 
             <details class="details details-sub">
@@ -455,6 +462,6 @@ Tags: {LOJA} {ITENS} {SUBTOTAL} {TAXA_ENTREGA} {TOTAL} {NOME} {TELEFONE} {ENDERE
       </section>
     </main>
 
-    <script type="module" src="/admin/script.js?v=21"></script>
+    <script type="module" src="/admin/script.js?v=22"></script>
   </body>
 </html>
