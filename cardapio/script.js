@@ -45,6 +45,12 @@ const pagamentoWrap = document.querySelector("#pagamento-wrap");
 const pagamentoSelect = document.querySelector("#pagamento");
 
 const cardapioNomeEl = document.querySelector("#cardapio-nome");
+const CHECKOUT_DRAFT_KEY_PREFIX = "cardapio.checkoutDraft.";
+
+function getCheckoutDraftKey() {
+  const slug = safeText(getSlugFromUrl()).toLowerCase();
+  return `${CHECKOUT_DRAFT_KEY_PREFIX}${slug || "default"}`;
+}
 
 function updateCheckoutAvailability() {
   const btn = checkoutForm?.querySelector('button[type="submit"]');
@@ -768,6 +774,9 @@ async function loadCardapio() {
     }
   }
 
+  // Depois de montar os selects (tipo/pagamento), tenta aplicar novamente o draft.
+  applyCheckoutDraft();
+
   renderCart();
 
   updateOpenClosedUI();
@@ -814,10 +823,26 @@ async function loadCardapio() {
 }
 
 function attachEvents() {
+  // Restaura o rascunho do checkout o quanto antes.
+  applyCheckoutDraft();
+
   telefoneInput?.addEventListener("input", (event) => {
     const target = event.target;
     if (!(target instanceof HTMLInputElement)) return;
     target.value = maskTelefone(target.value);
+    scheduleSaveCheckoutDraft();
+  });
+
+  checkoutForm?.addEventListener("input", (event) => {
+    const target = event.target;
+    if (!(target instanceof HTMLElement)) return;
+    if (target.closest("#checkout-form")) scheduleSaveCheckoutDraft();
+  });
+
+  checkoutForm?.addEventListener("change", (event) => {
+    const target = event.target;
+    if (!(target instanceof HTMLElement)) return;
+    if (target.closest("#checkout-form")) scheduleSaveCheckoutDraft();
   });
 
   document.body.addEventListener("click", (event) => {
@@ -842,6 +867,7 @@ function attachEvents() {
       if (tipo === "retirada") enderecoTextarea.value = "";
     }
     renderCart();
+    scheduleSaveCheckoutDraft();
   });
 
   checkoutForm?.addEventListener("submit", async (event) => {
@@ -867,6 +893,15 @@ function attachEvents() {
     const nome = String(formData.get("nome") || "").trim();
     const telefone = String(formData.get("telefone") || "").trim();
     const endereco = String(formData.get("endereco") || "").trim();
+
+    // Persistimos os dados do cliente antes de qualquer reset.
+    writeCheckoutDraft({
+      nome,
+      telefone,
+      endereco,
+      tipo_pedido: String(formData.get("tipo_pedido") || "").trim(),
+      pagamento: String(formData.get("pagamento") || "").trim()
+    });
 
     const tipoPedido = getTipoPedido();
     const subtotal = calculateSubtotal();
@@ -916,6 +951,9 @@ function attachEvents() {
     cart.length = 0;
     checkoutForm.reset();
     renderCart();
+
+    // Mantém os dados preenchidos para o próximo pedido.
+    applyCheckoutDraft();
   });
 }
 

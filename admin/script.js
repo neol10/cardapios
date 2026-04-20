@@ -105,9 +105,12 @@ function setupHexInputs(root) {
     if (!(colorInput instanceof HTMLInputElement)) return;
     if (!(hexInput instanceof HTMLInputElement)) return;
 
+    let lastValidValue = String(colorInput.value || "").toUpperCase();
+
     const syncFromColor = () => {
       hexInput.classList.remove("is-invalid");
       hexInput.value = String(colorInput.value || "").toUpperCase();
+      lastValidValue = hexInput.value;
     };
 
     const syncToColorIfValid = (commit = false) => {
@@ -116,6 +119,7 @@ function setupHexInputs(root) {
         hexInput.classList.remove("is-invalid");
         colorInput.value = normalized;
         refreshColorPreviewForInput(colorInput);
+        lastValidValue = normalized;
         return;
       }
 
@@ -132,6 +136,21 @@ function setupHexInputs(root) {
         hexInput.select();
       } catch {
         // ignora
+      }
+    });
+
+    hexInput.addEventListener("keydown", (event) => {
+      if (event.key === "Enter") {
+        event.preventDefault();
+        syncToColorIfValid(true);
+        hexInput.blur();
+        return;
+      }
+      if (event.key === "Escape") {
+        event.preventDefault();
+        hexInput.classList.remove("is-invalid");
+        hexInput.value = lastValidValue;
+        hexInput.blur();
       }
     });
 
@@ -591,6 +610,12 @@ function fillProdutoForm(item) {
   form.nome.value = item.nome;
   form.preco.value = String(item.preco).replace(".", ",");
   form.imagem_url.value = item.imagem_url || "";
+
+  try {
+    form.nome?.focus();
+  } catch {
+    // ignora
+  }
 }
 
 function resetForms() {
@@ -930,6 +955,12 @@ async function setupDashboardPage() {
     if (idField) idField.value = "";
     await loadProdutos();
     toast("Concluído.", "success");
+
+    try {
+      produtoForm.nome?.focus();
+    } catch {
+      // ignora
+    }
   });
 
   const cancelProdutoEdit = document.querySelector("#cancel-produto-edit");
