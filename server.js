@@ -73,6 +73,23 @@ function handleRequest(req, res) {
   const decodedPath = safeDecodeURIComponent(pathname);
   const relativePath = decodedPath.replace(/^\/+/g, "");
 
+  // Redireciona URLs com .html para URLs limpas
+  if (pathname === "/admin/index.html") {
+    res.writeHead(308, { Location: "/admin" });
+    res.end();
+    return;
+  }
+  if (pathname === "/admin/dashboard.html") {
+    res.writeHead(308, { Location: "/admin/dashboard" });
+    res.end();
+    return;
+  }
+  if (pathname === "/cardapio/index.html") {
+    res.writeHead(308, { Location: "/cardapio" });
+    res.end();
+    return;
+  }
+
   if (!isSafeRelativePath(relativePath)) {
     res.writeHead(400, { "Content-Type": "text/plain; charset=utf-8" });
     res.end("400 - Caminho inválido.");

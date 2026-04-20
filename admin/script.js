@@ -226,7 +226,7 @@ async function initLoginPage() {
 
   const { data } = await supabase.auth.getSession();
   if (data.session) {
-    window.location.href = "./dashboard.html";
+    window.location.href = "/admin/dashboard";
     return;
   }
 
@@ -246,7 +246,7 @@ async function initLoginPage() {
     }
 
     setMessage(authMessage, "Login realizado com sucesso.", "success");
-    window.location.href = "./dashboard.html";
+    window.location.href = "/admin/dashboard";
   });
 }
 
@@ -255,7 +255,7 @@ async function requireAuth() {
     assertSupabaseConfig();
   } catch (error) {
     toast(error.message, "error");
-    window.location.href = "./index.html";
+    window.location.href = "/admin";
     return null;
   }
 
@@ -264,7 +264,7 @@ async function requireAuth() {
   } = await supabase.auth.getSession();
 
   if (!session) {
-    window.location.href = "./index.html";
+    window.location.href = "/admin";
     return null;
   }
 
@@ -577,7 +577,7 @@ async function setupDashboardPage() {
   const logoutBtn = document.querySelector("#logout-btn");
   logoutBtn?.addEventListener("click", async () => {
     await supabase.auth.signOut();
-    window.location.href = "./index.html";
+    window.location.href = "/admin";
   });
 
   await loadCardapios();

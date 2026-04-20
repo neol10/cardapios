@@ -22,9 +22,15 @@
     }
   ],
   "routes": [
-    { "handle": "filesystem" },
     { "src": "^/$", "dest": "/admin", "status": 308 },
+
+    { "src": "^/admin/index\\.html$", "dest": "/admin", "status": 308 },
+    { "src": "^/admin/dashboard\\.html$", "dest": "/admin/dashboard", "status": 308 },
+    { "src": "^/cardapio/index\\.html$", "dest": "/cardapio", "status": 308 },
+
     { "src": "^/dashboard(?:\\.html)?/?$", "dest": "/admin/dashboard", "status": 308 },
+
+    { "handle": "filesystem" },
     { "src": "^/admin/?$", "dest": "/admin/index.html" },
     { "src": "^/admin/dashboard/?$", "dest": "/admin/dashboard.html" },
     { "src": "^/cardapio/?$", "dest": "/cardapio/index.html" },
