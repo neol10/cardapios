@@ -277,6 +277,26 @@ p {
   gap: 12px;
 }
 
+.galeria-wrap {
+  margin-bottom: 12px;
+}
+
+.galeria-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  gap: 10px;
+}
+
+.galeria-grid img {
+  width: 100%;
+  height: 92px;
+  object-fit: cover;
+  border-radius: 14px;
+  border: 1px solid var(--border);
+  background: color-mix(in srgb, var(--surface) 86%, transparent);
+  box-shadow: 0 10px 30px color-mix(in srgb, var(--theme2) 10%, transparent);
+}
+
 .produto-media {
   position: relative;
   width: 100%;

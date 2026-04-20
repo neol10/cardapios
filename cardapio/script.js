@@ -38,6 +38,9 @@ const cardapioMaps = document.querySelector("#cardapio-maps");
 const cardapioWhatsappTop = document.querySelector("#cardapio-whatsapp-top");
 const whatsappFab = document.querySelector("#whatsapp-fab");
 
+const galeriaWrap = document.querySelector("#galeria-wrap");
+const galeriaEl = document.querySelector("#galeria");
+
 const tipoPedidoWrap = document.querySelector("#tipo-pedido-wrap");
 const tipoPedidoSelect = document.querySelector("#tipo_pedido");
 const enderecoWrap = document.querySelector("#endereco-wrap");
@@ -368,6 +371,31 @@ function safeHttpUrl(value) {
   } catch {
     return "";
   }
+}
+
+function parseGaleriaUrls(value) {
+  if (!value) return [];
+  if (Array.isArray(value)) return value.map((v) => safeHttpUrl(v)).filter(Boolean);
+  try {
+    const parsed = JSON.parse(String(value));
+    if (!Array.isArray(parsed)) return [];
+    return parsed.map((v) => safeHttpUrl(v)).filter(Boolean);
+  } catch {
+    return [];
+  }
+}
+
+function renderGaleria(urls) {
+  if (!galeriaWrap || !galeriaEl) return;
+  const list = (Array.isArray(urls) ? urls : []).map((u) => safeHttpUrl(u)).filter(Boolean);
+  galeriaWrap.classList.toggle("is-hidden", list.length === 0);
+  if (!list.length) {
+    galeriaEl.innerHTML = "";
+    return;
+  }
+  galeriaEl.innerHTML = list
+    .map((url, idx) => `<img src="${url}" alt="Imagem do estabelecimento ${idx + 1}" loading="lazy" />`)
+    .join("");
 }
 
 function parsePayments(text) {
@@ -766,6 +794,8 @@ async function loadCardapio() {
   }
 
   activeCardapio = data;
+
+  renderGaleria(parseGaleriaUrls(data.galeria_urls));
 
   document.querySelector("#cardapio-nome").textContent = data.nome;
   setThemeColor(data.cor_tema);
