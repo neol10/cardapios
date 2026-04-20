@@ -23,23 +23,23 @@ const state = {
   isEditingCardapio: false
 };
 
-const DEFAULT_WHATSAPP_TEMPLATE = `*✅ Novo pedido — {LOJA}*
+const DEFAULT_WHATSAPP_TEMPLATE = `*\u2705 Novo pedido — {LOJA}*
 ━━━━━━━━━━━━━━━━
-📋 *Resumo*
-🚚 Tipo: {TIPO_PEDIDO}
-💵 Pagamento: {PAGAMENTO}
+\uD83D\uDCCB *Resumo*
+\uD83D\uDE9A Tipo: {TIPO_PEDIDO}
+\uD83D\uDCB5 Pagamento: {PAGAMENTO}
 
-👤 *Cliente*
+\uD83D\uDC64 *Cliente*
 {NOME}
-📞 {TELEFONE}
+\uD83D\uDCDE {TELEFONE}
 
-📍 *Endereço*
+\uD83D\uDCCD *Endereço*
 {ENDERECO}
 
-🛒 *Itens*
+\uD83D\uDED2 *Itens*
 {ITENS}
 
-💰 *Valores*
+\uD83D\uDCB0 *Valores*
 Subtotal: {SUBTOTAL}
 Taxa de entrega: {TAXA_ENTREGA}
 *Total: {TOTAL}*`;
@@ -495,7 +495,18 @@ function fillCardapioForm(item) {
   if (form.whatsapp_botao) form.whatsapp_botao.value = item.whatsapp_botao || "flutuante";
   if (form.mensagem_whatsapp_template) {
     const current = String(item.mensagem_whatsapp_template || "").trim();
-    form.mensagem_whatsapp_template.value = current || DEFAULT_WHATSAPP_TEMPLATE;
+    const hasReplacementChar = current.includes("\uFFFD") || current.includes("�");
+    const looksLikeDefault =
+      current.includes("Novo pedido") &&
+      current.includes("{LOJA}") &&
+      current.includes("{ITENS}") &&
+      current.includes("{TOTAL}") &&
+      current.includes("Resumo") &&
+      current.includes("Itens") &&
+      current.includes("Valores");
+
+    form.mensagem_whatsapp_template.value =
+      !current || (hasReplacementChar && looksLikeDefault) ? DEFAULT_WHATSAPP_TEMPLATE : current;
   }
 
   refreshAllColorPreviews(form);

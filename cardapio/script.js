@@ -491,7 +491,8 @@ function buildWhatsappMessage({ nome, telefone, endereco }) {
     .join("\n");
 
   const template = safeText(activeCardapio?.mensagem_whatsapp_template);
-  if (template) {
+  const templateCorrompido = template.includes("\uFFFD") || template.includes("�");
+  if (template && !templateCorrompido) {
     const resolvedEndereco = tipoPedido === "retirada" ? "Retirada no balcão" : endereco;
     const vars = {
       LOJA: activeCardapio.nome,
@@ -524,23 +525,23 @@ function buildWhatsappMessage({ nome, telefone, endereco }) {
   const enderecoLinha = tipoPedido === "retirada" ? "Retirada no balcão" : endereco;
 
   const defaultTemplate = [
-    `*✅ Novo pedido — ${activeCardapio.nome}*`,
+    `*\u2705 Novo pedido — ${activeCardapio.nome}*`,
     "━━━━━━━━━━━━━━━━",
-    "📋 *Resumo*",
+    "\uD83D\uDCCB *Resumo*",
     `🚚 Tipo: ${tipoPedidoLabel}`,
-    `💵 Pagamento: ${pagamento || "Não informado"}`,
+    `\uD83D\uDCB5 Pagamento: ${pagamento || "Não informado"}`,
     "",
-    "👤 *Cliente*",
+    "\uD83D\uDC64 *Cliente*",
     `${nome}`,
-    `📞 ${telefone}`,
+    `\uD83D\uDCDE ${telefone}`,
     "",
-    "📍 *Endereço*",
+    "\uD83D\uDCCD *Endereço*",
     `${enderecoLinha || "Não informado"}`,
     "",
-    "🛒 *Itens*",
+    "\uD83D\uDED2 *Itens*",
     itensTexto,
     "",
-    "💰 *Valores*",
+    "\uD83D\uDCB0 *Valores*",
     `Subtotal: ${formatPriceBRL(subtotal)}`,
     `Taxa de entrega: ${formatPriceBRL(taxaEntrega)}`,
     `*Total: ${formatPriceBRL(total)}*`
