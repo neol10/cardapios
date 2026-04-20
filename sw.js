@@ -3,7 +3,7 @@
    - Evita cache de requests não-GET
 */
 
-const CACHE_VERSION = "v4";
+const CACHE_VERSION = "v5";
 const STATIC_CACHE = `cardapios-static-${CACHE_VERSION}`;
 
 const PRECACHE_URLS = [
