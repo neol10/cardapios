@@ -345,6 +345,20 @@ select:disabled {
   gap: 10px;
 }
 
+.palette-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.palette-row input {
+  flex: 1 1 auto;
+}
+
+.palette-hint {
+  margin-top: 6px;
+}
+
 .color-row input[type="color"] {
   width: 54px;
   height: 42px;

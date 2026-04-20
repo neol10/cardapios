@@ -96,6 +96,116 @@ function normalizeHexColor(value) {
   return null;
 }
 
+function hexToRgb(hex) {
+  const n = normalizeHexColor(hex);
+  if (!n) return null;
+  const r = Number.parseInt(n.slice(1, 3), 16);
+  const g = Number.parseInt(n.slice(3, 5), 16);
+  const b = Number.parseInt(n.slice(5, 7), 16);
+  return { r, g, b };
+}
+
+function relativeLuminance({ r, g, b }) {
+  const srgb = [r, g, b].map((v) => v / 255);
+  const lin = srgb.map((c) => (c <= 0.04045 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4)));
+  return 0.2126 * lin[0] + 0.7152 * lin[1] + 0.0722 * lin[2];
+}
+
+function mixRgb(a, b, t) {
+  const clamp01 = (x) => Math.max(0, Math.min(1, x));
+  const tt = clamp01(t);
+  return {
+    r: Math.round(a.r + (b.r - a.r) * tt),
+    g: Math.round(a.g + (b.g - a.g) * tt),
+    b: Math.round(a.b + (b.b - a.b) * tt),
+  };
+}
+
+function rgbToHex({ r, g, b }) {
+  const to2 = (v) => v.toString(16).padStart(2, "0").toUpperCase();
+  return `#${to2(r)}${to2(g)}${to2(b)}`;
+}
+
+function mixHex(a, b, t) {
+  const ra = hexToRgb(a);
+  const rb = hexToRgb(b);
+  if (!ra || !rb) return "";
+  return rgbToHex(mixRgb(ra, rb, t));
+}
+
+function extractHexColors(text) {
+  const raw = String(text || "");
+  const matches = raw.match(/#?[0-9a-fA-F]{3}([0-9a-fA-F]{3})?/g) || [];
+  const out = [];
+  const seen = new Set();
+
+  for (const m of matches) {
+    const normalized = normalizeHexColor(m);
+    if (!normalized) continue;
+    if (seen.has(normalized)) continue;
+    seen.add(normalized);
+    out.push(normalized);
+  }
+
+  return out;
+}
+
+function applyPaletteToCardapioForm(cardapioForm, paletteText) {
+  const colors = extractHexColors(paletteText);
+  if (colors.length === 0) {
+    throw new Error("Nenhuma cor HEX válida encontrada na paleta");
+  }
+
+  const annotated = colors
+    .map((hex) => {
+      const rgb = hexToRgb(hex);
+      if (!rgb) return null;
+      return { hex, rgb, lum: relativeLuminance(rgb) };
+    })
+    .filter(Boolean);
+
+  if (annotated.length === 0) {
+    throw new Error("Nenhuma cor HEX válida encontrada na paleta");
+  }
+
+  annotated.sort((a, b) => a.lum - b.lum);
+
+  const text = annotated[0].hex;
+  const bg = annotated[annotated.length - 1].hex;
+
+  const withoutEnds = annotated
+    .map((x) => x.hex)
+    .filter((hex) => hex !== text && hex !== bg);
+
+  const theme = withoutEnds[0] || annotated[Math.floor(annotated.length / 2)].hex;
+  const secondary = withoutEnds[1] || theme;
+  const surface = withoutEnds[2] || mixHex(bg, text, 0.06) || bg;
+  const border = mixHex(surface, text, 0.14) || mixHex(bg, text, 0.14) || surface;
+  const muted = mixHex(text, bg, 0.52) || text;
+  const bg1 = theme;
+  const bg2 = secondary !== theme ? secondary : mixHex(theme, bg, 0.3) || bg;
+
+  const setIfExists = (name, value) => {
+    const el = cardapioForm.querySelector(`[name="${CSS.escape(name)}"]`);
+    if (!el) return;
+    el.value = value;
+  };
+
+  setIfExists("cor_tema", theme);
+  setIfExists("cor_secundaria", secondary);
+  setIfExists("cor_fundo", bg);
+  setIfExists("cor_surface", surface);
+  setIfExists("cor_borda", border);
+  setIfExists("cor_texto", text);
+  setIfExists("cor_muted", muted);
+  setIfExists("fundo_cor_1", bg1);
+  setIfExists("fundo_cor_2", bg2);
+
+  refreshAllColorPreviews(cardapioForm);
+  updateThemePreview(cardapioForm);
+  updateFundoVisibility(cardapioForm);
+}
+
 function setupHexInputs(root) {
   if (!root) return;
 
@@ -681,6 +791,19 @@ async function setupDashboardPage() {
 
   setupColorPreviewListeners(cardapioForm);
   setupThemeControls(cardapioForm);
+
+  const paletteInput = document.querySelector("#palette-input");
+  const applyPaletteBtn = document.querySelector(".js-apply-palette");
+  if (cardapioForm && paletteInput instanceof HTMLInputElement && applyPaletteBtn) {
+    applyPaletteBtn.addEventListener("click", () => {
+      try {
+        applyPaletteToCardapioForm(cardapioForm, paletteInput.value);
+        toast("Paleta aplicada.");
+      } catch (error) {
+        toast(error?.message ? String(error.message) : "Falha ao aplicar paleta", "error");
+      }
+    });
+  }
 
   const whatsappInput = cardapioForm?.querySelector('input[name="whatsapp"]');
   whatsappInput?.addEventListener("input", (event) => {
