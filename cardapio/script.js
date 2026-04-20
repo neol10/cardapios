@@ -65,6 +65,101 @@ function getCheckoutDraftKey() {
   return `${CHECKOUT_DRAFT_KEY_PREFIX}${slug || "default"}`;
 }
 
+function readCheckoutDraft() {
+  try {
+    const raw = localStorage.getItem(getCheckoutDraftKey());
+    if (!raw) return null;
+    const parsed = JSON.parse(raw);
+    if (!parsed || typeof parsed !== "object") return null;
+    return parsed;
+  } catch {
+    return null;
+  }
+}
+
+function writeCheckoutDraft(partial) {
+  try {
+    const current = readCheckoutDraft() || {};
+    const next = {
+      ...current,
+      ...(partial && typeof partial === "object" ? partial : {}),
+      updatedAt: Date.now()
+    };
+    localStorage.setItem(getCheckoutDraftKey(), JSON.stringify(next));
+  } catch {
+    // ignora
+  }
+}
+
+let saveCheckoutDraftTimer = null;
+function scheduleSaveCheckoutDraft() {
+  if (!checkoutForm) return;
+  if (saveCheckoutDraftTimer) window.clearTimeout(saveCheckoutDraftTimer);
+  saveCheckoutDraftTimer = window.setTimeout(() => {
+    saveCheckoutDraftTimer = null;
+    try {
+      const formData = new FormData(checkoutForm);
+      writeCheckoutDraft({
+        nome: String(formData.get("nome") || "").trim(),
+        telefone: String(formData.get("telefone") || "").trim(),
+        endereco: String(formData.get("endereco") || "").trim(),
+        tipo_pedido: String(formData.get("tipo_pedido") || "").trim(),
+        pagamento: String(formData.get("pagamento") || "").trim()
+      });
+    } catch {
+      // ignora
+    }
+  }, 260);
+}
+
+function applyCheckoutDraft() {
+  if (!checkoutForm) return;
+  const draft = readCheckoutDraft();
+  if (!draft) return;
+
+  const nomeEl = checkoutForm.querySelector('input[name="nome"]');
+  const telefoneEl = checkoutForm.querySelector('input[name="telefone"]');
+  const enderecoEl = checkoutForm.querySelector('textarea[name="endereco"]');
+  const tipoEl = checkoutForm.querySelector('select[name="tipo_pedido"]');
+  const pagamentoEl = checkoutForm.querySelector('select[name="pagamento"]');
+
+  const setIfEmpty = (el, value) => {
+    if (!el) return;
+    const v = String(value || "");
+    if (!v) return;
+    if (String(el.value || "").trim()) return;
+    el.value = v;
+  };
+
+  if (nomeEl instanceof HTMLInputElement) setIfEmpty(nomeEl, draft.nome);
+  if (telefoneEl instanceof HTMLInputElement) {
+    setIfEmpty(telefoneEl, draft.telefone);
+    if (String(telefoneEl.value || "").trim()) telefoneEl.value = maskTelefone(telefoneEl.value);
+  }
+  if (enderecoEl instanceof HTMLTextAreaElement) setIfEmpty(enderecoEl, draft.endereco);
+
+  if (tipoEl instanceof HTMLSelectElement) {
+    const next = String(draft.tipo_pedido || "").trim();
+    if (next) {
+      const has = Array.from(tipoEl.options).some((o) => o.value === next);
+      if (has && tipoEl.value !== next) {
+        tipoEl.value = next;
+        tipoEl.dispatchEvent(new Event("change", { bubbles: true }));
+      }
+    }
+  }
+
+  if (pagamentoEl instanceof HTMLSelectElement) {
+    const next = String(draft.pagamento || "").trim();
+    if (next) {
+      const has = Array.from(pagamentoEl.options).some((o) => o.value === next);
+      if (has && pagamentoEl.value !== next) {
+        pagamentoEl.value = next;
+      }
+    }
+  }
+}
+
 function updateCheckoutAvailability() {
   const btn = checkoutForm?.querySelector('button[type="submit"]');
   if (!(btn instanceof HTMLButtonElement)) return;
