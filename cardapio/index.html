@@ -18,7 +18,10 @@
           if (!slug || slug === "index.html") return;
           var link = document.querySelector('link[rel="manifest"]');
           if (!link) return;
-          link.setAttribute("href", "/api/manifest.webmanifest?slug=" + encodeURIComponent(slug));
+          link.setAttribute(
+            "href",
+            "/api/manifest.webmanifest?slug=" + encodeURIComponent(slug) + "&v=" + Date.now()
+          );
         } catch (e) {}
       })();
     </script>
