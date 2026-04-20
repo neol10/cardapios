@@ -114,18 +114,32 @@
           <div class="form-row">
             <label>
               Nome completo
-              <input type="text" name="nome" placeholder="Ex.: João da Silva" required />
+              <input type="text" name="nome" placeholder="Ex.: João da Silva" autocomplete="name" required />
             </label>
 
             <label>
               Telefone
-              <input type="text" name="telefone" id="telefone" placeholder="(11) 99999-9999" required />
+              <input
+                type="text"
+                name="telefone"
+                id="telefone"
+                placeholder="(11) 99999-9999"
+                autocomplete="tel"
+                inputmode="tel"
+                required
+              />
             </label>
           </div>
 
           <label id="endereco-wrap">
             Endereço completo
-            <textarea name="endereco" rows="3" placeholder="Rua, número, bairro, complemento" required></textarea>
+            <textarea
+              name="endereco"
+              rows="3"
+              placeholder="Rua, número, bairro, complemento"
+              autocomplete="street-address"
+              required
+            ></textarea>
           </label>
 
           <button class="btn btn-primary" type="submit">Finalizar pedido</button>

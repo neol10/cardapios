@@ -46,6 +46,46 @@ const pagamentoSelect = document.querySelector("#pagamento");
 
 const cardapioNomeEl = document.querySelector("#cardapio-nome");
 
+function updateCheckoutAvailability() {
+  const btn = checkoutForm?.querySelector('button[type="submit"]');
+  if (!(btn instanceof HTMLButtonElement)) return;
+
+  if (!btn.dataset.originalText) {
+    btn.dataset.originalText = btn.textContent || "Finalizar pedido";
+  }
+
+  if (!activeCardapio) {
+    btn.disabled = true;
+    btn.textContent = "Carregando...";
+    return;
+  }
+
+  if (!isOpenNow(activeCardapio)) {
+    setCheckoutEnabled(false, CLOSED_MESSAGE);
+    return;
+  }
+
+  // Se reabriu, limpa a mensagem fixa de fechado
+  if (checkoutMessage?.textContent === CLOSED_MESSAGE) setCheckoutMessage("");
+
+  if (!cart.length) {
+    btn.disabled = true;
+    btn.textContent = "Adicione itens";
+    return;
+  }
+
+  const minimo = Number(activeCardapio?.pedido_minimo || 0);
+  const subtotal = calculateSubtotal();
+  if (minimo > 0 && subtotal < minimo) {
+    btn.disabled = true;
+    btn.textContent = "Atingir pedido minimo";
+    return;
+  }
+
+  btn.disabled = false;
+  btn.textContent = btn.dataset.originalText || "Finalizar pedido";
+}
+
 function setHeaderState(title, subtitle) {
   if (cardapioNomeEl) cardapioNomeEl.textContent = title;
   if (typeof subtitle === "string" && cardapioSubtitle) cardapioSubtitle.textContent = subtitle;
@@ -331,7 +371,7 @@ function updateOpenClosedUI() {
     cardapioStatus.textContent = abertoAgora ? "Aberto agora" : "Fechado agora";
   }
 
-  setCheckoutEnabled(abertoAgora, CLOSED_MESSAGE);
+  updateCheckoutAvailability();
 
   const whatsappNumber = onlyDigits(activeCardapio?.whatsapp);
   const waBaseLink = whatsappNumber ? `https://wa.me/${whatsappNumber}` : "";
@@ -361,7 +401,7 @@ function renderProdutos() {
         <div class="produto-body">
           <h3>${nome}</h3>
           <p class="price">${formatPriceBRL(produto.preco)}</p>
-          <button class="btn btn-primary add-to-cart" data-id="${produto.id}">Adicionar ao pedido</button>
+          <button type="button" class="btn btn-primary add-to-cart" data-id="${produto.id}">Adicionar ao pedido</button>
         </div>
       </article>
     `;
@@ -386,6 +426,7 @@ function renderCart() {
     if (cartTaxa) cartTaxa.classList.add("is-hidden");
     if (cartMinimo) cartMinimo.classList.add("is-hidden");
     setTotalLineValue(cartTotal, "Total", "R$ 0,00");
+    updateCheckoutAvailability();
     return;
   }
 
@@ -402,7 +443,7 @@ function renderCart() {
             <span class="cart-price">${formatPriceBRL(item.preco * item.quantidade)}</span>
           </div>
         </div>
-        <button class="btn btn-ghost remove-item" data-id="${item.id}" aria-label="Remover ${escapeHtml(item.nome)}">Remover</button>
+        <button class="btn btn-ghost remove-item" data-id="${item.id}" aria-label="Remover 1 unidade de ${escapeHtml(item.nome)}">Remover 1</button>
       </div>
     `
     )
@@ -432,6 +473,8 @@ function renderCart() {
   }
 
   setTotalLineValue(cartTotal, "Total", formatPriceBRL(calculateTotal()));
+
+  updateCheckoutAvailability();
 }
 
 function addToCart(produtoId, buttonElement) {
@@ -453,9 +496,19 @@ function addToCart(produtoId, buttonElement) {
   renderCart();
   pulseCart();
 
-  if (buttonElement) {
+  if (buttonElement instanceof HTMLElement) {
     buttonElement.classList.add("flash");
     setTimeout(() => buttonElement.classList.remove("flash"), 300);
+
+    if (buttonElement instanceof HTMLButtonElement) {
+      if (!buttonElement.dataset.originalText) {
+        buttonElement.dataset.originalText = buttonElement.textContent || "";
+      }
+      buttonElement.textContent = "Adicionado";
+      window.setTimeout(() => {
+        buttonElement.textContent = buttonElement.dataset.originalText || "Adicionar ao pedido";
+      }, 520);
+    }
   }
 }
 

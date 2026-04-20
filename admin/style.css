@@ -512,6 +512,19 @@ select:disabled {
   transition: transform 160ms ease, border-color 160ms ease;
 }
 
+.list-item p {
+  margin: 0 0 6px;
+}
+
+.list-item p:last-of-type {
+  margin-bottom: 0;
+}
+
+.list-item.is-selected {
+  border-color: color-mix(in srgb, var(--primary) 55%, var(--border));
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--primary) 18%, transparent);
+}
+
 .list-item:hover {
   transform: translateY(-1px);
   border-color: color-mix(in srgb, var(--primary) 22%, var(--border));
