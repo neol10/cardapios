@@ -364,6 +364,8 @@ select:disabled {
 
 .color-hex {
   display: inline-block;
+  min-width: 112px;
+  width: 112px;
   font-size: 0.82rem;
   font-weight: 800;
   letter-spacing: 0.03em;
@@ -375,6 +377,20 @@ select:disabled {
   font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New",
     monospace;
   text-transform: uppercase;
+}
+
+input.color-hex {
+  cursor: text;
+}
+
+input.color-hex:focus {
+  outline: 2px solid color-mix(in srgb, var(--primary) 45%, black);
+  border-color: var(--primary);
+}
+
+input.color-hex.is-invalid {
+  border-color: color-mix(in srgb, var(--danger) 65%, var(--border));
+  outline: 2px solid color-mix(in srgb, var(--danger) 35%, black);
 }
 
 .theme-preview {

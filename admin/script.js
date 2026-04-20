@@ -72,10 +72,78 @@ function refreshColorPreviewForInput(input) {
   const swatch = row.querySelector(".color-swatch");
   const hex = row.querySelector(".color-hex");
   const value = String(input.value || "").trim();
-  if (hex) hex.textContent = value ? value.toUpperCase() : "";
+  if (hex instanceof HTMLInputElement) {
+    hex.value = value ? value.toUpperCase() : "";
+  } else if (hex) {
+    hex.textContent = value ? value.toUpperCase() : "";
+  }
   if (swatch instanceof HTMLElement) {
     swatch.style.backgroundColor = value || "transparent";
   }
+}
+
+function normalizeHexColor(value) {
+  const raw = String(value || "").trim();
+  if (!raw) return "";
+  const hex = raw.startsWith("#") ? raw.slice(1) : raw;
+  if (/^[0-9a-fA-F]{3}$/.test(hex)) {
+    const expanded = `${hex[0]}${hex[0]}${hex[1]}${hex[1]}${hex[2]}${hex[2]}`;
+    return `#${expanded.toUpperCase()}`;
+  }
+  if (/^[0-9a-fA-F]{6}$/.test(hex)) {
+    return `#${hex.toUpperCase()}`;
+  }
+  return null;
+}
+
+function setupHexInputs(root) {
+  if (!root) return;
+
+  root.querySelectorAll(".color-row").forEach((row) => {
+    const colorInput = row.querySelector('input[type="color"]');
+    const hexInput = row.querySelector(".color-hex-input");
+    if (!(colorInput instanceof HTMLInputElement)) return;
+    if (!(hexInput instanceof HTMLInputElement)) return;
+
+    const syncFromColor = () => {
+      hexInput.classList.remove("is-invalid");
+      hexInput.value = String(colorInput.value || "").toUpperCase();
+    };
+
+    const syncToColorIfValid = (commit = false) => {
+      const normalized = normalizeHexColor(hexInput.value);
+      if (normalized) {
+        hexInput.classList.remove("is-invalid");
+        colorInput.value = normalized;
+        refreshColorPreviewForInput(colorInput);
+        return;
+      }
+
+      hexInput.classList.add("is-invalid");
+      if (commit) syncFromColor();
+    };
+
+    // Inicial
+    syncFromColor();
+
+    // Facilita copiar
+    hexInput.addEventListener("focus", () => {
+      try {
+        hexInput.select();
+      } catch {
+        // ignora
+      }
+    });
+
+    // Se digitou um HEX válido, já aplica
+    hexInput.addEventListener("input", () => syncToColorIfValid(false));
+    hexInput.addEventListener("change", () => syncToColorIfValid(true));
+    hexInput.addEventListener("blur", () => syncToColorIfValid(true));
+
+    // Se mexeu no seletor, atualiza texto
+    colorInput.addEventListener("input", syncFromColor);
+    colorInput.addEventListener("change", syncFromColor);
+  });
 }
 
 function refreshAllColorPreviews(root) {
@@ -93,6 +161,7 @@ function setupColorPreviewListeners(root) {
     input.addEventListener("input", handler);
     input.addEventListener("change", handler);
   });
+  setupHexInputs(root);
   refreshAllColorPreviews(root);
 }
 
