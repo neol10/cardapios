@@ -47,6 +47,19 @@ const pagamentoSelect = document.querySelector("#pagamento");
 const cardapioNomeEl = document.querySelector("#cardapio-nome");
 const CHECKOUT_DRAFT_KEY_PREFIX = "cardapio.checkoutDraft.";
 
+function withTimeout(promise, ms, label) {
+  let timer;
+  const timeout = new Promise((_, reject) => {
+    timer = window.setTimeout(() => {
+      reject(new Error(`${label} demorou mais de ${Math.round(ms / 1000)}s`));
+    }, ms);
+  });
+
+  return Promise.race([promise, timeout]).finally(() => {
+    if (timer) window.clearTimeout(timer);
+  });
+}
+
 function getCheckoutDraftKey() {
   const slug = safeText(getSlugFromUrl()).toLowerCase();
   return `${CHECKOUT_DRAFT_KEY_PREFIX}${slug || "default"}`;
@@ -645,11 +658,11 @@ async function loadCardapio() {
     return;
   }
 
-  const { data, error } = await supabase
-    .from("cardapios")
-    .select("*")
-    .eq("slug", slug)
-    .single();
+  const { data, error } = await withTimeout(
+    supabase.from("cardapios").select("*").eq("slug", slug).single(),
+    12_000,
+    "Carregamento do cardápio"
+  );
 
   if (error || !data) {
     setHeaderState("Cardápio não encontrado", "Verifique o link e tente novamente.");
@@ -805,11 +818,11 @@ async function loadCardapio() {
     document.documentElement.style.setProperty("--hero-banner", "none");
   }
 
-  const { data: produtos, error: produtosError } = await supabase
-    .from("produtos")
-    .select("*")
-    .eq("cardapio_id", data.id)
-    .order("nome");
+  const { data: produtos, error: produtosError } = await withTimeout(
+    supabase.from("produtos").select("*").eq("cardapio_id", data.id).order("nome"),
+    12_000,
+    "Carregamento dos produtos"
+  );
 
   if (produtosError) {
     setHeaderState(data.nome, "Não foi possível carregar os produtos.");
@@ -967,14 +980,21 @@ async function init() {
       return;
     }
 
-    attachEvents();
+    try {
+      attachEvents();
+    } catch (error) {
+      const msg = error?.message ? String(error.message) : "Erro desconhecido";
+      setHeaderState("Erro ao iniciar", "Tente recarregar a página.");
+      produtosContainer.innerHTML = `<p class="muted">Erro ao iniciar: ${escapeHtml(msg)}</p>`;
+      return;
+    }
 
     try {
       await loadCardapio();
     } catch (error) {
       setHeaderState("Erro ao carregar", "Tente recarregar a página.");
       const msg = error?.message ? String(error.message) : "Erro desconhecido";
-      produtosContainer.innerHTML = `<p class="muted">Erro ao carregar cardápio: ${msg}</p>`;
+      produtosContainer.innerHTML = `<p class="muted">Erro ao carregar cardápio: ${escapeHtml(msg)}</p>`;
     }
   } finally {
     document.body.classList.remove("is-loading");
