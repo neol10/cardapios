@@ -3,13 +3,12 @@
    - Evita cache de requests não-GET
 */
 
-const CACHE_VERSION = "v6";
+const CACHE_VERSION = "v7";
 const STATIC_CACHE = `cardapios-static-${CACHE_VERSION}`;
 
 const PRECACHE_URLS = [
   "/pwa/icon.svg",
-  "/admin/manifest.webmanifest",
-  "/cardapio/manifest.webmanifest"
+  "/admin/manifest.webmanifest"
 ];
 
 self.addEventListener("install", (event) => {

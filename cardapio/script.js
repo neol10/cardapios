@@ -373,6 +373,36 @@ function safeHttpUrl(value) {
   }
 }
 
+function upsertHeadLink(rel, href, extra = {}) {
+  const safeHref = safeHttpUrl(href);
+  if (!safeHref) return;
+
+  const head = document.head || document.querySelector("head");
+  if (!head) return;
+
+  const selector = `link[rel="${CSS.escape(rel)}"]`;
+  let link = head.querySelector(selector);
+  if (!link) {
+    link = document.createElement("link");
+    link.setAttribute("rel", rel);
+    head.appendChild(link);
+  }
+
+  link.setAttribute("href", safeHref);
+  for (const [key, value] of Object.entries(extra)) {
+    if (value == null) continue;
+    link.setAttribute(key, String(value));
+  }
+}
+
+function applyBrandIcons(photoUrl) {
+  const safe = safeHttpUrl(photoUrl);
+  if (!safe) return;
+
+  upsertHeadLink("icon", safe);
+  upsertHeadLink("apple-touch-icon", safe);
+}
+
 function parseGaleriaUrls(value) {
   if (!value) return [];
   if (Array.isArray(value)) return value.map((v) => safeHttpUrl(v)).filter(Boolean);
@@ -795,6 +825,7 @@ async function loadCardapio() {
 
   activeCardapio = data;
 
+  applyBrandIcons(data.foto_url);
   renderGaleria(parseGaleriaUrls(data.galeria_urls));
 
   document.querySelector("#cardapio-nome").textContent = data.nome;

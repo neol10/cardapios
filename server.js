@@ -73,6 +73,14 @@ function handleRequest(req, res) {
   const decodedPath = safeDecodeURIComponent(pathname);
   const relativePath = decodedPath.replace(/^\/+/g, "");
 
+  if (pathname === "/api/manifest.webmanifest") {
+    const manifestPath = path.join(ROOT, "cardapio", "manifest.webmanifest");
+    if (fileExists(manifestPath)) {
+      serveFile(res, manifestPath);
+      return;
+    }
+  }
+
   // Redireciona URLs com .html para URLs limpas
   if (pathname === "/admin/index.html") {
     res.writeHead(308, { Location: "/admin" });
