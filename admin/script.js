@@ -23,26 +23,26 @@ const state = {
   isEditingCardapio: false
 };
 
-const DEFAULT_WHATSAPP_TEMPLATE = `*✔ Novo pedido — {LOJA}*
+const DEFAULT_WHATSAPP_TEMPLATE = `*Novo pedido - {LOJA}*
 -------------------------
-*RESUMO*
-▶ Tipo: {TIPO_PEDIDO}
-▶ Pagamento: {PAGAMENTO}
+RESUMO
+Tipo: {TIPO_PEDIDO}
+Pagamento: {PAGAMENTO}
 
-*CLIENTE*
+CLIENTE
 Nome: {NOME}
-Tel: {TELEFONE}
+Telefone: {TELEFONE}
 
-*ENDEREÇO*
+ENDERECO
 {ENDERECO}
 
-*ITENS*
+ITENS
 {ITENS}
 
-*VALORES*
+VALORES
 Subtotal: {SUBTOTAL}
 Taxa de entrega: {TAXA_ENTREGA}
-*TOTAL: {TOTAL}*`;
+TOTAL: {TOTAL}`;
 
 function escapeHtml(value) {
   const str = String(value ?? "");
@@ -501,9 +501,9 @@ function fillCardapioForm(item) {
       current.includes("{LOJA}") &&
       current.includes("{ITENS}") &&
       current.includes("{TOTAL}") &&
-      current.includes("Resumo") &&
-      current.includes("Itens") &&
-      current.includes("Valores");
+      (current.includes("RESUMO") || current.includes("Resumo")) &&
+      (current.includes("ITENS") || current.includes("Itens")) &&
+      (current.includes("VALORES") || current.includes("Valores"));
 
     form.mensagem_whatsapp_template.value =
       !current || (hasReplacementChar && looksLikeDefault) ? DEFAULT_WHATSAPP_TEMPLATE : current;

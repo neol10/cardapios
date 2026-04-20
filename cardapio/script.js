@@ -525,26 +525,26 @@ function buildWhatsappMessage({ nome, telefone, endereco }) {
   const enderecoLinha = tipoPedido === "retirada" ? "Retirada no balcão" : endereco;
 
   const defaultTemplate = [
-    `*✔ Novo pedido — ${activeCardapio.nome}*`,
+    `*Novo pedido - ${activeCardapio.nome}*`,
     "-------------------------",
-    "*RESUMO*",
-    `▶ Tipo: ${tipoPedidoLabel}`,
-    `▶ Pagamento: ${pagamento || "Não informado"}`,
+    "RESUMO",
+    `Tipo: ${tipoPedidoLabel}`,
+    `Pagamento: ${pagamento || "Nao informado"}`,
     "",
-    "*CLIENTE*",
+    "CLIENTE",
     `Nome: ${nome}`,
-    `Tel: ${telefone}`,
+    `Telefone: ${telefone}`,
     "",
-    "*ENDEREÇO*",
-    `${enderecoLinha || "Não informado"}`,
+    "ENDERECO",
+    `${enderecoLinha || "Nao informado"}`,
     "",
-    "*ITENS*",
+    "ITENS",
     itensTexto,
     "",
-    "*VALORES*",
+    "VALORES",
     `Subtotal: ${formatPriceBRL(subtotal)}`,
     `Taxa de entrega: ${formatPriceBRL(taxaEntrega)}`,
-    `*TOTAL: ${formatPriceBRL(total)}*`
+    `TOTAL: ${formatPriceBRL(total)}`
   ];
 
   return defaultTemplate.join("\n");
