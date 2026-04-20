@@ -25,9 +25,9 @@ const state = {
 
 const DEFAULT_WHATSAPP_TEMPLATE = `*✅ Novo pedido — {LOJA}*
 ━━━━━━━━━━━━━━━━
-🧾 *Resumo*
+📋 *Resumo*
 🚚 Tipo: {TIPO_PEDIDO}
-💳 Pagamento: {PAGAMENTO}
+💵 Pagamento: {PAGAMENTO}
 
 👤 *Cliente*
 {NOME}
@@ -36,7 +36,7 @@ const DEFAULT_WHATSAPP_TEMPLATE = `*✅ Novo pedido — {LOJA}*
 📍 *Endereço*
 {ENDERECO}
 
-🛍️ *Itens*
+🛒 *Itens*
 {ITENS}
 
 💰 *Valores*
