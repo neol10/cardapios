@@ -8,27 +8,43 @@
     <meta name="mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-    <link rel="manifest" href="/api/manifest.webmanifest" />
     <script>
       (function () {
         try {
           var segments = String(window.location.pathname || "").split("/").filter(Boolean);
           var cardapioIndex = segments.indexOf("cardapio");
           var slug = cardapioIndex >= 0 ? segments[cardapioIndex + 1] : "";
-          if (!slug || slug === "index.html") return;
-          var link = document.querySelector('link[rel="manifest"]');
-          if (!link) return;
-          link.setAttribute(
-            "href",
-            "/api/manifest.webmanifest?slug=" + encodeURIComponent(slug) + "&v=" + Date.now()
-          );
+          if (!slug || slug === "index.html") slug = "";
+
+          var bust = Date.now();
+          var manifestHref = slug
+            ? "/api/manifest.webmanifest?slug=" + encodeURIComponent(slug) + "&v=" + bust
+            : "/api/manifest.webmanifest?v=" + bust;
+
+          var iconHref = slug
+            ? "/api/icon?slug=" + encodeURIComponent(slug) + "&v=" + bust
+            : "/pwa/icon-32.png?v=" + bust;
+
+          var head = document.head || document.getElementsByTagName("head")[0];
+          if (!head) return;
+
+          var manifest = document.createElement("link");
+          manifest.setAttribute("rel", "manifest");
+          manifest.setAttribute("href", manifestHref);
+          head.appendChild(manifest);
+
+          var icon = document.createElement("link");
+          icon.setAttribute("rel", "icon");
+          icon.setAttribute("href", iconHref);
+          head.appendChild(icon);
+
+          var apple = document.createElement("link");
+          apple.setAttribute("rel", "apple-touch-icon");
+          apple.setAttribute("href", iconHref);
+          head.appendChild(apple);
         } catch (e) {}
       })();
     </script>
-    <link rel="icon" href="/pwa/icon.svg" type="image/svg+xml" />
-    <link rel="icon" href="/pwa/icon-32.png" type="image/png" sizes="32x32" />
-    <link rel="icon" href="/pwa/icon-16.png" type="image/png" sizes="16x16" />
-    <link rel="apple-touch-icon" href="/pwa/icon-180.png" />
     <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />
     <link rel="preconnect" href="https://esm.sh" crossorigin />
     <link rel="preconnect" href="https://uapwitkmxuoepnjlffqy.supabase.co" crossorigin />
