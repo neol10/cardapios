@@ -30,6 +30,18 @@
 
     { "src": "^/dashboard(?:\\.html)?/?$", "dest": "/admin/dashboard", "status": 308 },
 
+    {
+      "src": "^/cardapio/([^/?#]+?)/?$",
+      "has": [
+        {
+          "type": "header",
+          "key": "user-agent",
+          "value": "(?i)(facebookexternalhit|whatsapp|twitterbot|slackbot|discordbot|telegrambot|linkedinbot|pinterest|embedly|googlebot|bingbot)"
+        }
+      ],
+      "dest": "/api/og-cardapio?slug=$1"
+    },
+
     { "handle": "filesystem" },
     { "src": "^/admin/?$", "dest": "/admin/index.html" },
     { "src": "^/admin/dashboard/?$", "dest": "/admin/dashboard.html" },

@@ -22,6 +22,17 @@ function redirect(res, location) {
   res.end();
 }
 
+function buildSquareSvgDataUrl(imageContentType, imageBuffer) {
+  const base64 = Buffer.from(imageBuffer).toString("base64");
+  const dataUrl = `data:${imageContentType};base64,${base64}`;
+
+  return `<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
+  <rect width="512" height="512" fill="#fff"/>
+  <image width="512" height="512" href="${dataUrl}" preserveAspectRatio="xMidYMid slice"/>
+</svg>`;
+}
+
 async function fetchCardapioBySlug(slug) {
   const SUPABASE_URL = "https://uapwitkmxuoepnjlffqy.supabase.co";
   const SUPABASE_ANON_KEY =
@@ -50,6 +61,7 @@ module.exports = async (req, res) => {
   const slugFromQuery = safeSlug(requestUrl.searchParams.get("slug"));
   const slugFromReferer = extractSlugFromReferer(req.headers.referer);
   const slug = slugFromQuery || slugFromReferer;
+  const format = String(requestUrl.searchParams.get("format") || "").trim().toLowerCase();
 
   if (!slug) {
     redirect(res, "/pwa/icon-192.png");
@@ -85,6 +97,23 @@ module.exports = async (req, res) => {
   const contentType = upstream.headers.get("content-type") || "image/png";
   const arrayBuffer = await upstream.arrayBuffer();
   const buf = Buffer.from(arrayBuffer);
+
+  if (format === "svg") {
+    // Evita resposta gigantesca (base64 dentro do SVG)
+    if (buf.length > 900_000) {
+      redirect(res, "/pwa/icon-192.png");
+      return;
+    }
+
+    const svg = buildSquareSvgDataUrl(contentType, buf);
+    res.statusCode = 200;
+    res.setHeader("Content-Type", "image/svg+xml; charset=utf-8");
+    res.setHeader("Cache-Control", "no-cache, no-store, must-revalidate");
+    res.setHeader("Pragma", "no-cache");
+    res.setHeader("Expires", "0");
+    res.end(svg);
+    return;
+  }
 
   res.statusCode = 200;
   res.setHeader("Content-Type", contentType);

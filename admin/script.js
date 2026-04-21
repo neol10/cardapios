@@ -20,6 +20,7 @@ const state = {
   cardapios: [],
   selectedCardapioId: null,
   produtos: [],
+  pedidos: [],
   isEditingCardapio: false
 };
 
@@ -638,12 +639,20 @@ function renderProdutos() {
   container.innerHTML = state.produtos
     .map((item) => {
       const nome = escapeHtml(item.nome);
+      const categoria = escapeHtml(item.categoria || "");
+      const descricao = escapeHtml(item.descricao || "");
       const imageUrl = safeHttpUrl(item.imagem_url);
       return `
       <article class="list-item" data-id="${item.id}">
         <h3>${nome}</h3>
+        ${categoria ? `<p class="muted"><strong>Categoria:</strong> ${categoria}</p>` : ""}
+        ${descricao ? `<p class="muted">${descricao}</p>` : ""}
         <p>${formatPriceBRL(item.preco)}</p>
-        ${imageUrl ? `<img src="${imageUrl}" alt="${nome}" style="width: 100%; max-height: 180px; object-fit: cover; border-radius: 10px;" />` : ""}
+        ${
+          imageUrl
+            ? `<img src="${imageUrl}" alt="${nome}" loading="lazy" decoding="async" style="width: 100%; max-height: 180px; object-fit: cover; border-radius: 10px;" />`
+            : ""
+        }
         <div class="list-actions">
           <button class="btn js-edit-produto" data-id="${item.id}">Editar</button>
           <button class="btn js-delete-produto" data-id="${item.id}">Excluir</button>
@@ -652,6 +661,42 @@ function renderProdutos() {
     `;
     })
     .join("");
+}
+
+function formatPedidoText(pedido, cardapioNome) {
+  const itens = Array.isArray(pedido.itens) ? pedido.itens : [];
+  const itensText = itens
+    .map((item) => {
+      const qtd = String(item.quantidade ?? "").trim();
+      const nome = String(item.nome ?? "").trim();
+      const preco = formatPriceBRL(item.preco_unitario);
+      return `${qtd}x ${nome} (${preco})`;
+    })
+    .join("\n");
+
+  const loja = cardapioNome ? String(cardapioNome).trim() : "";
+  const nomeCliente = String(pedido.nome_cliente ?? "").trim();
+  const telefone = String(pedido.telefone ?? "").trim();
+  const endereco = String(pedido.endereco ?? "").trim();
+  const status = String(pedido.status || "novo").trim();
+  const data = new Date(pedido.created_at).toLocaleString("pt-BR");
+
+  return [
+    "NOVO PEDIDO",
+    loja ? `Loja: ${loja}` : "",
+    `Status: ${status}`,
+    `Data: ${data}`,
+    "",
+    `Nome: ${nomeCliente}`,
+    `Telefone: ${telefone}`,
+    `Endereço: ${endereco}`,
+    "",
+    "ITENS:",
+    itensText || "(sem itens)",
+    ""
+  ]
+    .filter(Boolean)
+    .join("\n");
 }
 
 function renderPedidos(pedidos) {
@@ -673,13 +718,25 @@ function renderPedidos(pedidos) {
       const nomeCliente = escapeHtml(pedido.nome_cliente);
       const telefone = escapeHtml(pedido.telefone);
       const endereco = escapeHtml(pedido.endereco);
+      const status = escapeHtml(pedido.status || "novo");
 
       return `
-      <article class="list-item">
+      <article class="list-item" data-id="${pedido.id}">
         <h3>${nomeCliente}</h3>
         <p><strong>Telefone:</strong> ${telefone}</p>
         <p><strong>Endereço:</strong> ${endereco}</p>
         <p><strong>Itens:</strong> ${itensText || "Sem itens"}</p>
+        <div class="list-actions" style="gap: 8px; align-items: center;">
+          <label style="display:flex; gap:8px; align-items:center;">
+            <span class="muted">Status</span>
+            <select class="js-pedido-status" data-id="${pedido.id}" aria-label="Status do pedido">
+              <option value="novo" ${status === "novo" ? "selected" : ""}>novo</option>
+              <option value="confirmado" ${status === "confirmado" ? "selected" : ""}>confirmado</option>
+              <option value="entregue" ${status === "entregue" ? "selected" : ""}>entregue</option>
+            </select>
+          </label>
+          <button class="btn js-copy-pedido" data-id="${pedido.id}">Copiar</button>
+        </div>
         <p class="muted"><strong>Data:</strong> ${new Date(pedido.created_at).toLocaleString("pt-BR")}</p>
       </article>
     `;
@@ -709,18 +766,19 @@ async function loadProdutos() {
     return;
   }
 
-  const { data, error } = await supabase
-    .from("produtos")
-    .select("*")
-    .eq("cardapio_id", state.selectedCardapioId)
-    .order("nome");
+  const { data, error } = await supabase.from("produtos").select("*").eq("cardapio_id", state.selectedCardapioId);
 
   if (error) {
     toast(`Erro ao carregar produtos: ${error.message}`, "error");
     return;
   }
 
-  state.produtos = data || [];
+  state.produtos = (data || []).sort((a, b) => {
+    const ca = String(a.categoria || "").toLowerCase();
+    const cb = String(b.categoria || "").toLowerCase();
+    if (ca !== cb) return ca.localeCompare(cb, "pt-BR");
+    return String(a.nome || "").localeCompare(String(b.nome || ""), "pt-BR");
+  });
   renderProdutos();
 }
 
@@ -738,7 +796,30 @@ async function loadPedidos() {
     return;
   }
 
-  renderPedidos(data || []);
+  state.pedidos = data || [];
+  renderPedidos(state.pedidos);
+}
+
+async function writeClipboard(text) {
+  const value = String(text ?? "");
+  if (!value) return;
+
+  try {
+    await navigator.clipboard.writeText(value);
+    return;
+  } catch {
+    // fallback
+  }
+
+  const el = document.createElement("textarea");
+  el.value = value;
+  el.setAttribute("readonly", "");
+  el.style.position = "fixed";
+  el.style.left = "-9999px";
+  document.body.appendChild(el);
+  el.select();
+  document.execCommand("copy");
+  document.body.removeChild(el);
 }
 
 function fillCardapioForm(item) {
@@ -818,6 +899,8 @@ function fillProdutoForm(item) {
   const idField = getHiddenIdField(form);
   if (idField) idField.value = item.id;
   form.nome.value = item.nome;
+  if (form.categoria) form.categoria.value = item.categoria || "";
+  if (form.descricao) form.descricao.value = item.descricao || "";
   form.preco.value = String(item.preco).replace(".", ",");
   form.imagem_url.value = item.imagem_url || "";
 
@@ -1229,6 +1312,8 @@ async function setupDashboardPage() {
     const formData = new FormData(produtoForm);
     const id = String(formData.get("id") || "").trim();
     const nome = String(formData.get("nome") || "").trim();
+    const categoria = String(formData.get("categoria") || "").trim();
+    const descricao = String(formData.get("descricao") || "").trim();
     const preco = parseMoneyInput(String(formData.get("preco") || ""));
     const imagemFile = formData.get("imagem");
     let imagem_url = String(formData.get("imagem_url") || "").trim();
@@ -1250,6 +1335,8 @@ async function setupDashboardPage() {
     const payload = {
       cardapio_id: state.selectedCardapioId,
       nome,
+      categoria: categoria || null,
+      descricao: descricao || null,
       preco,
       imagem_url: imagem_url || null
     };
@@ -1371,6 +1458,43 @@ async function setupDashboardPage() {
       await loadCardapios();
       toast("Concluído.", "success");
     }
+
+    if (target.classList.contains("js-copy-pedido") && cardapioId) {
+      const pedido = state.pedidos.find((p) => p.id === cardapioId);
+      if (!pedido) {
+        toast("Pedido não encontrado.", "error");
+        return;
+      }
+      const cardapioNome = state.cardapios.find((c) => c.id === pedido.cardapio_id)?.nome || "";
+      const text = formatPedidoText(pedido, cardapioNome);
+      try {
+        await writeClipboard(text);
+        toast("Copiado.", "success");
+      } catch {
+        toast("Não foi possível copiar.", "error");
+      }
+    }
+  });
+
+  document.body.addEventListener("change", async (event) => {
+    const target = event.target;
+    if (!(target instanceof HTMLSelectElement)) return;
+    if (!target.classList.contains("js-pedido-status")) return;
+
+    const pedidoId = String(target.dataset.id || "").trim();
+    const status = String(target.value || "novo").trim();
+    if (!pedidoId) return;
+
+    const { error } = await supabase.from("pedidos").update({ status }).eq("id", pedidoId);
+    if (error) {
+      toast(`Erro ao atualizar status: ${error.message}`, "error");
+      await loadPedidos();
+      return;
+    }
+
+    const local = state.pedidos.find((p) => p.id === pedidoId);
+    if (local) local.status = status;
+    toast("Status atualizado.", "success");
   });
 }
 

@@ -132,6 +132,13 @@ alter table public.cardapios add column if not exists whatsapp_botao text;
 alter table public.cardapios add column if not exists mensagem_whatsapp_template text;
 alter table public.cardapios add column if not exists formas_pagamento text;
 
+alter table public.produtos add column if not exists categoria text;
+alter table public.produtos add column if not exists descricao text;
+
+alter table public.pedidos add column if not exists status text;
+
+update public.pedidos set status = 'novo' where status is null;
+
 update public.cardapios set taxa_entrega = 0 where taxa_entrega is null;
 update public.cardapios set pedido_minimo = 0 where pedido_minimo is null;
 update public.cardapios set aceita_entrega = true where aceita_entrega is null;
@@ -149,6 +156,8 @@ create table if not exists public.produtos (
   id uuid primary key default gen_random_uuid(),
   cardapio_id uuid not null references public.cardapios(id) on delete cascade,
   nome text not null,
+  categoria text,
+  descricao text,
   preco numeric(10,2) not null check (preco >= 0),
   imagem_url text,
   created_at timestamptz not null default now()
@@ -161,6 +170,7 @@ create table if not exists public.pedidos (
   telefone text not null,
   endereco text not null,
   itens jsonb not null,
+  status text not null default 'novo' check (status in ('novo','confirmado','entregue')),
   created_at timestamptz not null default now()
 );
 
@@ -208,6 +218,13 @@ create policy "auth read pedidos"
 on public.pedidos
 for select
 using (public.is_admin(auth.uid()));
+
+drop policy if exists "auth update pedidos" on public.pedidos;
+create policy "auth update pedidos"
+on public.pedidos
+for update
+using (public.is_admin(auth.uid()))
+with check (public.is_admin(auth.uid()));
 
 -- Storage para imagens de produtos.
 insert into storage.buckets (id, name, public)

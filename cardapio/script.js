@@ -395,23 +395,32 @@ function upsertHeadLink(rel, href, extra = {}) {
   }
 }
 
-function setAllHeadIcons(href) {
-  const safeHref = safeHttpUrl(href);
-  if (!safeHref) return;
+function setHeadIcons(iconHref, appleHref) {
+  const safeIcon = safeHttpUrl(iconHref);
+  const safeApple = safeHttpUrl(appleHref);
+  if (!safeIcon && !safeApple) return;
 
   const head = document.head || document.querySelector("head");
   if (!head) return;
 
-  const nodes = head.querySelectorAll('link[rel="icon"], link[rel="apple-touch-icon"]');
-  nodes.forEach((node) => {
-    node.setAttribute("href", safeHref);
+  const iconNodes = head.querySelectorAll('link[rel="icon"]');
+  iconNodes.forEach((node) => {
+    if (!safeIcon) return;
+    node.setAttribute("href", safeIcon);
+    node.setAttribute("type", "image/svg+xml");
+    node.removeAttribute("sizes");
+  });
+
+  const appleNodes = head.querySelectorAll('link[rel="apple-touch-icon"]');
+  appleNodes.forEach((node) => {
+    if (!safeApple) return;
+    node.setAttribute("href", safeApple);
     node.removeAttribute("type");
     node.removeAttribute("sizes");
   });
 
-  // Garante um favicon sem type/sizes (alguns browsers preferem esse)
-  upsertHeadLink("icon", safeHref);
-  upsertHeadLink("apple-touch-icon", safeHref);
+  if (safeIcon) upsertHeadLink("icon", safeIcon, { type: "image/svg+xml" });
+  if (safeApple) upsertHeadLink("apple-touch-icon", safeApple);
 }
 
 function applyBrandIcons(slug) {
@@ -419,8 +428,9 @@ function applyBrandIcons(slug) {
   if (!safeSlug) return;
 
   const cacheBust = Date.now();
-  const iconUrl = `/api/icon?slug=${encodeURIComponent(safeSlug)}&v=${cacheBust}`;
-  setAllHeadIcons(new URL(iconUrl, window.location.origin).toString());
+  const iconUrl = `/api/icon?slug=${encodeURIComponent(safeSlug)}&format=svg&v=${cacheBust}`;
+  const appleUrl = `/api/icon?slug=${encodeURIComponent(safeSlug)}&v=${cacheBust}`;
+  setHeadIcons(new URL(iconUrl, window.location.origin).toString(), new URL(appleUrl, window.location.origin).toString());
 }
 
 function parseGaleriaUrls(value) {
@@ -444,7 +454,7 @@ function renderGaleria(urls) {
     return;
   }
   galeriaEl.innerHTML = list
-    .map((url, idx) => `<img src="${url}" alt="Imagem do estabelecimento ${idx + 1}" loading="lazy" />`)
+    .map((url, idx) => `<img src="${url}" alt="Imagem do estabelecimento ${idx + 1}" loading="lazy" decoding="async" />`)
     .join("");
 }
 
@@ -583,15 +593,19 @@ function renderProdutos() {
     .map(
       (produto) => {
         const nome = escapeHtml(produto.nome);
+        const categoria = escapeHtml(produto.categoria || "");
+        const descricao = escapeHtml(produto.descricao || "");
         const imageUrl = safeHttpUrl(produto.imagem_url) ||
           "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=800&q=80";
         return `
       <article class="produto-card">
         <div class="produto-media">
-          <img src="${imageUrl}" alt="${nome}" loading="lazy" />
+          <img src="${imageUrl}" alt="${nome}" loading="lazy" decoding="async" />
         </div>
         <div class="produto-body">
           <h3>${nome}</h3>
+          ${categoria ? `<p class="muted"><strong>${categoria}</strong></p>` : ""}
+          ${descricao ? `<p class="muted">${descricao}</p>` : ""}
           <p class="price">${formatPriceBRL(produto.preco)}</p>
           <button type="button" class="btn btn-primary add-to-cart" data-id="${produto.id}">Adicionar ao pedido</button>
         </div>
@@ -997,7 +1011,7 @@ async function loadCardapio() {
   const { data: produtos, error: produtosError } = await withTimeout(
     supabase.from("produtos").select("*").eq("cardapio_id", data.id).order("nome"),
     12_000,
-    "Carregamento dos produtos"
+    supabase.from("produtos").select("*").eq("cardapio_id", data.id),
   );
 
   if (produtosError) {

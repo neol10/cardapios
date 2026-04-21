@@ -73,6 +73,31 @@ function handleRequest(req, res) {
   const decodedPath = safeDecodeURIComponent(pathname);
   const relativePath = decodedPath.replace(/^\/+/g, "");
 
+  if (pathname === "/api/icon") {
+    try {
+      // Em produção isso roda como serverless na Vercel; no localhost chamamos o handler direto.
+      const handler = require("./api/icon.js");
+      handler(req, res);
+      return;
+    } catch {
+      res.writeHead(500, { "Content-Type": "text/plain; charset=utf-8" });
+      res.end("Erro ao executar /api/icon no localhost.");
+      return;
+    }
+  }
+
+  if (pathname === "/api/og-cardapio") {
+    try {
+      const handler = require("./api/og-cardapio.js");
+      handler(req, res);
+      return;
+    } catch {
+      res.writeHead(500, { "Content-Type": "text/plain; charset=utf-8" });
+      res.end("Erro ao executar /api/og-cardapio no localhost.");
+      return;
+    }
+  }
+
   if (pathname === "/api/manifest.webmanifest") {
     const manifestPath = path.join(ROOT, "cardapio", "manifest.webmanifest");
     if (fileExists(manifestPath)) {
