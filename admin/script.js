@@ -1045,23 +1045,6 @@ function getOwnerEditLink(slug) {
   return `${window.location.origin}/admin/owner?slug=${encodeURIComponent(safe)}`;
 }
 
-async function writeClipboard(text) {
-  try {
-    await navigator.clipboard.writeText(String(text || ""));
-    return;
-  } catch {
-    // fallback
-  }
-  const el = document.createElement("textarea");
-  el.value = String(text || "");
-  el.setAttribute("readonly", "");
-  el.style.position = "fixed";
-  el.style.left = "-9999px";
-  document.body.appendChild(el);
-  el.select();
-  document.execCommand("copy");
-  document.body.removeChild(el);
-}
 
 function resetForms() {
   const cardapioForm = document.querySelector("#cardapio-form");
