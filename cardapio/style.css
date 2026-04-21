@@ -1,3 +1,24 @@
+.btn-owner-edit {
+  display: inline-block;
+  margin-top: 8px;
+  background: var(--theme, #ff6a00);
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  padding: 7px 18px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(95, 51, 30, 0.08);
+  transition: background 0.18s;
+}
+.btn-owner-edit:hover,
+.btn-owner-edit:focus {
+  background: #c8945b;
+}
+.btn-owner-edit.is-hidden {
+  display: none !important;
+}
 :root {
   --theme: #ff6a00;
   --theme2: #c8945b;

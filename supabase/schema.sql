@@ -121,6 +121,7 @@ create table if not exists public.cardapios (
   nome text not null,
   slug text not null unique,
   whatsapp text not null,
+  owner_edit_enabled boolean not null default false,
   cor_tema text not null default '#ff6a00',
   cor_secundaria text,
   fonte_key text,
@@ -163,6 +164,7 @@ alter table public.cardapios add column if not exists fonte_peso_texto integer;
 alter table public.cardapios add column if not exists fonte_peso_titulo integer;
 alter table public.cardapios add column if not exists abre_em time;
 alter table public.cardapios add column if not exists fecha_em time;
+alter table public.cardapios add column if not exists owner_edit_enabled boolean;
 alter table public.cardapios add column if not exists fundo_estilo text;
 alter table public.cardapios add column if not exists fundo_cor_1 text;
 alter table public.cardapios add column if not exists fundo_cor_2 text;
@@ -207,6 +209,154 @@ update public.cardapios set fundo_angulo = 135 where fundo_angulo is null;
 update public.cardapios set fonte_key = 'sora' where fonte_key is null;
 update public.cardapios set fonte_peso_texto = 400 where fonte_peso_texto is null;
 update public.cardapios set fonte_peso_titulo = 800 where fonte_peso_titulo is null;
+update public.cardapios set owner_edit_enabled = false where owner_edit_enabled is null;
+
+-- Acesso do proprietário por cardápio (PIN separado do admin)
+create table if not exists public.cardapio_owner_access (
+  cardapio_id uuid primary key references public.cardapios(id) on delete cascade,
+  enabled boolean not null default false,
+  pin_hash text not null,
+  updated_at timestamptz not null default now()
+);
+
+alter table public.cardapio_owner_access enable row level security;
+
+revoke all on table public.cardapio_owner_access from anon, authenticated;
+
+create or replace function public.admin_set_owner_access(
+  p_cardapio_id uuid,
+  p_enabled boolean,
+  p_new_pin text default null
+)
+returns void
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  next_hash text;
+begin
+  if not public.is_admin(auth.uid()) then
+    raise exception 'not_admin';
+  end if;
+
+  if p_new_pin is not null and length(trim(p_new_pin)) > 0 then
+    next_hash := crypt(trim(p_new_pin), gen_salt('bf'));
+  end if;
+
+  insert into public.cardapio_owner_access (cardapio_id, enabled, pin_hash, updated_at)
+  values (
+    p_cardapio_id,
+    coalesce(p_enabled, false),
+    coalesce(next_hash, crypt(gen_random_uuid()::text, gen_salt('bf'))),
+    now()
+  )
+  on conflict (cardapio_id) do update set
+    enabled = excluded.enabled,
+    pin_hash = coalesce(next_hash, public.cardapio_owner_access.pin_hash),
+    updated_at = now();
+
+  update public.cardapios
+  set owner_edit_enabled = coalesce(p_enabled, false)
+  where id = p_cardapio_id;
+end;
+$$;
+
+revoke all on function public.admin_set_owner_access(uuid, boolean, text) from public;
+grant execute on function public.admin_set_owner_access(uuid, boolean, text) to authenticated;
+
+create or replace function public.owner_verify_pin(p_slug text, p_pin text)
+returns boolean
+language plpgsql
+stable
+security definer
+set search_path = public
+as $$
+declare
+  c_id uuid;
+  saved_hash text;
+  is_enabled boolean;
+begin
+  select id, owner_edit_enabled into c_id, is_enabled
+  from public.cardapios
+  where slug = lower(trim(p_slug))
+  limit 1;
+
+  if c_id is null or is_enabled is not true then
+    return false;
+  end if;
+
+  select pin_hash
+  into saved_hash
+  from public.cardapio_owner_access
+  where cardapio_id = c_id;
+
+  if saved_hash is null then
+    return false;
+  end if;
+
+  return crypt(trim(p_pin), saved_hash) = saved_hash;
+end;
+$$;
+
+revoke all on function public.owner_verify_pin(text, text) from public;
+grant execute on function public.owner_verify_pin(text, text) to anon, authenticated;
+
+create or replace function public.owner_update_cardapio(
+  p_slug text,
+  p_pin text,
+  p_patch jsonb
+)
+returns boolean
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  c_id uuid;
+  ok boolean;
+begin
+  ok := public.owner_verify_pin(p_slug, p_pin);
+  if ok is not true then
+    return false;
+  end if;
+
+  select id into c_id
+  from public.cardapios
+  where slug = lower(trim(p_slug))
+  limit 1;
+
+  if c_id is null then
+    return false;
+  end if;
+
+  update public.cardapios
+  set
+    nome = coalesce(nullif(trim(p_patch->>'nome'), ''), nome),
+    whatsapp = coalesce(nullif(trim(p_patch->>'whatsapp'), ''), whatsapp),
+    slogan = coalesce(nullif(trim(p_patch->>'slogan'), ''), slogan),
+    horario_funcionamento = coalesce(nullif(trim(p_patch->>'horario_funcionamento'), ''), horario_funcionamento),
+    abre_em = case
+      when nullif(trim(p_patch->>'abre_em'), '') is not null then (trim(p_patch->>'abre_em'))::time
+      else abre_em
+    end,
+    fecha_em = case
+      when nullif(trim(p_patch->>'fecha_em'), '') is not null then (trim(p_patch->>'fecha_em'))::time
+      else fecha_em
+    end,
+    endereco = coalesce(nullif(trim(p_patch->>'endereco'), ''), endereco),
+    instagram_url = coalesce(nullif(trim(p_patch->>'instagram_url'), ''), instagram_url)
+  where id = c_id;
+
+  return true;
+exception
+  when others then
+    return false;
+end;
+$$;
+
+revoke all on function public.owner_update_cardapio(text, text, jsonb) from public;
+grant execute on function public.owner_update_cardapio(text, text, jsonb) to anon, authenticated;
 
 create table if not exists public.produtos (
   id uuid primary key default gen_random_uuid(),

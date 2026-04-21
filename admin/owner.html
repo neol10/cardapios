@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Editar Cardápio | Proprietário</title>
+    <meta name="theme-color" content="#0f0d0b" />
+    <link rel="manifest" href="/admin/manifest.webmanifest" />
+    <link rel="icon" href="/pwa/icon.svg" type="image/svg+xml" />
+    <link rel="icon" href="/pwa/icon-32.png" type="image/png" sizes="32x32" />
+    <link rel="icon" href="/pwa/icon-16.png" type="image/png" sizes="16x16" />
+    <link rel="apple-touch-icon" href="/pwa/icon-180.png" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&family=Playfair+Display:wght@600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="/admin/style.css?v=9" />
+    <script>
+      window.__SUPABASE_CONFIG__ = {
+        url: "https://uapwitkmxuoepnjlffqy.supabase.co",
+        anonKey:
+          "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVhcHdpdGtteHVvZXBuamxmZnF5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ4OTcxMjUsImV4cCI6MjA5MDQ3MzEyNX0.YTz_EqzK4m0CMM25n3QJC1b3Nj9bikIrDDEEFi5n6ps"
+      };
+    </script>
+  </head>
+  <body class="admin-body">
+    <main class="auth-layout" id="owner-page">
+      <section class="auth-card">
+        <h1>Editar Cardápio</h1>
+        <p id="owner-subtitle">Acesse com o PIN do proprietário.</p>
+
+        <form id="owner-auth-form" class="stack-gap">
+          <label>
+            PIN
+            <input type="password" name="pin" inputmode="numeric" autocomplete="one-time-code" required />
+          </label>
+          <button type="submit" class="btn btn-primary btn-lg">Entrar</button>
+        </form>
+
+        <form id="owner-edit-form" class="stack-gap is-hidden">
+          <input type="hidden" name="slug" />
+
+          <label>
+            Nome
+            <input type="text" name="nome" required />
+          </label>
+
+          <label>
+            WhatsApp (somente números)
+            <input type="text" name="whatsapp" required />
+          </label>
+
+          <label>
+            Slogan
+            <input type="text" name="slogan" />
+          </label>
+
+          <label>
+            Horário (texto)
+            <input type="text" name="horario_funcionamento" placeholder="Ex.: Seg-Sex 18h às 23h" />
+          </label>
+
+          <div class="two-cols">
+            <label>
+              Abre às
+              <input type="time" name="abre_em" />
+            </label>
+            <label>
+              Fecha às
+              <input type="time" name="fecha_em" />
+            </label>
+          </div>
+
+          <label>
+            Endereço
+            <input type="text" name="endereco" />
+          </label>
+
+          <label>
+            Instagram (URL)
+            <input type="url" name="instagram_url" placeholder="https://instagram.com/sua_loja" />
+          </label>
+
+          <button type="submit" class="btn btn-primary btn-lg">Salvar</button>
+          <button type="button" class="btn" id="owner-logout">Sair</button>
+        </form>
+
+        <p id="owner-message" class="message" aria-live="polite"></p>
+        <div id="toast-container" class="toast-container" aria-live="polite" aria-atomic="true"></div>
+      </section>
+    </main>
+
+    <script type="module" src="/admin/script.js?v=25"></script>
+  </body>
+</html>

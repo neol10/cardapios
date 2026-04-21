@@ -1009,6 +1009,13 @@ function fillCardapioForm(item) {
       !current || (hasReplacementChar && looksLikeDefault) ? DEFAULT_WHATSAPP_TEMPLATE : current;
   }
 
+  if (form.owner_edit_enabled) {
+    form.owner_edit_enabled.checked = Boolean(item.owner_edit_enabled);
+  }
+  if (form.owner_pin) {
+    form.owner_pin.value = "";
+  }
+
   refreshAllColorPreviews(form);
   updateFundoVisibility(form);
   updateThemePreview(form);
@@ -1030,6 +1037,30 @@ function fillProdutoForm(item) {
   } catch {
     // ignora
   }
+}
+
+function getOwnerEditLink(slug) {
+  const safe = String(slug || "").trim();
+  if (!safe) return "";
+  return `${window.location.origin}/admin/owner?slug=${encodeURIComponent(safe)}`;
+}
+
+async function writeClipboard(text) {
+  try {
+    await navigator.clipboard.writeText(String(text || ""));
+    return;
+  } catch {
+    // fallback
+  }
+  const el = document.createElement("textarea");
+  el.value = String(text || "");
+  el.setAttribute("readonly", "");
+  el.style.position = "fixed";
+  el.style.left = "-9999px";
+  document.body.appendChild(el);
+  el.select();
+  document.execCommand("copy");
+  document.body.removeChild(el);
 }
 
 function resetForms() {
@@ -1124,6 +1155,28 @@ async function setupDashboardPage() {
     window.location.href = "/admin";
   });
 
+  const copyOwnerBtn = document.querySelector(".js-copy-owner-link");
+  copyOwnerBtn?.addEventListener("click", async () => {
+    const form = document.querySelector("#cardapio-form");
+    const id = String(form?.id?.value || "").trim();
+    const cardapio = id ? state.cardapios.find((c) => c.id === id) : null;
+    if (!cardapio) {
+      toast("Selecione um cardápio primeiro.", "error");
+      return;
+    }
+    if (!cardapio.owner_edit_enabled) {
+      toast("Habilite o acesso do proprietário e salve o cardápio.", "error");
+      return;
+    }
+    const link = getOwnerEditLink(cardapio.slug);
+    try {
+      await writeClipboard(link);
+      toast("Link copiado.", "success");
+    } catch {
+      toast("Não foi possível copiar.", "error");
+    }
+  });
+
   await loadCardapios();
   setEditingMode(false);
 
@@ -1194,6 +1247,16 @@ async function setupDashboardPage() {
     const densidade = String(formData.get("densidade") || "confortavel");
     const whatsapp_botao = String(formData.get("whatsapp_botao") || "flutuante");
     const mensagem_whatsapp_template = String(formData.get("mensagem_whatsapp_template") || "").trim();
+
+    const owner_edit_enabled = formData.get("owner_edit_enabled") === "on";
+    const owner_pin = String(formData.get("owner_pin") || "").trim();
+
+    const current = id ? state.cardapios.find((c) => c.id === id) : null;
+    const wasOwnerEnabled = Boolean(current?.owner_edit_enabled);
+    if (owner_edit_enabled && !wasOwnerEnabled && !owner_pin) {
+      toast("Defina um PIN do proprietário para habilitar a edição.", "error");
+      return;
+    }
 
     const fotoFile = formData.get("foto");
     let foto_url = String(formData.get("foto_url") || "").trim();
@@ -1397,6 +1460,21 @@ async function setupDashboardPage() {
 
     await loadCardapios();
     if (savedId) {
+      try {
+        const pinArg = owner_pin ? owner_pin : null;
+        const { error: ownerError } = await supabase.rpc("admin_set_owner_access", {
+          p_cardapio_id: savedId,
+          p_enabled: owner_edit_enabled,
+          p_new_pin: pinArg
+        });
+
+        if (ownerError) {
+          toast("Falha ao salvar acesso do proprietário. Rode o schema/patch no Supabase.", "error");
+        }
+      } catch {
+        toast("Falha ao salvar acesso do proprietário.", "error");
+      }
+
       setSelectedCardapio(savedId);
       setEditingMode(true);
       const fresh = state.cardapios.find((c) => c.id === savedId);
@@ -1629,4 +1707,192 @@ if (loginForm) {
 
 if (document.querySelector("#cardapio-form")) {
   setupDashboardPage();
+}
+
+function getOwnerSessionKey(slug) {
+  return `owner.pin.ok:${String(slug || "").trim().toLowerCase()}`;
+}
+
+function clearOwnerSession(slug) {
+  try {
+    sessionStorage.removeItem(getOwnerSessionKey(slug));
+  } catch {
+    // ignore
+  }
+}
+
+function setOwnerVerified(slug) {
+  try {
+    sessionStorage.setItem(getOwnerSessionKey(slug), "1");
+  } catch {
+    // ignore
+  }
+}
+
+function isOwnerVerified(slug) {
+  try {
+    return sessionStorage.getItem(getOwnerSessionKey(slug)) === "1";
+  } catch {
+    return false;
+  }
+}
+
+function getOwnerSlugFromUrl() {
+  try {
+    const url = new URL(window.location.href);
+    const slug = String(url.searchParams.get("slug") || "").trim();
+    return slug;
+  } catch {
+    return "";
+  }
+}
+
+async function initOwnerPage() {
+  const ownerPage = document.querySelector("#owner-page");
+  if (!ownerPage) return;
+
+  try {
+    assertSupabaseConfig();
+  } catch (error) {
+    const msg = ownerPage.querySelector("#owner-message");
+    setMessage(msg, error.message, "error");
+    return;
+  }
+
+  const slug = getOwnerSlugFromUrl();
+  const subtitle = ownerPage.querySelector("#owner-subtitle");
+  if (subtitle) subtitle.textContent = slug ? `Cardápio: ${slug}` : "Informe o slug na URL.";
+
+  const authForm = ownerPage.querySelector("#owner-auth-form");
+  const editForm = ownerPage.querySelector("#owner-edit-form");
+  const message = ownerPage.querySelector("#owner-message");
+  const logoutBtn = ownerPage.querySelector("#owner-logout");
+
+  if (!(authForm instanceof HTMLFormElement) || !(editForm instanceof HTMLFormElement)) return;
+
+  const setOwnerMessage = (text, type = "") => setMessage(message, text, type);
+
+  const showEdit = (show) => {
+    editForm.classList.toggle("is-hidden", !show);
+    authForm.classList.toggle("is-hidden", show);
+  };
+
+  const loadAndFill = async () => {
+    const { data, error } = await supabase
+      .from("cardapios")
+      .select("nome,slug,whatsapp,slogan,horario_funcionamento,abre_em,fecha_em,endereco,instagram_url")
+      .eq("slug", slug)
+      .single();
+
+    if (error || !data) {
+      setOwnerMessage("Não foi possível carregar o cardápio.", "error");
+      return false;
+    }
+
+    editForm.slug.value = data.slug;
+    editForm.nome.value = data.nome || "";
+    editForm.whatsapp.value = maskTelefone(data.whatsapp || "");
+    editForm.slogan.value = data.slogan || "";
+    editForm.horario_funcionamento.value = data.horario_funcionamento || "";
+    editForm.abre_em.value = data.abre_em ? String(data.abre_em).slice(0, 5) : "";
+    editForm.fecha_em.value = data.fecha_em ? String(data.fecha_em).slice(0, 5) : "";
+    editForm.endereco.value = data.endereco || "";
+    editForm.instagram_url.value = data.instagram_url || "";
+    return true;
+  };
+
+  const tryAuto = async () => {
+    if (!slug) return;
+    if (!isOwnerVerified(slug)) return;
+    showEdit(true);
+    await loadAndFill();
+  };
+
+  await tryAuto();
+
+  authForm.addEventListener("submit", async (event) => {
+    event.preventDefault();
+    if (!slug) {
+      setOwnerMessage("URL inválida: faltou o slug.", "error");
+      return;
+    }
+
+    const fd = new FormData(authForm);
+    const pin = String(fd.get("pin") || "").trim();
+    if (!pin) {
+      setOwnerMessage("Informe o PIN.", "error");
+      return;
+    }
+
+    setOwnerMessage("Validando...");
+    const { data, error } = await supabase.rpc("owner_verify_pin", { p_slug: slug, p_pin: pin });
+    if (error) {
+      setOwnerMessage("Não foi possível validar. Verifique o schema no Supabase.", "error");
+      return;
+    }
+
+    if (data !== true) {
+      setOwnerMessage("PIN incorreto ou acesso desabilitado.", "error");
+      return;
+    }
+
+    setOwnerVerified(slug);
+    showEdit(true);
+    setOwnerMessage("");
+    await loadAndFill();
+  });
+
+  editForm.addEventListener("submit", async (event) => {
+    event.preventDefault();
+    if (!slug) return;
+
+    const pinInput = authForm.querySelector('input[name="pin"]');
+    const pin = pinInput instanceof HTMLInputElement ? String(pinInput.value || "").trim() : "";
+
+    if (!pin) {
+      setOwnerMessage("Digite o PIN novamente (por segurança).", "error");
+      showEdit(false);
+      return;
+    }
+
+    const patch = {
+      nome: String(editForm.nome.value || "").trim(),
+      whatsapp: onlyDigits(editForm.whatsapp.value || ""),
+      slogan: String(editForm.slogan.value || "").trim(),
+      horario_funcionamento: String(editForm.horario_funcionamento.value || "").trim(),
+      abre_em: String(editForm.abre_em.value || "").trim(),
+      fecha_em: String(editForm.fecha_em.value || "").trim(),
+      endereco: String(editForm.endereco.value || "").trim(),
+      instagram_url: String(editForm.instagram_url.value || "").trim()
+    };
+
+    setOwnerMessage("Salvando...");
+    const { data, error } = await supabase.rpc("owner_update_cardapio", {
+      p_slug: slug,
+      p_pin: pin,
+      p_patch: patch
+    });
+
+    if (error) {
+      setOwnerMessage("Não foi possível salvar. Verifique o schema no Supabase.", "error");
+      return;
+    }
+
+    if (data !== true) {
+      setOwnerMessage("PIN inválido ou acesso desabilitado.", "error");
+      return;
+    }
+
+    setOwnerMessage("Salvo com sucesso.", "success");
+  });
+
+  logoutBtn?.addEventListener("click", () => {
+    clearOwnerSession(slug);
+    showEdit(false);
+    setOwnerMessage("Sessão encerrada.");
+  });
+}
+
+if (document.querySelector("#owner-page")) {
+  initOwnerPage();
 }

@@ -859,6 +859,50 @@ async function loadCardapio() {
 
   activeCardapio = data;
 
+  // Dono: botão secreto de edição
+  const ownerBtn = document.getElementById("owner-edit-btn");
+  let ownerBtnPin = null;
+  if (ownerBtn) {
+    ownerBtn.classList.add("is-hidden");
+    ownerBtn.onclick = () => {
+      const pin = window.prompt("Digite o PIN do proprietário para editar:");
+      if (!pin) return;
+      // Redireciona para a tela de edição do proprietário
+      window.location.href = `/admin/owner?slug=${encodeURIComponent(slug)}&pin=${encodeURIComponent(pin)}`;
+    };
+    // Só mostra se habilitado
+    if (data.owner_edit_enabled) {
+      // Segredo: segure 2s no nome do cardápio
+      const nomeEl = document.getElementById("cardapio-nome");
+      let holdTimer = null;
+      nomeEl?.addEventListener("mousedown", (ev) => {
+        if (holdTimer) clearTimeout(holdTimer);
+        holdTimer = setTimeout(() => {
+          ownerBtn.classList.remove("is-hidden");
+        }, 2000);
+      });
+      nomeEl?.addEventListener("mouseup", () => {
+        if (holdTimer) clearTimeout(holdTimer);
+      });
+      nomeEl?.addEventListener("mouseleave", () => {
+        if (holdTimer) clearTimeout(holdTimer);
+      });
+      // Toque longo mobile
+      nomeEl?.addEventListener("touchstart", (ev) => {
+        if (holdTimer) clearTimeout(holdTimer);
+        holdTimer = setTimeout(() => {
+          ownerBtn.classList.remove("is-hidden");
+        }, 2000);
+      });
+      nomeEl?.addEventListener("touchend", () => {
+        if (holdTimer) clearTimeout(holdTimer);
+      });
+      nomeEl?.addEventListener("touchcancel", () => {
+        if (holdTimer) clearTimeout(holdTimer);
+      });
+    }
+  }
+
   applyBrandIcons(getSlugFromUrl());
   renderGaleria(parseGaleriaUrls(data.galeria_urls));
 

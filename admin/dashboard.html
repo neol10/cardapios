@@ -61,6 +61,29 @@
             <input type="text" name="whatsapp" placeholder="5511999999999" required />
           </label>
 
+          <details class="details details-sub">
+            <summary>Acesso do proprietário</summary>
+
+            <label>
+              <input type="checkbox" name="owner_edit_enabled" />
+              Permitir que o proprietário edite este cardápio
+            </label>
+
+            <label>
+              PIN do proprietário
+              <input
+                type="password"
+                name="owner_pin"
+                placeholder="Defina um PIN (ex.: 1664800)"
+                inputmode="numeric"
+                autocomplete="off"
+              />
+              <div class="muted">O PIN não é exibido. Para trocar, digite um novo e salve.</div>
+            </label>
+
+            <button type="button" class="btn js-copy-owner-link">Copiar link do editor</button>
+          </details>
+
           <label>
             Cor do tema
             <div class="color-row">
