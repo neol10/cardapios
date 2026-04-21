@@ -33,6 +33,58 @@ $$;
 revoke all on function public.is_admin(uuid) from public;
 grant execute on function public.is_admin(uuid) to anon, authenticated;
 
+-- PIN extra do admin (2a etapa após e-mail/senha)
+-- Mantém somente o HASH no banco. Para trocar o PIN depois:
+--   update public.admin_settings
+--   set admin_pin_hash = crypt('NOVO_PIN', gen_salt('bf')), updated_at = now()
+--   where id = 1;
+
+create table if not exists public.admin_settings (
+  id integer primary key check (id = 1),
+  admin_pin_hash text not null,
+  updated_at timestamptz not null default now()
+);
+
+alter table public.admin_settings enable row level security;
+
+-- Ninguém deve ler/editar diretamente pelo cliente.
+revoke all on table public.admin_settings from anon, authenticated;
+
+-- Define o PIN inicial (1664800) somente se ainda não existir.
+insert into public.admin_settings (id, admin_pin_hash)
+values (1, crypt('1664800', gen_salt('bf')))
+on conflict (id) do nothing;
+
+create or replace function public.verify_admin_pin(p_pin text)
+returns boolean
+language plpgsql
+stable
+security definer
+set search_path = public
+as $$
+declare
+  saved_hash text;
+begin
+  if not public.is_admin(auth.uid()) then
+    return false;
+  end if;
+
+  select admin_pin_hash
+  into saved_hash
+  from public.admin_settings
+  where id = 1;
+
+  if saved_hash is null then
+    return false;
+  end if;
+
+  return crypt(p_pin, saved_hash) = saved_hash;
+end;
+$$;
+
+revoke all on function public.verify_admin_pin(text) from public;
+grant execute on function public.verify_admin_pin(text) to authenticated;
+
 drop policy if exists "admin read own row" on public.admins;
 create policy "admin read own row"
 on public.admins

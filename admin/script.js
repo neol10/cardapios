@@ -16,6 +16,125 @@ if ("serviceWorker" in navigator) {
 const loginForm = document.querySelector("#login-form");
 const authMessage = document.querySelector("#auth-message");
 
+const ADMIN_PIN_SESSION_KEY = "admin.pin.ok";
+
+function clearAdminPinSession() {
+  try {
+    sessionStorage.removeItem(ADMIN_PIN_SESSION_KEY);
+  } catch {
+    // ignore
+  }
+}
+
+function isAdminPinVerified() {
+  try {
+    return sessionStorage.getItem(ADMIN_PIN_SESSION_KEY) === "1";
+  } catch {
+    return false;
+  }
+}
+
+function setAdminPinVerified() {
+  try {
+    sessionStorage.setItem(ADMIN_PIN_SESSION_KEY, "1");
+  } catch {
+    // ignore
+  }
+}
+
+function setDashboardVisible(visible) {
+  const topbar = document.querySelector(".topbar");
+  const grid = document.querySelector("main.dashboard-grid");
+  if (topbar instanceof HTMLElement) topbar.style.display = visible ? "" : "none";
+  if (grid instanceof HTMLElement) grid.style.display = visible ? "" : "none";
+}
+
+function mountAdminPinOverlay() {
+  const existing = document.querySelector("#admin-pin-overlay");
+  if (existing) return existing;
+
+  const overlay = document.createElement("div");
+  overlay.id = "admin-pin-overlay";
+  overlay.className = "auth-layout";
+  overlay.innerHTML = `
+    <section class="auth-card">
+      <h1>Confirmar PIN</h1>
+      <p>Digite o PIN para acessar o painel.</p>
+
+      <form id="admin-pin-form" class="stack-gap">
+        <label>
+          PIN
+          <input type="password" name="pin" inputmode="numeric" autocomplete="one-time-code" required />
+        </label>
+        <button type="submit" class="btn btn-primary btn-lg">Confirmar</button>
+      </form>
+
+      <p id="admin-pin-message" class="message" aria-live="polite"></p>
+    </section>
+  `;
+
+  document.body.appendChild(overlay);
+  return overlay;
+}
+
+async function requireAdminPinGate() {
+  if (isAdminPinVerified()) return true;
+
+  setDashboardVisible(false);
+  const overlay = mountAdminPinOverlay();
+
+  const form = overlay.querySelector("#admin-pin-form");
+  const message = overlay.querySelector("#admin-pin-message");
+  const input = overlay.querySelector('input[name="pin"]');
+
+  if (!(form instanceof HTMLFormElement) || !(message instanceof HTMLElement)) {
+    toast("Falha ao iniciar validação do PIN.", "error");
+    window.location.href = "/admin";
+    return false;
+  }
+
+  if (input instanceof HTMLInputElement) input.focus();
+
+  return await new Promise((resolve) => {
+    form.addEventListener("submit", async (event) => {
+      event.preventDefault();
+
+      const fd = new FormData(form);
+      const pin = String(fd.get("pin") || "").trim();
+
+      if (!pin) {
+        setMessage(message, "Informe o PIN.", "error");
+        return;
+      }
+
+      setMessage(message, "Validando...");
+
+      const submitBtn = form.querySelector('button[type="submit"]');
+      if (submitBtn instanceof HTMLButtonElement) submitBtn.disabled = true;
+
+      const { data, error } = await supabase.rpc("verify_admin_pin", { p_pin: pin });
+
+      if (submitBtn instanceof HTMLButtonElement) submitBtn.disabled = false;
+
+      if (error) {
+        setMessage(message, "Não foi possível validar o PIN. Verifique o schema no Supabase.", "error");
+        return;
+      }
+
+      if (data !== true) {
+        setMessage(message, "PIN incorreto.", "error");
+        if (input instanceof HTMLInputElement) input.select();
+        return;
+      }
+
+      setAdminPinVerified();
+      overlay.remove();
+      setDashboardVisible(true);
+      resolve(true);
+    });
+  });
+}
+
 const state = {
   cardapios: [],
   selectedCardapioId: null,
@@ -473,6 +592,8 @@ async function initLoginPage() {
     setMessage(authMessage, error.message, "error");
     return;
   }
+
+  clearAdminPinSession();
 
   const { data } = await supabase.auth.getSession();
   if (data.session) {
@@ -990,11 +1111,15 @@ async function setupDashboardPage() {
   const session = await requireAuth();
   if (!session) return;
 
+  const ok = await requireAdminPinGate();
+  if (!ok) return;
+
   const emailEl = document.querySelector("#session-email");
   if (emailEl) emailEl.textContent = session.user.email || "Admin";
 
   const logoutBtn = document.querySelector("#logout-btn");
   logoutBtn?.addEventListener("click", async () => {
+    clearAdminPinSession();
     await supabase.auth.signOut();
     window.location.href = "/admin";
   });
