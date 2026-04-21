@@ -570,11 +570,55 @@ function renderCardapios() {
           <a class="btn" href="/cardapio/${slugHref}" target="_blank" rel="noopener">Abrir cardápio</a>
           <button class="btn js-manage-cardapio" data-id="${item.id}">${isSelected ? "Gerenciando" : "Gerenciar"}</button>
           <button class="btn js-edit-cardapio" data-id="${item.id}">Editar dados</button>
+          <button class="btn js-delete-cardapio" data-id="${item.id}">Excluir</button>
         </div>
       </article>
     `;
     })
     .join("");
+}
+
+function extractBucketObjectPath(publicUrl, bucketName) {
+  const raw = String(publicUrl || "").trim();
+  if (!raw) return "";
+
+  try {
+    const url = new URL(raw);
+    url.search = "";
+    url.hash = "";
+    const marker = `/storage/v1/object/public/${encodeURIComponent(bucketName)}/`;
+    const idx = url.pathname.indexOf(marker);
+    if (idx < 0) return "";
+    const objectPath = url.pathname.slice(idx + marker.length);
+    return decodeURIComponent(objectPath);
+  } catch {
+    return "";
+  }
+}
+
+async function cleanupCardapioBucketImages(cardapio) {
+  if (!supabase || !cardapio?.id) return;
+
+  const bucket = supabase.storage.from("cardapios");
+  const paths = new Set();
+
+  const fotoPath = extractBucketObjectPath(cardapio.foto_url, "cardapios");
+  const bannerPath = extractBucketObjectPath(cardapio.banner_url, "cardapios");
+  if (fotoPath && fotoPath.startsWith(`${cardapio.id}/`)) paths.add(fotoPath);
+  if (bannerPath && bannerPath.startsWith(`${cardapio.id}/`)) paths.add(bannerPath);
+
+  const galeria = Array.isArray(cardapio.galeria_urls) ? cardapio.galeria_urls : [];
+  for (const item of galeria) {
+    const p = extractBucketObjectPath(item, "cardapios");
+    if (p && p.startsWith(`${cardapio.id}/`)) paths.add(p);
+  }
+
+  if (!paths.size) return;
+  try {
+    await bucket.remove(Array.from(paths));
+  } catch {
+    // best-effort: não bloqueia a exclusão do cardápio
+  }
 }
 
 function renderProdutos() {
@@ -1285,6 +1329,46 @@ async function setupDashboardPage() {
       }
 
       await loadProdutos();
+      toast("Concluído.", "success");
+    }
+
+    if (target.classList.contains("js-delete-cardapio") && cardapioId) {
+      const cardapio = state.cardapios.find((c) => c.id === cardapioId);
+      const nome = cardapio?.nome ? String(cardapio.nome) : "este cardápio";
+      const confirmDelete = confirm(
+        `Deseja realmente excluir ${nome}?\n\nIsso irá apagar também os produtos e pedidos vinculados.`
+      );
+      if (!confirmDelete) return;
+
+      try {
+        await cleanupCardapioBucketImages(cardapio);
+      } catch {
+        // ignora
+      }
+
+      const { error } = await supabase.from("cardapios").delete().eq("id", cardapioId);
+      if (error) {
+        toast(`Erro ao excluir: ${error.message}`, "error");
+        return;
+      }
+
+      const form = document.querySelector("#cardapio-form");
+      form?.reset();
+      const idField = getHiddenIdField(form);
+      if (idField) idField.value = "";
+      refreshAllColorPreviews(form);
+      updateFundoVisibility(form);
+      updateThemePreview(form);
+      setGaleriaUrls(form, []);
+      renderGaleriaPreview(form);
+
+      setSelectedCardapio(null);
+      setEditingMode(false);
+      state.produtos = [];
+      renderProdutos();
+      renderPedidos([]);
+
+      await loadCardapios();
       toast("Concluído.", "success");
     }
   });
