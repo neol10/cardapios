@@ -50,9 +50,13 @@ alter table public.admin_settings enable row level security;
 -- Ninguém deve ler/editar diretamente pelo cliente.
 revoke all on table public.admin_settings from anon, authenticated;
 
--- Define o PIN inicial (1664800) somente se ainda não existir.
+-- Cria um hash inicial aleatório (ninguém sabe o PIN ainda).
+-- Depois, defina o seu PIN diretamente no Supabase (SQL Editor), por exemplo:
+--   update public.admin_settings
+--   set admin_pin_hash = crypt('1664800', gen_salt('bf')), updated_at = now()
+--   where id = 1;
 insert into public.admin_settings (id, admin_pin_hash)
-values (1, crypt('1664800', gen_salt('bf')))
+values (1, crypt(gen_random_uuid()::text, gen_salt('bf')))
 on conflict (id) do nothing;
 
 create or replace function public.verify_admin_pin(p_pin text)
