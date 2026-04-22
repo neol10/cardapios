@@ -29,7 +29,7 @@
     <main class="auth-layout" id="owner-page">
       <section class="auth-card">
         <h1>Editar Cardápio</h1>
-        <p id="owner-subtitle">Acesse com o PIN do proprietário.</p>
+        <p id="owner-subtitle">Acesse com o PIN do proprietário para editar cardápio, imagens e produtos.</p>
 
         <form id="owner-auth-form" class="stack-gap">
           <label>
@@ -83,15 +83,73 @@
             <input type="url" name="instagram_url" placeholder="https://instagram.com/sua_loja" />
           </label>
 
+          <details class="details details-sub">
+            <summary>Imagens do cardápio</summary>
+
+            <label>
+              Foto do cardápio (URL)
+              <input type="url" name="foto_url" placeholder="https://..." />
+            </label>
+
+            <label>
+              Banner do cardápio (URL)
+              <input type="url" name="banner_url" placeholder="https://..." />
+            </label>
+          </details>
+
           <button type="submit" class="btn btn-primary btn-lg">Salvar</button>
           <button type="button" class="btn" id="owner-logout">Sair</button>
         </form>
+
+        <details class="details details-sub is-hidden" id="owner-produtos-section" open>
+          <summary>Produtos</summary>
+
+          <div id="owner-produtos-list" class="list">
+            <p class="muted">Nenhum produto carregado ainda.</p>
+          </div>
+
+          <form id="owner-produto-form" class="stack-gap">
+            <input type="hidden" name="id" />
+
+            <label>
+              Nome do produto
+              <input type="text" name="nome" required />
+            </label>
+
+            <div class="two-cols">
+              <label>
+                Categoria
+                <input type="text" name="categoria" />
+              </label>
+
+              <label>
+                Preço
+                <input type="text" name="preco" placeholder="0,00" required />
+              </label>
+            </div>
+
+            <label>
+              Descrição
+              <textarea name="descricao" rows="3"></textarea>
+            </label>
+
+            <label>
+              Imagem do produto (URL)
+              <input type="url" name="imagem_url" placeholder="https://..." />
+            </label>
+
+            <div class="topbar-actions">
+              <button type="submit" class="btn btn-primary btn-lg">Salvar produto</button>
+              <button type="button" class="btn" id="owner-produto-cancel">Cancelar edição</button>
+            </div>
+          </form>
+        </details>
 
         <p id="owner-message" class="message" aria-live="polite"></p>
         <div id="toast-container" class="toast-container" aria-live="polite" aria-atomic="true"></div>
       </section>
     </main>
 
-    <script type="module" src="/admin/script.js?v=25"></script>
+    <script type="module" src="/admin/script.js?v=26"></script>
   </body>
 </html>

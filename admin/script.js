@@ -995,6 +995,8 @@ function fillCardapioForm(item) {
   if (form.fecha_em) form.fecha_em.value = item.fecha_em ? String(item.fecha_em).slice(0, 5) : "";
   if (form.endereco) form.endereco.value = item.endereco || "";
   if (form.instagram_url) form.instagram_url.value = item.instagram_url || "";
+  if (form.foto_url) form.foto_url.value = item.foto_url || "";
+  if (form.banner_url) form.banner_url.value = item.banner_url || "";
   if (form.taxa_entrega) {
     const value = typeof item.taxa_entrega === "number" ? item.taxa_entrega : Number(item.taxa_entrega || 0);
     form.taxa_entrega.value = String(value || 0).replace(".", ",");
@@ -1054,6 +1056,34 @@ function fillProdutoForm(item) {
   } catch {
     // ignora
   }
+}
+
+function fillOwnerProdutoForm(form, item) {
+  if (!form) return;
+  const idField = getHiddenIdField(form);
+  if (idField) idField.value = item?.id || "";
+  form.nome.value = item?.nome || "";
+  if (form.categoria) form.categoria.value = item?.categoria || "";
+  if (form.descricao) form.descricao.value = item?.descricao || "";
+  if (form.preco) form.preco.value = String(item?.preco ?? "").replace(".", ",");
+  if (form.imagem_url) form.imagem_url.value = item?.imagem_url || "";
+}
+
+function resetOwnerProdutoForm(form) {
+  if (!form) return;
+  form.reset();
+  const idField = getHiddenIdField(form);
+  if (idField) idField.value = "";
+}
+
+function getOwnerPinInput() {
+  const form = document.querySelector("#owner-auth-form");
+  const pinInput = form?.querySelector('input[name="pin"]');
+  return pinInput instanceof HTMLInputElement ? pinInput : null;
+}
+
+function getOwnerPinValue() {
+  return String(getOwnerPinInput()?.value || "").trim();
 }
 
 function getOwnerEditLink(slug) {
@@ -1717,6 +1747,98 @@ async function setupDashboardPage() {
   });
 }
 
+let ownerCardapio = null;
+let ownerProdutos = [];
+
+function renderOwnerProdutos() {
+  const container = document.querySelector("#owner-produtos-list");
+  if (!container) return;
+
+  if (!ownerProdutos.length) {
+    container.innerHTML = '<p class="muted">Nenhum produto cadastrado neste cardápio.</p>';
+    return;
+  }
+
+  container.innerHTML = ownerProdutos
+    .map((item) => {
+      const nome = escapeHtml(item.nome);
+      const categoria = escapeHtml(item.categoria || "");
+      const descricao = escapeHtml(item.descricao || "");
+      const imagem = safeHttpUrl(item.imagem_url);
+
+      return `
+        <article class="list-item" data-id="${item.id}">
+          <div style="display:flex; gap:12px; align-items:center;">
+            ${imagem ? `<img src="${imagem}" alt="${nome}" style="width:52px; height:52px; border-radius:12px; object-fit:cover; border:1px solid var(--border);" />` : ""}
+            <div>
+              <h3 style="margin:0;">${nome}</h3>
+              <p class="muted">${formatPriceBRL(item.preco)}</p>
+            </div>
+          </div>
+          ${categoria ? `<p class="muted">Categoria: ${categoria}</p>` : ""}
+          ${descricao ? `<p class="muted">${descricao}</p>` : ""}
+          <div class="list-actions">
+            <button class="btn js-owner-edit-produto" data-id="${item.id}">Editar</button>
+            <button class="btn js-owner-delete-produto" data-id="${item.id}">Excluir</button>
+          </div>
+        </article>
+      `;
+    })
+    .join("");
+}
+
+async function loadOwnerProdutos() {
+  const container = document.querySelector("#owner-produtos-list");
+  if (!ownerCardapio?.id) {
+    ownerProdutos = [];
+    renderOwnerProdutos();
+    if (container) container.innerHTML = '<p class="muted">Salve e valide o cardápio para gerenciar produtos.</p>';
+    return;
+  }
+
+  const { data, error } = await supabase
+    .from("produtos")
+    .select("*")
+    .eq("cardapio_id", ownerCardapio.id)
+    .order("created_at", { ascending: false });
+
+  if (error) {
+    ownerProdutos = [];
+    renderOwnerProdutos();
+    if (container) container.innerHTML = `<p class="muted">Erro ao carregar produtos: ${escapeHtml(error.message)}</p>`;
+    return;
+  }
+
+  ownerProdutos = data || [];
+  renderOwnerProdutos();
+}
+
+function getOwnerCardapioEditPayload(editForm) {
+  return {
+    nome: String(editForm.nome.value || "").trim(),
+    whatsapp: onlyDigits(editForm.whatsapp.value || ""),
+    slogan: String(editForm.slogan.value || "").trim(),
+    horario_funcionamento: String(editForm.horario_funcionamento.value || "").trim(),
+    abre_em: String(editForm.abre_em.value || "").trim(),
+    fecha_em: String(editForm.fecha_em.value || "").trim(),
+    endereco: String(editForm.endereco.value || "").trim(),
+    instagram_url: String(editForm.instagram_url.value || "").trim(),
+    foto_url: String(editForm.foto_url?.value || "").trim(),
+    banner_url: String(editForm.banner_url?.value || "").trim()
+  };
+}
+
+function getOwnerProdutoPayload(form) {
+  return {
+    id: String(form?.id?.value || "").trim(),
+    nome: String(form?.nome?.value || "").trim(),
+    categoria: String(form?.categoria?.value || "").trim(),
+    descricao: String(form?.descricao?.value || "").trim(),
+    preco: String(form?.preco?.value || "").trim(),
+    imagem_url: String(form?.imagem_url?.value || "").trim()
+  };
+}
+
 if (loginForm) {
   initLoginPage();
 }
@@ -1781,6 +1903,9 @@ async function initOwnerPage() {
 
   const authForm = ownerPage.querySelector("#owner-auth-form");
   const editForm = ownerPage.querySelector("#owner-edit-form");
+  const ownerProdutosSection = ownerPage.querySelector("#owner-produtos-section");
+  const ownerProdutoForm = ownerPage.querySelector("#owner-produto-form");
+  const ownerProdutoCancel = ownerPage.querySelector("#owner-produto-cancel");
   const message = ownerPage.querySelector("#owner-message");
   const logoutBtn = ownerPage.querySelector("#owner-logout");
 
@@ -1791,12 +1916,15 @@ async function initOwnerPage() {
   const showEdit = (show) => {
     editForm.classList.toggle("is-hidden", !show);
     authForm.classList.toggle("is-hidden", show);
+    if (ownerProdutosSection instanceof HTMLElement) {
+      ownerProdutosSection.classList.toggle("is-hidden", !show);
+    }
   };
 
   const loadAndFill = async () => {
     const { data, error } = await supabase
       .from("cardapios")
-      .select("nome,slug,whatsapp,slogan,horario_funcionamento,abre_em,fecha_em,endereco,instagram_url")
+      .select("id,nome,slug,whatsapp,slogan,horario_funcionamento,abre_em,fecha_em,endereco,instagram_url,foto_url,banner_url")
       .eq("slug", slug)
       .single();
 
@@ -1814,6 +1942,10 @@ async function initOwnerPage() {
     editForm.fecha_em.value = data.fecha_em ? String(data.fecha_em).slice(0, 5) : "";
     editForm.endereco.value = data.endereco || "";
     editForm.instagram_url.value = data.instagram_url || "";
+    if (editForm.foto_url) editForm.foto_url.value = data.foto_url || "";
+    if (editForm.banner_url) editForm.banner_url.value = data.banner_url || "";
+    ownerCardapio = data;
+    await loadOwnerProdutos();
     return true;
   };
 
@@ -1871,16 +2003,7 @@ async function initOwnerPage() {
       return;
     }
 
-    const patch = {
-      nome: String(editForm.nome.value || "").trim(),
-      whatsapp: onlyDigits(editForm.whatsapp.value || ""),
-      slogan: String(editForm.slogan.value || "").trim(),
-      horario_funcionamento: String(editForm.horario_funcionamento.value || "").trim(),
-      abre_em: String(editForm.abre_em.value || "").trim(),
-      fecha_em: String(editForm.fecha_em.value || "").trim(),
-      endereco: String(editForm.endereco.value || "").trim(),
-      instagram_url: String(editForm.instagram_url.value || "").trim()
-    };
+    const patch = getOwnerCardapioEditPayload(editForm);
 
     setOwnerMessage("Salvando...");
     const { data, error } = await supabase.rpc("owner_update_cardapio", {
@@ -1900,11 +2023,126 @@ async function initOwnerPage() {
     }
 
     setOwnerMessage("Salvo com sucesso.", "success");
+    await loadAndFill();
+  });
+
+  ownerProdutoCancel?.addEventListener("click", () => {
+    if (!(ownerProdutoForm instanceof HTMLFormElement)) return;
+    resetOwnerProdutoForm(ownerProdutoForm);
+  });
+
+  ownerProdutoForm?.addEventListener("submit", async (event) => {
+    event.preventDefault();
+    if (!slug || !ownerCardapio?.id) {
+      setOwnerMessage("Carregue um cardápio válido antes de salvar produtos.", "error");
+      return;
+    }
+
+    const pin = getOwnerPinValue();
+    if (!pin) {
+      setOwnerMessage("Digite o PIN novamente (por segurança).", "error");
+      return;
+    }
+
+    const payload = getOwnerProdutoPayload(ownerProdutoForm);
+    if (!payload.nome || !payload.preco) {
+      setOwnerMessage("Preencha nome e preço do produto.", "error");
+      return;
+    }
+
+    const { data, error } = await supabase.rpc("owner_upsert_produto", {
+      p_slug: slug,
+      p_pin: pin,
+      p_patch: {
+        id: payload.id || null,
+        nome: payload.nome,
+        categoria: payload.categoria || null,
+        descricao: payload.descricao || null,
+        preco: payload.preco,
+        imagem_url: payload.imagem_url || null
+      }
+    });
+
+    if (error) {
+      setOwnerMessage("Não foi possível salvar o produto. Verifique o schema no Supabase.", "error");
+      return;
+    }
+
+    if (data !== true) {
+      setOwnerMessage("PIN inválido ou acesso desabilitado.", "error");
+      return;
+    }
+
+    resetOwnerProdutoForm(ownerProdutoForm);
+    await loadOwnerProdutos();
+    setOwnerMessage("Produto salvo com sucesso.", "success");
+  });
+
+  ownerPage.addEventListener("click", async (event) => {
+    const target = event.target;
+    if (!(target instanceof HTMLElement)) return;
+
+    const editButton = target.closest(".js-owner-edit-produto");
+    if (editButton instanceof HTMLElement) {
+      const produtoId = String(editButton.dataset.id || "").trim();
+      const produto = ownerProdutos.find((item) => item.id === produtoId);
+      if (!produto || !(ownerProdutoForm instanceof HTMLFormElement)) return;
+      fillOwnerProdutoForm(ownerProdutoForm, produto);
+      try {
+        ownerProdutoForm.nome?.focus();
+      } catch {
+        // ignora
+      }
+      return;
+    }
+
+    const deleteButton = target.closest(".js-owner-delete-produto");
+    if (deleteButton instanceof HTMLElement) {
+      const produtoId = String(deleteButton.dataset.id || "").trim();
+      const produto = ownerProdutos.find((item) => item.id === produtoId);
+      if (!produto) return;
+
+      const confirmed = confirm(`Excluir ${produto.nome}?`);
+      if (!confirmed) return;
+
+      const pin = getOwnerPinValue();
+      if (!pin) {
+        setOwnerMessage("Digite o PIN novamente (por segurança).", "error");
+        return;
+      }
+
+      const { data, error } = await supabase.rpc("owner_delete_produto", {
+        p_slug: slug,
+        p_pin: pin,
+        p_produto_id: produto.id
+      });
+
+      if (error) {
+        setOwnerMessage("Não foi possível excluir o produto. Verifique o schema no Supabase.", "error");
+        return;
+      }
+
+      if (data !== true) {
+        setOwnerMessage("PIN inválido ou acesso desabilitado.", "error");
+        return;
+      }
+
+      await loadOwnerProdutos();
+      setOwnerMessage("Produto excluído.", "success");
+    }
   });
 
   logoutBtn?.addEventListener("click", () => {
     clearOwnerSession(slug);
     showEdit(false);
+    ownerCardapio = null;
+    ownerProdutos = [];
+    if (ownerProdutosSection instanceof HTMLElement) {
+      ownerProdutosSection.classList.add("is-hidden");
+    }
+    if (ownerProdutoForm instanceof HTMLFormElement) {
+      resetOwnerProdutoForm(ownerProdutoForm);
+    }
     setOwnerMessage("Sessão encerrada.");
   });
 }

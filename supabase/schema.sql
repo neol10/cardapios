@@ -349,7 +349,9 @@ begin
       else fecha_em
     end,
     endereco = coalesce(nullif(trim(p_patch->>'endereco'), ''), endereco),
-    instagram_url = coalesce(nullif(trim(p_patch->>'instagram_url'), ''), instagram_url)
+    instagram_url = coalesce(nullif(trim(p_patch->>'instagram_url'), ''), instagram_url),
+    foto_url = coalesce(nullif(trim(p_patch->>'foto_url'), ''), foto_url),
+    banner_url = coalesce(nullif(trim(p_patch->>'banner_url'), ''), banner_url)
   where id = c_id;
 
   return true;
@@ -361,6 +363,141 @@ $$;
 
 revoke all on function public.owner_update_cardapio(text, text, jsonb) from public;
 grant execute on function public.owner_update_cardapio(text, text, jsonb) to anon, authenticated;
+
+create or replace function public.owner_upsert_produto(
+  p_slug text,
+  p_pin text,
+  p_patch jsonb
+)
+returns boolean
+language plpgsql
+security definer
+set search_path = public, extensions
+as $$
+declare
+  c_id uuid;
+  produto_id uuid;
+  v_nome text;
+  v_categoria text;
+  v_descricao text;
+  v_imagem_url text;
+  v_preco numeric(10,2);
+begin
+  if public.owner_verify_pin(p_slug, p_pin) is not true then
+    return false;
+  end if;
+
+  select id into c_id
+  from public.cardapios
+  where slug = lower(trim(p_slug))
+  limit 1;
+
+  if c_id is null then
+    return false;
+  end if;
+
+  v_nome := nullif(trim(p_patch->>'nome'), '');
+  if v_nome is null then
+    return false;
+  end if;
+
+  v_categoria := nullif(trim(p_patch->>'categoria'), '');
+  v_descricao := nullif(trim(p_patch->>'descricao'), '');
+  v_imagem_url := nullif(trim(p_patch->>'imagem_url'), '');
+
+  begin
+    v_preco := (trim(coalesce(p_patch->>'preco', '')))::numeric(10,2);
+  exception
+    when others then
+      return false;
+  end;
+
+  if v_preco is null or v_preco < 0 then
+    return false;
+  end if;
+
+  begin
+    if nullif(trim(p_patch->>'id'), '') is not null then
+      produto_id := (trim(p_patch->>'id'))::uuid;
+    end if;
+  exception
+    when others then
+      return false;
+  end;
+
+  if produto_id is null then
+    insert into public.produtos (cardapio_id, nome, categoria, descricao, preco, imagem_url)
+    values (c_id, v_nome, v_categoria, v_descricao, v_preco, v_imagem_url);
+    return true;
+  end if;
+
+  update public.produtos
+  set
+    nome = v_nome,
+    categoria = v_categoria,
+    descricao = v_descricao,
+    preco = v_preco,
+    imagem_url = v_imagem_url
+  where id = produto_id
+    and cardapio_id = c_id;
+
+  if not found then
+    return false;
+  end if;
+
+  return true;
+exception
+  when others then
+    return false;
+end;
+$$;
+
+revoke all on function public.owner_upsert_produto(text, text, jsonb) from public;
+grant execute on function public.owner_upsert_produto(text, text, jsonb) to anon, authenticated;
+
+create or replace function public.owner_delete_produto(
+  p_slug text,
+  p_pin text,
+  p_produto_id uuid
+)
+returns boolean
+language plpgsql
+security definer
+set search_path = public, extensions
+as $$
+declare
+  c_id uuid;
+begin
+  if public.owner_verify_pin(p_slug, p_pin) is not true then
+    return false;
+  end if;
+
+  select id into c_id
+  from public.cardapios
+  where slug = lower(trim(p_slug))
+  limit 1;
+
+  if c_id is null then
+    return false;
+  end if;
+
+  delete from public.produtos
+  where id = p_produto_id
+    and cardapio_id = c_id;
+
+  if not found then
+    return false;
+  end if;
+
+  return true;
+exception
+  when others then
+    return false;
+end;
+$$;
+
+revoke all on function public.owner_delete_produto(text, text, uuid) from public;
+grant execute on function public.owner_delete_produto(text, text, uuid) to anon, authenticated;
 
 create table if not exists public.produtos (
   id uuid primary key default gen_random_uuid(),
