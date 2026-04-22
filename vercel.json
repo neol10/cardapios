@@ -22,7 +22,9 @@
     }
   ],
   "routes": [
-    { "src": "^/$", "dest": "/admin", "status": 308 },
+    { "src": "^/$", "dest": "/index.html" },
+
+    { "src": "^/cardapio/comunidade/?$", "dest": "/index.html" },
 
     { "src": "^/admin/index\\.html$", "dest": "/admin", "status": 308 },
     { "src": "^/admin/dashboard\\.html$", "dest": "/admin/dashboard", "status": 308 },

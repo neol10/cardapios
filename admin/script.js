@@ -64,7 +64,7 @@ function mountAdminPinOverlay() {
       <form id="admin-pin-form" class="stack-gap">
         <label>
           PIN
-          <input type="password" name="pin" inputmode="numeric" autocomplete="one-time-code" required />
+          <input type="password" name="pin" inputmode="numeric" pattern="[0-9]*" maxlength="12" autocomplete="one-time-code" required />
         </label>
         <button type="submit" class="btn btn-primary btn-lg">Confirmar</button>
       </form>
@@ -100,7 +100,8 @@ async function requireAdminPinGate() {
       event.preventDefault();
 
       const fd = new FormData(form);
-      const pin = String(fd.get("pin") || "").trim();
+      const rawPin = String(fd.get("pin") || "").trim();
+      const pin = onlyDigits(rawPin);
 
       if (!pin) {
         setMessage(message, "Informe o PIN.", "error");
@@ -117,7 +118,19 @@ async function requireAdminPinGate() {
       if (submitBtn instanceof HTMLButtonElement) submitBtn.disabled = false;
 
       if (error) {
-        setMessage(message, "Não foi possível validar o PIN. Verifique o schema no Supabase.", "error");
+        console.error("Falha ao validar PIN (verify_admin_pin):", error);
+        const isLocalhost =
+          typeof window !== "undefined" &&
+          (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1");
+
+        const detail = isLocalhost
+          ? [error.message, error.details, error.hint].filter(Boolean).join(" | ")
+          : "";
+        setMessage(
+          message,
+          `Não foi possível validar o PIN. ${detail ? `Erro: ${detail}` : "Verifique o schema no Supabase."}`,
+          "error"
+        );
         return;
       }
 
@@ -635,6 +648,7 @@ async function requireAuth() {
   } = await supabase.auth.getSession();
 
   if (!session) {
+    clearAdminPinSession();
     window.location.href = "/admin";
     return null;
   }
@@ -678,6 +692,7 @@ function renderCardapios() {
       const slugHref = encodeURIComponent(String(item.slug || ""));
       const whatsapp = escapeHtml(item.whatsapp);
       const fotoUrl = safeHttpUrl(item.foto_url);
+      const modo = String(item.modo || "pedido").toLowerCase() === "catalogo" ? "Catálogo" : "Pedido";
       const isSelected = state.selectedCardapioId === item.id;
 
       return `
@@ -688,6 +703,7 @@ function renderCardapios() {
         </div>
         <p class="muted">Slug: /cardapio/${slugText}</p>
         <p class="muted">WhatsApp: ${whatsapp}</p>
+        <p class="muted">Modo: ${modo}</p>
         <div class="list-actions">
           <a class="btn" href="/cardapio/${slugHref}" target="_blank" rel="noopener">Abrir cardápio</a>
           <button class="btn js-manage-cardapio" data-id="${item.id}">${isSelected ? "Gerenciando" : "Gerenciar"}</button>
@@ -992,6 +1008,7 @@ function fillCardapioForm(item) {
   if (form.aceita_retirada) form.aceita_retirada.value = String(item.aceita_retirada ?? true);
   if (form.layout_produtos) form.layout_produtos.value = item.layout_produtos || "grid";
   if (form.densidade) form.densidade.value = item.densidade || "confortavel";
+  if (form.modo) form.modo.value = item.modo || "pedido";
   if (form.whatsapp_botao) form.whatsapp_botao.value = item.whatsapp_botao || "flutuante";
   if (form.mensagem_whatsapp_template) {
     const current = String(item.mensagem_whatsapp_template || "").trim();
@@ -1228,6 +1245,7 @@ async function setupDashboardPage() {
     const aceita_retirada = String(formData.get("aceita_retirada") || "true") === "true";
     const layout_produtos = String(formData.get("layout_produtos") || "grid");
     const densidade = String(formData.get("densidade") || "confortavel");
+    const modo = String(formData.get("modo") || "pedido");
     const whatsapp_botao = String(formData.get("whatsapp_botao") || "flutuante");
     const mensagem_whatsapp_template = String(formData.get("mensagem_whatsapp_template") || "").trim();
 
@@ -1259,12 +1277,18 @@ async function setupDashboardPage() {
       return;
     }
 
+    if (modo !== "pedido" && modo !== "catalogo") {
+      toast("Modo inválido. Selecione Pedido ou Catálogo.", "error");
+      return;
+    }
+
     const basePayload = {
       nome,
       slug,
       whatsapp,
       cor_tema,
       cor_secundaria: cor_secundaria || null,
+      modo,
       fundo_estilo,
       cor_fundo: cor_fundo || null,
       fundo_cor_1: fundo_cor_1 || null,
@@ -1341,6 +1365,10 @@ async function setupDashboardPage() {
           toast("Seu Supabase ainda não tem a coluna galeria_urls. Rode o schema/patch do projeto.", "error");
           return;
         }
+        if (String(error.message || "").includes("modo")) {
+          toast("Seu Supabase ainda não tem a coluna modo. Rode o schema/patch do projeto.", "error");
+          return;
+        }
         toast(`Erro ao salvar cardápio: ${error.message}`, "error");
         return;
       }
@@ -1354,6 +1382,10 @@ async function setupDashboardPage() {
       if (insertError || !inserted) {
         if (String(insertError?.message || "").includes("galeria_urls")) {
           toast("Seu Supabase ainda não tem a coluna galeria_urls. Rode o schema/patch do projeto.", "error");
+          return;
+        }
+        if (String(insertError?.message || "").includes("modo")) {
+          toast("Seu Supabase ainda não tem a coluna modo. Rode o schema/patch do projeto.", "error");
           return;
         }
         toast(`Erro ao salvar cardápio: ${insertError?.message || "Sem retorno"}`, "error");

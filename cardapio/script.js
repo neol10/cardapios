@@ -15,6 +15,11 @@ const cart = [];
 let activeCardapio = null;
 let activeProdutos = [];
 
+function isCatalogMode(cardapio) {
+  const value = safeText(cardapio?.modo) || "pedido";
+  return value === "catalogo";
+}
+
 const produtosContainer = document.querySelector("#produtos");
 const cartItemsContainer = document.querySelector("#cart-items");
 const cartTotal = document.querySelector("#cart-total");
@@ -589,6 +594,8 @@ function renderProdutos() {
     return;
   }
 
+  const catalogo = isCatalogMode(activeCardapio);
+
   produtosContainer.innerHTML = activeProdutos
     .map(
       (produto) => {
@@ -607,13 +614,29 @@ function renderProdutos() {
           ${categoria ? `<p class="muted"><strong>${categoria}</strong></p>` : ""}
           ${descricao ? `<p class="muted">${descricao}</p>` : ""}
           <p class="price">${formatPriceBRL(produto.preco)}</p>
-          <button type="button" class="btn btn-primary add-to-cart" data-id="${produto.id}">Adicionar ao pedido</button>
+          ${
+            catalogo
+              ? ""
+              : `<button type="button" class="btn btn-primary add-to-cart" data-id="${produto.id}">Adicionar ao pedido</button>`
+          }
         </div>
       </article>
     `;
       }
     )
     .join("");
+}
+
+function applyCardapioModeUI() {
+  const catalogo = isCatalogMode(activeCardapio);
+  document.body.classList.toggle("modo-catalogo", catalogo);
+
+  if (catalogo && cardapioSubtitle && activeCardapio) {
+    const slogan = safeText(activeCardapio.slogan);
+    if (!slogan) {
+      cardapioSubtitle.textContent = "Veja os produtos e os valores.";
+    }
+  }
 }
 
 function calculateTotal() {
@@ -924,6 +947,8 @@ async function loadCardapio() {
     const slogan = safeText(data.slogan);
     cardapioSubtitle.textContent = slogan || "Escolha seus itens e finalize em poucos passos.";
   }
+
+  applyCardapioModeUI();
 
   const horario = safeText(data.horario_funcionamento);
   const abre = safeText(data.abre_em);

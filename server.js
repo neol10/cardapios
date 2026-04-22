@@ -130,15 +130,25 @@ function handleRequest(req, res) {
   }
 
   if (pathname === "/") {
-    res.writeHead(302, { Location: "/cardapio/" });
-    res.end();
-    return;
+    const indexPath = path.join(ROOT, "index.html");
+    if (fileExists(indexPath)) {
+      serveFile(res, indexPath);
+      return;
+    }
   }
 
   if (pathname === "/cardapio") {
     res.writeHead(302, { Location: "/cardapio/" });
     res.end();
     return;
+  }
+
+  if (pathname === "/cardapio/comunidade" || pathname === "/cardapio/comunidade/") {
+    const indexPath = path.join(ROOT, "index.html");
+    if (fileExists(indexPath)) {
+      serveFile(res, indexPath);
+      return;
+    }
   }
 
   // 1) Arquivo estático direto (ex: /cardapio/style.css, /admin/style.css, /shared/supabase.js)

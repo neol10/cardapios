@@ -3,6 +3,7 @@
 Projeto completo com:
 
 - Área pública de cardápio com slug dinâmico
+- Vitrine pública (/) com lista de cardápios
 - Carrinho e checkout com validação
 - Salvamento de pedido no Supabase antes do redirecionamento
 - Integração direta com WhatsApp (`wa.me`)
@@ -55,6 +56,8 @@ Alternativa: definir `globalThis.__SUPABASE_CONFIG__` antes dos scripts em cada 
 - Acesse `/admin/index.html` e faça login.
 - Crie um cardápio com slug e WhatsApp.
 - Selecione o cardápio e cadastre produtos (com upload de imagem, se quiser).
+- Acesse `/` para ver a lista pública de cardápios.
+- Alternativa: acesse `/cardapio/comunidade` para a mesma vitrine pública.
 - Acesse `/cardapio/{slug}` (ou `/cardapio/index.html?slug={slug}` quando sem rewrite no servidor).
 - Cliente finaliza pedido, pedido é salvo na tabela `pedidos`, e o WhatsApp abre com mensagem pronta.
 
@@ -81,5 +84,6 @@ Passo a passo:
 
 Depois do deploy:
 
+- Vitrine pública: `https://SEU-DOMINIO/`
 - Admin: `https://SEU-DOMINIO/admin`
 - Cardápio: `https://SEU-DOMINIO/cardapio/seu-slug`

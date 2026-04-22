@@ -1,7 +1,7 @@
 -- Execute este script no SQL Editor do Supabase.
 -- Cria tabelas, chaves, políticas de acesso e bucket de imagens.
 
-create extension if not exists pgcrypto;
+create extension if not exists pgcrypto with schema extensions;
 
 -- Allowlist de admins (melhora segurança: não basta estar autenticado)
 -- Para liberar o seu usuário como admin, rode no SQL Editor:
@@ -23,7 +23,7 @@ returns boolean
 language sql
 stable
 security definer
-set search_path = public
+set search_path = public, extensions
 as $$
   select exists (
     select 1 from public.admins where user_id = p_user_id
@@ -64,7 +64,7 @@ returns boolean
 language plpgsql
 stable
 security definer
-set search_path = public
+set search_path = public, extensions
 as $$
 declare
   saved_hash text;
@@ -121,6 +121,7 @@ create table if not exists public.cardapios (
   nome text not null,
   slug text not null unique,
   whatsapp text not null,
+  modo text not null default 'pedido' check (modo in ('pedido','catalogo')),
   owner_edit_enabled boolean not null default false,
   cor_tema text not null default '#ff6a00',
   cor_secundaria text,
@@ -164,6 +165,8 @@ alter table public.cardapios add column if not exists fonte_peso_texto integer;
 alter table public.cardapios add column if not exists fonte_peso_titulo integer;
 alter table public.cardapios add column if not exists abre_em time;
 alter table public.cardapios add column if not exists fecha_em time;
+alter table public.cardapios add column if not exists modo text;
+alter table public.cardapios alter column modo set default 'pedido';
 alter table public.cardapios add column if not exists owner_edit_enabled boolean;
 alter table public.cardapios add column if not exists fundo_estilo text;
 alter table public.cardapios add column if not exists fundo_cor_1 text;
@@ -201,6 +204,7 @@ update public.cardapios set taxa_entrega = 0 where taxa_entrega is null;
 update public.cardapios set pedido_minimo = 0 where pedido_minimo is null;
 update public.cardapios set aceita_entrega = true where aceita_entrega is null;
 update public.cardapios set aceita_retirada = true where aceita_retirada is null;
+update public.cardapios set modo = 'pedido' where modo is null;
 update public.cardapios set layout_produtos = 'grid' where layout_produtos is null;
 update public.cardapios set densidade = 'confortavel' where densidade is null;
 update public.cardapios set whatsapp_botao = 'flutuante' where whatsapp_botao is null;
@@ -231,7 +235,7 @@ create or replace function public.admin_set_owner_access(
 returns void
 language plpgsql
 security definer
-set search_path = public
+set search_path = public, extensions
 as $$
 declare
   next_hash text;
@@ -270,7 +274,7 @@ returns boolean
 language plpgsql
 stable
 security definer
-set search_path = public
+set search_path = public, extensions
 as $$
 declare
   c_id uuid;
@@ -310,7 +314,7 @@ create or replace function public.owner_update_cardapio(
 returns boolean
 language plpgsql
 security definer
-set search_path = public
+set search_path = public, extensions
 as $$
 declare
   c_id uuid;

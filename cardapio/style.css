@@ -426,6 +426,18 @@ p {
   border-radius: 14px;
 }
 
+body.modo-catalogo .cart-box,
+body.modo-catalogo #checkout-form,
+body.modo-catalogo #tipo-pedido-wrap,
+body.modo-catalogo #pagamento-wrap,
+body.modo-catalogo #endereco-wrap {
+  display: none !important;
+}
+
+body.modo-catalogo .produto-body {
+  grid-template-areas: "title price";
+}
+
 .btn {
   width: 100%;
   border-radius: 12px;
