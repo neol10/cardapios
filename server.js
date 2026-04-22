@@ -117,6 +117,11 @@ function handleRequest(req, res) {
     res.end();
     return;
   }
+  if (pathname === "/admin/owner.html") {
+    res.writeHead(308, { Location: "/admin/owner" });
+    res.end();
+    return;
+  }
   if (pathname === "/cardapio/index.html") {
     res.writeHead(308, { Location: "/cardapio" });
     res.end();
@@ -141,6 +146,14 @@ function handleRequest(req, res) {
     res.writeHead(302, { Location: "/cardapio/" });
     res.end();
     return;
+  }
+
+  if (pathname === "/admin/owner") {
+    const ownerPath = path.join(ROOT, "admin", "owner.html");
+    if (fileExists(ownerPath)) {
+      serveFile(res, ownerPath);
+      return;
+    }
   }
 
   if (pathname === "/cardapio/comunidade" || pathname === "/cardapio/comunidade/") {
