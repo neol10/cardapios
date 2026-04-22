@@ -1158,7 +1158,8 @@ async function setupDashboardPage() {
   const copyOwnerBtn = document.querySelector(".js-copy-owner-link");
   copyOwnerBtn?.addEventListener("click", async () => {
     const form = document.querySelector("#cardapio-form");
-    const id = String(form?.id?.value || "").trim();
+    const idField = getHiddenIdField(form);
+    const id = String(idField?.value || "").trim();
     const cardapio = id ? state.cardapios.find((c) => c.id === id) : null;
     if (!cardapio) {
       toast("Selecione um cardápio primeiro.", "error");
