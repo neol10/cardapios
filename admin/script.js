@@ -1818,6 +1818,7 @@ function getOwnerCardapioEditPayload(editForm) {
     nome: String(editForm.nome.value || "").trim(),
     whatsapp: onlyDigits(editForm.whatsapp.value || ""),
     slogan: String(editForm.slogan.value || "").trim(),
+    modo: String(editForm.modo?.value || "pedido").trim(),
     horario_funcionamento: String(editForm.horario_funcionamento.value || "").trim(),
     abre_em: String(editForm.abre_em.value || "").trim(),
     fecha_em: String(editForm.fecha_em.value || "").trim(),
@@ -1924,7 +1925,7 @@ async function initOwnerPage() {
   const loadAndFill = async () => {
     const { data, error } = await supabase
       .from("cardapios")
-      .select("id,nome,slug,whatsapp,slogan,horario_funcionamento,abre_em,fecha_em,endereco,instagram_url,foto_url,banner_url")
+      .select("id,nome,slug,whatsapp,slogan,modo,horario_funcionamento,abre_em,fecha_em,endereco,instagram_url,foto_url,banner_url")
       .eq("slug", slug)
       .single();
 
@@ -1937,6 +1938,7 @@ async function initOwnerPage() {
     editForm.nome.value = data.nome || "";
     editForm.whatsapp.value = maskTelefone(data.whatsapp || "");
     editForm.slogan.value = data.slogan || "";
+    if (editForm.modo) editForm.modo.value = data.modo || "pedido";
     editForm.horario_funcionamento.value = data.horario_funcionamento || "";
     editForm.abre_em.value = data.abre_em ? String(data.abre_em).slice(0, 5) : "";
     editForm.fecha_em.value = data.fecha_em ? String(data.fecha_em).slice(0, 5) : "";
