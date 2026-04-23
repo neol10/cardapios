@@ -168,6 +168,22 @@
   font-size: 0.9rem;
 }
 
+.pedido-item .pedido-comentario {
+  width: 100%;
+  margin-top: 8px;
+  padding: 6px 8px;
+  border: 1px solid var(--border, #e5e5e5);
+  border-radius: 6px;
+  font-size: 0.85rem;
+  background: var(--surface, #ffffff);
+  color: var(--text, #333333);
+}
+
+.pedido-item .pedido-comentario:focus {
+  outline: 2px solid var(--theme, #ff6a00);
+  border-color: var(--theme, #ff6a00);
+}
+
 .pedido-item .pedido-preco {
   font-weight: 700;
   color: var(--theme, #ff6a00);
@@ -271,6 +287,12 @@
   margin-top: 8px;
 }
 
+.btn-print {
+  margin-top: 12px;
+  font-size: 0.9rem;
+  padding: 8px 12px;
+}
+
 /* Animações */
 @keyframes slideIn {
   from {
@@ -306,14 +328,226 @@
   .mesa-selector {
     flex-direction: column;
     align-items: stretch;
+    gap: 16px;
+    padding: 20px;
+  }
+
+  .mesa-selector input {
+    font-size: 1.4rem;
+    padding: 16px;
+    min-height: 56px;
+  }
+
+  .mesa-selector button {
+    min-height: 56px;
+    font-size: 1.1rem;
+    padding: 16px;
   }
 
   .pedidos-box {
     position: static;
+    padding: 20px;
   }
 
   .mesa-actions {
     flex-direction: column;
+    gap: 12px;
+  }
+
+  .mesa-actions button {
+    min-height: 48px;
+    font-size: 1.1rem;
+    padding: 14px;
+  }
+
+  /* Produtos mais fáceis de tocar */
+  .produtos-grid {
+    gap: 16px;
+  }
+
+  .produtos-grid .produto-card {
+    min-height: 120px;
+  }
+
+  .produtos-grid .produto-card .add-to-cart {
+    min-height: 44px;
+    font-size: 1rem;
+    padding: 12px 20px;
+    margin-top: 8px;
+  }
+
+  /* Pedidos mais legíveis */
+  .pedidos-mesa {
+    min-height: 250px;
+    max-height: 60vh;
+    padding: 16px;
+  }
+
+  .pedido-item {
+    padding: 12px 16px;
+    margin-bottom: 12px;
+    font-size: 1rem;
+  }
+
+  .pedido-item .pedido-comentario {
+    font-size: 1rem;
+    padding: 10px 12px;
+    min-height: 40px;
+  }
+
+  .pedido-item .remover-pedido {
+    min-height: 36px;
+    font-size: 0.9rem;
+    padding: 8px 12px;
+  }
+
+  /* Lista de mesas */
+  .mesas-list {
+    max-height: 40vh;
+  }
+
+  .mesa-item {
+    padding: 16px;
+    margin-bottom: 12px;
+    min-height: 60px;
+  }
+
+  .mesa-item .mesa-numero {
+    font-size: 1.2rem;
+  }
+
+  /* Busca */
+  .mesa-search input {
+    font-size: 1.1rem;
+    padding: 16px 18px;
+    min-height: 50px;
+  }
+
+  /* Botão de reset */
+  #reset-mesas-btn {
+    min-height: 48px;
+    font-size: 1rem;
+    margin-top: 20px;
+  }
+
+  /* Botão de tela cheia */
+  #fullscreen-btn {
+    min-height: 44px;
+    font-size: 1rem;
+    padding: 12px 16px;
+    margin-top: 12px;
+  }
+
+  /* Resumo */
+  .garcom-summary {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  .summary-card {
+    padding: 16px 20px;
+    text-align: center;
+  }
+
+  .summary-card strong {
+    font-size: 1.3rem;
+  }
+
+  /* Header */
+  .hero {
+    padding: 20px 16px 16px;
+  }
+
+  .hero-content {
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .hero-media {
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* Botão de impressão */
+  .btn-print {
+    min-height: 44px;
+    font-size: 1rem;
+    padding: 12px 16px;
+  }
+}
+
+/* Melhorias para tablets */
+@media (min-width: 769px) and (max-width: 1024px) {
+  .mesa-selector input {
+    font-size: 1.3rem;
+    padding: 14px;
+  }
+
+  .mesa-selector button {
+    padding: 14px 20px;
+    font-size: 1rem;
+  }
+
+  .produtos-grid .produto-card .add-to-cart {
+    padding: 10px 18px;
+    font-size: 0.95rem;
+  }
+
+  .pedido-item .pedido-comentario {
+    font-size: 0.9rem;
+  }
+}
+
+/* Melhorias de usabilidade mobile */
+@media (max-width: 768px) {
+  /* Evitar zoom em inputs */
+  input[type="number"],
+  input[type="search"],
+  input[type="text"] {
+    font-size: 16px !important;
+  }
+
+  /* Botões mais fáceis de tocar */
+  button {
+    min-height: 44px;
+    touch-action: manipulation;
+  }
+
+  /* Melhor feedback visual no toque */
+  .produto-card,
+  .mesa-item,
+  .pedido-item {
+    transition: all 0.1s ease;
+  }
+
+  .produto-card:active,
+  .mesa-item:active {
+    transform: scale(0.98);
+    opacity: 0.8;
+  }
+
+  /* Scroll suave */
+  .pedidos-mesa,
+  .mesas-list {
+    scroll-behavior: smooth;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* Melhor legibilidade */
+  .muted {
+    font-size: 1rem;
+    line-height: 1.5;
+  }
+
+  /* Espaçamento adequado */
+  .details {
+    margin: 20px 0;
+  }
+
+  .details summary {
+    padding: 16px;
+    font-size: 1.1rem;
+    font-weight: 600;
   }
 }
 

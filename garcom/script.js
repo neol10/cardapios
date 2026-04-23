@@ -22,12 +22,90 @@ const resetMesasBtn = document.querySelector("#reset-mesas-btn");
 const totalMesasAbertasEl = document.querySelector("#total-mesas-abertas");
 const totalPedidosEl = document.querySelector("#total-pedidos-abertos");
 const totalValorEl = document.querySelector("#total-aberto-valor");
+const fullscreenBtn = document.querySelector("#fullscreen-btn");
 
 let activeCardapio = null;
 let activeProdutos = [];
 let mesasAbertas = new Map(); // numero_mesa -> { pedidos: [], criado_em: Date }
 let mesaAtual = null;
 let mesaSearchTerm = "";
+let backupInterval = null;
+
+// Persistência de dados
+function salvarMesasLocalStorage() {
+  try {
+    const data = {
+      mesas: Array.from(mesasAbertas.entries()).map(([numero, mesa]) => ({
+        numero,
+        pedidos: mesa.pedidos,
+        criado_em: mesa.criado_em.toISOString()
+      })),
+      mesaAtual,
+      timestamp: Date.now()
+    };
+    localStorage.setItem(`garcom-${getSlugFromUrl()}`, JSON.stringify(data));
+  } catch (error) {
+    console.warn("Erro ao salvar mesas:", error);
+  }
+}
+
+function carregarMesasLocalStorage() {
+  try {
+    const slug = getSlugFromUrl();
+    const data = JSON.parse(localStorage.getItem(`garcom-${slug}`));
+    if (!data || !data.mesas) return;
+
+    // Verificar se os dados são recentes (últimas 24h)
+    const idade = Date.now() - (data.timestamp || 0);
+    if (idade > 24 * 60 * 60 * 1000) return;
+
+    mesasAbertas.clear();
+    for (const mesaData of data.mesas) {
+      mesasAbertas.set(mesaData.numero, {
+        pedidos: mesaData.pedidos,
+        criado_em: new Date(mesaData.criado_em)
+      });
+    }
+
+    if (data.mesaAtual && mesasAbertas.has(data.mesaAtual)) {
+      mesaAtual = data.mesaAtual;
+    }
+
+    atualizarListaMesas();
+    if (mesaAtual) {
+      numeroMesaInput.value = mesaAtual;
+      mesaAtualEl.textContent = mesaAtual;
+      document.body.classList.add("mesa-selecionada");
+      renderPedidosMesa();
+    }
+  } catch (error) {
+    console.warn("Erro ao carregar mesas:", error);
+  }
+}
+
+function iniciarBackupAutomatico() {
+  if (backupInterval) clearInterval(backupInterval);
+  backupInterval = setInterval(salvarMesasLocalStorage, 30000); // A cada 30 segundos
+}
+
+function pararBackupAutomatico() {
+  if (backupInterval) {
+    clearInterval(backupInterval);
+    backupInterval = null;
+  }
+}
+
+function toggleFullscreen() {
+  if (!document.fullscreenElement) {
+    document.documentElement.requestFullscreen().catch(err => {
+      console.warn("Erro ao entrar em tela cheia:", err);
+    });
+  } else {
+    document.exitFullscreen().catch(err => {
+      console.warn("Erro ao sair da tela cheia:", err);
+    });
+  }
+}
 
 // Funções utilitárias
 function safeText(value) {
@@ -131,12 +209,14 @@ function adicionarPedidoMesa(produto, triggerEl = null) {
       id: produto.id,
       nome: produto.nome,
       preco: Number(produto.preco),
-      quantidade: 1
+      quantidade: 1,
+      comentario: ""
     });
   }
 
   renderPedidosMesa();
   atualizarListaMesas();
+  salvarMesasLocalStorage();
   
   // Animação de feedback
   if (triggerEl instanceof HTMLElement) {
@@ -223,6 +303,59 @@ function resetTodasMesas() {
   atualizarListaMesas();
 }
 
+function imprimirPedidoMesa() {
+  if (!mesaAtual || !mesasAbertas.has(mesaAtual)) return;
+
+  const mesa = mesasAbertas.get(mesaAtual);
+  if (!mesa.pedidos.length) return;
+
+  const subtotal = calcularTotalMesa(mesa);
+  const dataHora = new Date().toLocaleString('pt-BR');
+
+  let conteudo = `
+    <html>
+    <head>
+      <title>Pedido Mesa ${mesaAtual}</title>
+      <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .header { text-align: center; margin-bottom: 20px; }
+        .pedido { margin: 10px 0; padding: 10px; border: 1px solid #ccc; }
+        .total { font-weight: bold; font-size: 1.2em; margin-top: 20px; }
+        .comentario { font-style: italic; color: #666; margin-top: 5px; }
+      </style>
+    </head>
+    <body>
+      <div class="header">
+        <h1>Pedido - Mesa ${mesaAtual}</h1>
+        <p>${activeCardapio?.nome || 'Cardápio'}</p>
+        <p>Data/Hora: ${dataHora}</p>
+      </div>
+  `;
+
+  mesa.pedidos.forEach((pedido, index) => {
+    conteudo += `
+      <div class="pedido">
+        <strong>${index + 1}. ${escapeHtml(pedido.nome)}</strong><br>
+        Quantidade: ${pedido.quantidade} x ${formatPriceBRL(pedido.preco)} = ${formatPriceBRL(pedido.preco * pedido.quantidade)}
+        ${pedido.comentario ? `<div class="comentario">Obs: ${escapeHtml(pedido.comentario)}</div>` : ''}
+      </div>
+    `;
+  });
+
+  conteudo += `
+      <div class="total">
+        Total: ${formatPriceBRL(subtotal)}
+      </div>
+    </body>
+    </html>
+  `;
+
+  const janela = window.open('', '_blank');
+  janela.document.write(conteudo);
+  janela.document.close();
+  janela.print();
+}
+
 function calcularTotalMesa(mesa) {
   return mesa.pedidos.reduce((total, pedido) => {
     return total + (pedido.preco * pedido.quantidade);
@@ -287,16 +420,18 @@ function renderPedidosMesa() {
         <span>Total:</span>
         <span>${formatPriceBRL(subtotal)}</span>
       </div>
+      <button class="btn btn-secondary btn-print" type="button">🖨️ Imprimir</button>
     </div>
   `;
 
   // Lista de pedidos
   const pedidosHtml = mesa.pedidos
     .map((pedido) => `
-      <div class="pedido-item">
+      <div class="pedido-item" data-id="${pedido.id}">
         <div class="pedido-info">
           <div class="pedido-nome">${escapeHtml(pedido.nome)}</div>
           <div class="pedido-quantidade">${pedido.quantidade}x ${formatPriceBRL(pedido.preco)}</div>
+          <input type="text" class="pedido-comentario" placeholder="Observações..." value="${escapeHtml(pedido.comentario || "")}" />
         </div>
         <div class="pedido-preco">${formatPriceBRL(pedido.preco * pedido.quantidade)}</div>
         <button class="remover-pedido" data-id="${pedido.id}">Remover</button>
@@ -473,6 +608,9 @@ function attachEvents() {
   // Resetar todas as mesas
   resetMesasBtn?.addEventListener("click", resetTodasMesas);
 
+  // Tela cheia
+  fullscreenBtn?.addEventListener("click", toggleFullscreen);
+
   // Buscar mesas / pedidos
   mesaSearchInput?.addEventListener("input", () => {
     mesaSearchTerm = String(mesaSearchInput.value || "").trim();
@@ -497,11 +635,36 @@ function attachEvents() {
       removerPedidoMesa(produtoId);
     }
 
+    if (target.classList.contains("btn-print")) {
+      imprimirPedidoMesa();
+    }
+
     if (target.classList.contains("mesa-item") || target.closest(".mesa-item")) {
       const mesaEl = target.classList.contains("mesa-item") ? target : target.closest(".mesa-item");
       const numero = parseInt(mesaEl.dataset.mesa);
       if (numero) {
         selecionarMesa(numero);
+      }
+    }
+  });
+
+  // Atualizar comentários
+  document.body.addEventListener("input", (event) => {
+    const target = event.target;
+    if (!(target instanceof HTMLInputElement)) return;
+
+    if (target.classList.contains("pedido-comentario")) {
+      const pedidoItem = target.closest(".pedido-item");
+      if (!pedidoItem || !mesaAtual) return;
+
+      const produtoId = pedidoItem.dataset.id;
+      const mesa = mesasAbertas.get(mesaAtual);
+      if (!mesa) return;
+
+      const pedido = mesa.pedidos.find(p => p.id === produtoId);
+      if (pedido) {
+        pedido.comentario = target.value.trim();
+        salvarMesasLocalStorage();
       }
     }
   });
@@ -534,7 +697,14 @@ async function init() {
   try {
     assertSupabaseConfig();
     attachEvents();
+    
+    // Carregar dados salvos
+    carregarMesasLocalStorage();
+    
     await loadCardapio();
+    
+    // Iniciar backup automático
+    iniciarBackupAutomatico();
   } catch (error) {
     console.error("Erro ao inicializar:", error);
     cardapioNomeEl.textContent = "Erro ao carregar";
