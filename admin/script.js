@@ -1557,8 +1557,8 @@ async function setupDashboardPage() {
     if (bannerInput instanceof HTMLInputElement) bannerInput.value = "";
     if (galeriaInputReset instanceof HTMLInputElement) galeriaInputReset.value = "";
 
-    await loadCardapios();
     if (savedId) {
+      let ownerAccessSaved = true;
       try {
         const pinArg = owner_pin ? owner_pin : null;
         const { error: ownerError } = await supabase.rpc("admin_set_owner_access", {
@@ -1568,11 +1568,15 @@ async function setupDashboardPage() {
         });
 
         if (ownerError) {
+          ownerAccessSaved = false;
           toast("Falha ao salvar acesso do proprietário. Rode o schema/patch no Supabase.", "error");
         }
       } catch {
+        ownerAccessSaved = false;
         toast("Falha ao salvar acesso do proprietário.", "error");
       }
+
+      await loadCardapios();
 
       setSelectedCardapio(savedId);
       setEditingMode(true);
@@ -1580,6 +1584,12 @@ async function setupDashboardPage() {
       if (fresh) fillCardapioForm(fresh);
       await loadProdutos();
       await loadPedidos();
+
+      if (!ownerAccessSaved) {
+        toast("Cardápio salvo, mas o acesso do proprietário não foi atualizado no banco.", "error");
+      }
+    } else {
+      await loadCardapios();
     }
 
     renderGaleriaPreview(cardapioForm);
