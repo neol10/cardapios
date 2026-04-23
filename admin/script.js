@@ -1064,6 +1064,7 @@ function fillCardapioForm(item) {
   refreshAllColorPreviews(form);
   updateFundoVisibility(form);
   updateThemePreview(form);
+  updateModoGarcomAvailability(form);
 }
 
 function fillProdutoForm(item) {
@@ -1122,6 +1123,20 @@ function getGarcomLink(slug) {
   const safe = String(slug || "").trim();
   if (!safe) return "";
   return `${window.location.origin}/garcom/${encodeURIComponent(safe)}`;
+}
+
+function updateModoGarcomAvailability(form) {
+  if (!form) return;
+  const modo = String(form.modo?.value || "pedido").toLowerCase();
+  const isPedido = modo === "pedido";
+  const toggle = form.modo_garcom_enabled;
+  if (!(toggle instanceof HTMLInputElement)) return;
+
+  if (!isPedido) {
+    toggle.checked = false;
+  }
+  toggle.disabled = !isPedido;
+  toggle.title = isPedido ? "" : "Disponível somente no modo Pedido.";
 }
 
 
@@ -1266,6 +1281,11 @@ async function setupDashboardPage() {
 
   setupColorPreviewListeners(cardapioForm);
   setupThemeControls(cardapioForm);
+  updateModoGarcomAvailability(cardapioForm);
+
+  cardapioForm?.modo?.addEventListener("change", () => {
+    updateModoGarcomAvailability(cardapioForm);
+  });
 
   const paletteInput = document.querySelector("#palette-input");
   const applyPaletteBtn = document.querySelector(".js-apply-palette");
@@ -1362,6 +1382,11 @@ async function setupDashboardPage() {
 
     if (modo !== "pedido" && modo !== "catalogo") {
       toast("Modo inválido. Selecione Pedido ou Catálogo.", "error");
+      return;
+    }
+
+    if (modo !== "pedido" && modo_garcom_enabled) {
+      toast("O modo garçom só funciona no cardápio em modo Pedido.", "error");
       return;
     }
 
@@ -1916,9 +1941,14 @@ function getOwnerSessionKey(slug) {
   return `owner.pin.ok:${String(slug || "").trim().toLowerCase()}`;
 }
 
+function getOwnerPinCacheKey(slug) {
+  return `owner.pin.value:${String(slug || "").trim().toLowerCase()}`;
+}
+
 function clearOwnerSession(slug) {
   try {
     sessionStorage.removeItem(getOwnerSessionKey(slug));
+    sessionStorage.removeItem(getOwnerPinCacheKey(slug));
   } catch {
     // ignore
   }
@@ -1937,6 +1967,27 @@ function isOwnerVerified(slug) {
     return sessionStorage.getItem(getOwnerSessionKey(slug)) === "1";
   } catch {
     return false;
+  }
+}
+
+function setOwnerPinCache(slug, pin) {
+  try {
+    const safePin = onlyDigits(pin).slice(0, 12);
+    if (!safePin) {
+      sessionStorage.removeItem(getOwnerPinCacheKey(slug));
+      return;
+    }
+    sessionStorage.setItem(getOwnerPinCacheKey(slug), safePin);
+  } catch {
+    // ignore
+  }
+}
+
+function getOwnerPinCache(slug) {
+  try {
+    return String(sessionStorage.getItem(getOwnerPinCacheKey(slug)) || "").trim();
+  } catch {
+    return "";
   }
 }
 
@@ -2030,6 +2081,11 @@ async function initOwnerPage() {
   const tryAuto = async () => {
     if (!slug) return;
     if (!isOwnerVerified(slug)) return;
+    const pinInput = authForm.querySelector('input[name="pin"]');
+    const cachedPin = getOwnerPinCache(slug);
+    if (pinInput instanceof HTMLInputElement && cachedPin) {
+      pinInput.value = cachedPin;
+    }
     showEdit(true);
     await loadAndFill();
   };
@@ -2044,7 +2100,7 @@ async function initOwnerPage() {
     }
 
     const fd = new FormData(authForm);
-    const pin = String(fd.get("pin") || "").trim();
+    const pin = onlyDigits(String(fd.get("pin") || "").trim());
     if (!pin) {
       setOwnerMessage("Informe o PIN.", "error");
       return;
@@ -2058,11 +2114,13 @@ async function initOwnerPage() {
     }
 
     if (data !== true) {
+      setOwnerPinCache(slug, "");
       setOwnerMessage("PIN incorreto ou acesso desabilitado.", "error");
       return;
     }
 
     setOwnerVerified(slug);
+    setOwnerPinCache(slug, pin);
     showEdit(true);
     setOwnerMessage("");
     await loadAndFill();
@@ -2073,22 +2131,16 @@ async function initOwnerPage() {
     if (!slug) return;
 
     const pinInput = authForm.querySelector('input[name="pin"]');
-    const pin = pinInput instanceof HTMLInputElement ? String(pinInput.value || "").trim() : "";
+    const pinFromInput = pinInput instanceof HTMLInputElement ? String(pinInput.value || "").trim() : "";
+    const pin = onlyDigits(pinFromInput || getOwnerPinCache(slug));
 
     if (!pin) {
-      setOwnerMessage("Digite o PIN novamente (por segurança).", "error");
+      setOwnerMessage("Digite o PIN para continuar.", "error");
       showEdit(false);
       return;
     }
 
     const patch = getOwnerCardapioEditPayload(editForm);
-    
-    // Debug: mostrar o que está sendo salvo
-    console.log("=== DEBUG ADMIN SAVE ===");
-    console.log("Patch completo:", patch);
-    console.log("Modo:", patch.modo);
-    console.log("Modo garçom enabled:", patch.modo_garcom_enabled);
-    console.log("Slug:", slug);
 
     setOwnerMessage("Salvando...");
     const { data, error } = await supabase.rpc("owner_update_cardapio", {
@@ -2103,10 +2155,12 @@ async function initOwnerPage() {
     }
 
     if (data !== true) {
+      setOwnerPinCache(slug, "");
       setOwnerMessage("PIN inválido ou acesso desabilitado.", "error");
       return;
     }
 
+    setOwnerPinCache(slug, pin);
     setOwnerMessage("Salvo com sucesso.", "success");
     await loadAndFill();
   });
@@ -2123,9 +2177,9 @@ async function initOwnerPage() {
       return;
     }
 
-    const pin = getOwnerPinValue();
+    const pin = onlyDigits(getOwnerPinValue() || getOwnerPinCache(slug));
     if (!pin) {
-      setOwnerMessage("Digite o PIN novamente (por segurança).", "error");
+      setOwnerMessage("Digite o PIN para continuar.", "error");
       return;
     }
 
@@ -2167,10 +2221,12 @@ async function initOwnerPage() {
     }
 
     if (data !== true) {
+      setOwnerPinCache(slug, "");
       setOwnerMessage("PIN inválido ou acesso desabilitado.", "error");
       return;
     }
 
+    setOwnerPinCache(slug, pin);
     resetOwnerProdutoForm(ownerProdutoForm);
     await loadOwnerProdutos();
     setOwnerMessage("Produto salvo com sucesso.", "success");
@@ -2203,9 +2259,9 @@ async function initOwnerPage() {
       const confirmed = confirm(`Excluir ${produto.nome}?`);
       if (!confirmed) return;
 
-      const pin = getOwnerPinValue();
+      const pin = onlyDigits(getOwnerPinValue() || getOwnerPinCache(slug));
       if (!pin) {
-        setOwnerMessage("Digite o PIN novamente (por segurança).", "error");
+        setOwnerMessage("Digite o PIN para continuar.", "error");
         return;
       }
 
@@ -2221,10 +2277,12 @@ async function initOwnerPage() {
       }
 
       if (data !== true) {
+        setOwnerPinCache(slug, "");
         setOwnerMessage("PIN inválido ou acesso desabilitado.", "error");
         return;
       }
 
+      setOwnerPinCache(slug, pin);
       await loadOwnerProdutos();
       setOwnerMessage("Produto excluído.", "success");
     }
