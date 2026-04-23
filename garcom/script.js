@@ -17,8 +17,17 @@ const cardapioFoto = document.querySelector("#cardapio-foto");
 const mesaAtualEl = document.querySelector("#mesa-atual");
 const countMesasEl = document.querySelector("#count-mesas");
 const listaMesasEl = document.querySelector("#lista-mesas");
+const mesaSearchInput = document.querySelector("#mesa-search");
+const resetMesasBtn = document.querySelector("#reset-mesas-btn");
+const totalMesasAbertasEl = document.querySelector("#total-mesas-abertas");
+const totalPedidosEl = document.querySelector("#total-pedidos-abertos");
+const totalValorEl = document.querySelector("#total-aberto-valor");
 
 let activeCardapio = null;
+let activeProdutos = [];
+let mesasAbertas = new Map(); // numero_mesa -> { pedidos: [], criado_em: Date }
+let mesaAtual = null;
+let mesaSearchTerm = "";
 let activeProdutos = [];
 let mesasAbertas = new Map(); // numero_mesa -> { pedidos: [], criado_em: Date }
 let mesaAtual = null;
@@ -196,6 +205,27 @@ function finalizarMesa() {
   }
 }
 
+function resetTodasMesas() {
+  if (mesasAbertas.size === 0) {
+    alert("Não há mesas abertas para resetar.");
+    return;
+  }
+
+  const confirmar = confirm(
+    "Resetar todas as mesas? Esta ação apagará todas as mesas abertas e seus pedidos."
+  );
+
+  if (!confirmar) return;
+
+  mesasAbertas.clear();
+  mesaAtual = null;
+  numeroMesaInput.value = "";
+  mesaAtualEl.textContent = "-";
+  document.body.classList.remove("mesa-selecionada");
+  renderPedidosMesa();
+  atualizarListaMesas();
+}
+
 function calcularTotalMesa(mesa) {
   return mesa.pedidos.reduce((total, pedido) => {
     return total + (pedido.preco * pedido.quantidade);
@@ -280,26 +310,60 @@ function renderPedidosMesa() {
   pedidosMesaContainer.innerHTML = resumoHtml + pedidosHtml;
 }
 
-function atualizarListaMesas() {
-  countMesasEl.textContent = mesasAbertas.size;
+function getMesasFiltradas() {
+  const termo = String(mesaSearchTerm || "").trim().toLowerCase();
+  const mesas = Array.from(mesasAbertas.entries()).sort((a, b) => a[0] - b[0]);
+  if (!termo) return mesas;
 
-  if (mesasAbertas.size === 0) {
-    listaMesasEl.innerHTML = '<p class="muted">Nenhuma mesa aberta.</p>';
+  return mesas.filter(([numero, mesa]) => {
+    if (String(numero).includes(termo)) return true;
+    return mesa.pedidos.some((pedido) => String(pedido.nome || "").toLowerCase().includes(termo));
+  });
+}
+
+function atualizarResumoMesas() {
+  const totalMesas = mesasAbertas.size;
+  const totalItens = Array.from(mesasAbertas.values()).reduce(
+    (sum, mesa) => sum + mesa.pedidos.reduce((count, pedido) => count + pedido.quantidade, 0),
+    0
+  );
+  const totalValor = Array.from(mesasAbertas.values()).reduce(
+    (sum, mesa) => sum + calcularTotalMesa(mesa),
+    0
+  );
+
+  if (totalMesasAbertasEl) totalMesasAbertasEl.textContent = totalMesas;
+  if (totalPedidosEl) totalPedidosEl.textContent = totalItens;
+  if (totalValorEl) totalValorEl.textContent = formatPriceBRL(totalValor);
+}
+
+function atualizarListaMesas() {
+  atualizarResumoMesas();
+
+  if (countMesasEl) countMesasEl.textContent = String(mesasAbertas.size);
+  const mesasFiltradas = getMesasFiltradas();
+
+  if (mesasFiltradas.length === 0) {
+    const message = mesasAbertas.size === 0
+      ? 'Nenhuma mesa aberta.'
+      : 'Nenhuma mesa encontrada para a busca.';
+    listaMesasEl.innerHTML = `<p class="muted">${message}</p>`;
     return;
   }
 
-  const mesasHtml = Array.from(mesasAbertas.entries())
-    .sort((a, b) => a[0] - b[0])
+  const mesasHtml = mesasFiltradas
     .map(([numero, mesa]) => {
       const total = calcularTotalMesa(mesa);
       const itens = mesa.pedidos.reduce((total, p) => total + p.quantidade, 0);
       const isAtual = numero === mesaAtual;
-      
+
       return `
         <div class="mesa-item ${isAtual ? 'mesa-atual' : ''}" data-mesa="${numero}">
-          <div class="mesa-numero">Mesa ${numero}</div>
-          <div class="mesa-info">
+          <div>
+            <div class="mesa-numero">Mesa ${numero}</div>
             <div class="mesa-pedidos">${itens} itens</div>
+          </div>
+          <div class="mesa-info">
             <div class="mesa-total">${formatPriceBRL(total)}</div>
           </div>
         </div>
@@ -408,6 +472,15 @@ function attachEvents() {
 
   // Finalizar mesa
   finalizarMesaBtn.addEventListener("click", finalizarMesa);
+
+  // Resetar todas as mesas
+  resetMesasBtn?.addEventListener("click", resetTodasMesas);
+
+  // Buscar mesas / pedidos
+  mesaSearchInput?.addEventListener("input", () => {
+    mesaSearchTerm = String(mesaSearchInput.value || "").trim();
+    atualizarListaMesas();
+  });
 
   // Adicionar produto
   document.body.addEventListener("click", (event) => {

@@ -69,6 +69,25 @@
 
       <!-- Pedidos da mesa atual -->
       <aside class="pedidos-box">
+        <div class="garcom-summary">
+          <div class="summary-card">
+            <span>Mesas abertas</span>
+            <strong id="total-mesas-abertas">0</strong>
+          </div>
+          <div class="summary-card">
+            <span>Itens em aberto</span>
+            <strong id="total-pedidos-abertos">0</strong>
+          </div>
+          <div class="summary-card">
+            <span>Total em aberto</span>
+            <strong id="total-aberto-valor">R$ 0,00</strong>
+          </div>
+        </div>
+
+        <label class="mesa-search">
+          <span>Pesquisar mesas / pedidos</span>
+          <input type="search" id="mesa-search" placeholder="Número ou produto..." />
+        </label>
         <h2>Pedidos da Mesa <span id="mesa-atual">-</span></h2>
         <div id="pedidos-mesa" class="pedidos-mesa">
           <p class="muted">Selecione uma mesa ou adicione produtos.</p>
@@ -86,6 +105,8 @@
             <p class="muted">Nenhuma mesa aberta.</p>
           </div>
         </details>
+
+        <button id="reset-mesas-btn" class="btn btn-ghost btn-full">Resetar Todas as Mesas</button>
       </aside>
     </main>
 

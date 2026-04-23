@@ -164,14 +164,6 @@ function handleRequest(req, res) {
     }
   }
 
-  if (pathname === "/cardapio/comunidade" || pathname === "/cardapio/comunidade/") {
-    const indexPath = path.join(ROOT, "index.html");
-    if (fileExists(indexPath)) {
-      serveFile(res, indexPath);
-      return;
-    }
-  }
-
   // 1) Arquivo estático direto (ex: /cardapio/style.css, /admin/style.css, /shared/supabase.js)
   const staticPath = path.join(ROOT, relativePath);
   if (fileExists(staticPath)) {

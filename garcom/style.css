@@ -67,6 +67,63 @@
   top: 20px;
 }
 
+.garcom-summary {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.summary-card {
+  background: var(--bg, #fffaf3);
+  border: 1px solid var(--border, #e5e5e5);
+  border-radius: 12px;
+  padding: 14px 16px;
+}
+
+.summary-card span {
+  display: block;
+  color: var(--muted, #666666);
+  font-size: 0.85rem;
+  margin-bottom: 8px;
+}
+
+.summary-card strong {
+  display: block;
+  font-size: 1.1rem;
+  color: var(--text, #333333);
+}
+
+.mesa-search {
+  display: block;
+  margin-bottom: 16px;
+}
+
+.mesa-search span {
+  display: block;
+  margin-bottom: 8px;
+  font-size: 0.95rem;
+  color: var(--text, #333333);
+}
+
+.mesa-search input {
+  width: 100%;
+  padding: 12px 14px;
+  border-radius: 10px;
+  border: 1px solid var(--border, #e5e5e5);
+  background: var(--surface, #ffffff);
+  color: var(--text, #333333);
+}
+
+.btn-full {
+  width: 100%;
+  justify-content: center;
+}
+
+.pedidos-box button#reset-mesas-btn {
+  margin-top: 12px;
+}
+
 .pedidos-box h2 {
   margin: 0 0 16px 0;
   color: var(--text, #333333);
