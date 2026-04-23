@@ -50,6 +50,8 @@
     { "src": "^/admin/?$", "dest": "/admin/index.html" },
     { "src": "^/admin/dashboard/?$", "dest": "/admin/dashboard.html" },
     { "src": "^/admin/owner/?$", "dest": "/admin/owner.html" },
+    { "src": "^/garcom/?$", "dest": "/garcom/index.html" },
+    { "src": "^/garcom/(.*)$", "dest": "/garcom/index.html" },
     { "src": "^/cardapio/?$", "dest": "/cardapio/index.html" },
     { "src": "^/cardapio/(.*)$", "dest": "/cardapio/index.html" }
   ]

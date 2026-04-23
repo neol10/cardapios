@@ -123,6 +123,7 @@ create table if not exists public.cardapios (
   whatsapp text not null,
   modo text not null default 'pedido' check (modo in ('pedido','catalogo')),
   owner_edit_enabled boolean not null default false,
+  modo_garcom_enabled boolean not null default false,
   cor_tema text not null default '#ff6a00',
   cor_secundaria text,
   fonte_key text,
@@ -340,6 +341,7 @@ begin
     whatsapp = coalesce(nullif(trim(p_patch->>'whatsapp'), ''), whatsapp),
     slogan = coalesce(nullif(trim(p_patch->>'slogan'), ''), slogan),
     modo = coalesce(nullif(trim(p_patch->>'modo'), ''), modo),
+    modo_garcom_enabled = coalesce(p_patch->>'modo_garcom_enabled', modo_garcom_enabled),
     horario_funcionamento = coalesce(nullif(trim(p_patch->>'horario_funcionamento'), ''), horario_funcionamento),
     abre_em = case
       when nullif(trim(p_patch->>'abre_em'), '') is not null then (trim(p_patch->>'abre_em'))::time
