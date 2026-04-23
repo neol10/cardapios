@@ -342,10 +342,9 @@ async function loadCardapio() {
     return;
   }
 
-  const isModoPedido = String(cardapioData.modo || "pedido").toLowerCase() === "pedido";
   const isGarcomEnabled = Boolean(cardapioData.modo_garcom_enabled);
   
-  if (!isGarcomEnabled || !isModoPedido) {
+  if (!isGarcomEnabled) {
     cardapioNomeEl.textContent = "Modo garçom desabilitado";
     cardapioSubtitle.textContent = "Este cardápio não está com modo garçom ativo.";
     produtosContainer.innerHTML = '<p class="muted">O modo garçom está desabilitado para este cardápio.</p>';

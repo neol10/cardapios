@@ -1942,14 +1942,10 @@ async function initOwnerPage() {
     if (editForm.modo) editForm.modo.value = data.modo || "pedido";
     if (editForm.modo_garcom_enabled) editForm.modo_garcom_enabled.checked = Boolean(data.modo_garcom_enabled || false);
     
-    // Mostrar/ocultar opção de modo garçom baseado no tipo de cardápio
+    // Mostrar a opção de modo garçom em todos os tipos de cardápio.
     const modoGarcomWrap = document.querySelector("#modo-garcom-wrap");
     if (modoGarcomWrap) {
-      const isModoPedido = data.modo === "pedido";
-      modoGarcomWrap.style.display = isModoPedido ? "block" : "none";
-      if (!isModoPedido) {
-        editForm.modo_garcom_enabled.checked = false;
-      }
+      modoGarcomWrap.style.display = "";
     }
     
     editForm.horario_funcionamento.value = data.horario_funcionamento || "";
@@ -2166,11 +2162,7 @@ async function initOwnerPage() {
     editForm.modo.addEventListener("change", () => {
       const modoGarcomWrap = document.querySelector("#modo-garcom-wrap");
       if (modoGarcomWrap) {
-        const isModoPedido = editForm.modo.value === "pedido";
-        modoGarcomWrap.style.display = isModoPedido ? "block" : "none";
-        if (!isModoPedido && editForm.modo_garcom_enabled) {
-          editForm.modo_garcom_enabled.checked = false;
-        }
+        modoGarcomWrap.style.display = "";
       }
     });
   }

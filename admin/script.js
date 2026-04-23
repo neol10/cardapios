@@ -717,6 +717,7 @@ function renderCardapios() {
       const whatsapp = escapeHtml(item.whatsapp);
       const fotoUrl = safeHttpUrl(item.foto_url);
       const modo = String(item.modo || "pedido").toLowerCase() === "catalogo" ? "Catálogo" : "Pedido";
+      const garcomStatus = Boolean(item.modo_garcom_enabled) ? "Ativo" : "Desativado";
       const isSelected = state.selectedCardapioId === item.id;
 
       return `
@@ -728,6 +729,7 @@ function renderCardapios() {
         <p class="muted">Slug: /cardapio/${slugText}</p>
         <p class="muted">WhatsApp: ${whatsapp}</p>
         <p class="muted">Modo: ${modo}</p>
+        <p class="muted">Garçom: ${garcomStatus}</p>
         <div class="list-actions">
           <a class="btn" href="/cardapio/${slugHref}" target="_blank" rel="noopener">Abrir cardápio</a>
           <a class="btn" href="/garcom/${slugHref}" target="_blank" rel="noopener">Abrir garçom</a>
@@ -1127,16 +1129,10 @@ function getGarcomLink(slug) {
 
 function updateModoGarcomAvailability(form) {
   if (!form) return;
-  const modo = String(form.modo?.value || "pedido").toLowerCase();
-  const isPedido = modo === "pedido";
   const toggle = form.modo_garcom_enabled;
   if (!(toggle instanceof HTMLInputElement)) return;
-
-  if (!isPedido) {
-    toggle.checked = false;
-  }
-  toggle.disabled = !isPedido;
-  toggle.title = isPedido ? "" : "Disponível somente no modo Pedido.";
+  toggle.disabled = false;
+  toggle.title = "Funciona tanto em Pedido quanto em Catálogo.";
 }
 
 
@@ -1385,11 +1381,6 @@ async function setupDashboardPage() {
       return;
     }
 
-    if (modo !== "pedido" && modo_garcom_enabled) {
-      toast("O modo garçom só funciona no cardápio em modo Pedido.", "error");
-      return;
-    }
-
     const basePayload = {
       nome,
       slug,
@@ -1397,7 +1388,7 @@ async function setupDashboardPage() {
       cor_tema,
       cor_secundaria: cor_secundaria || null,
       modo,
-      modo_garcom_enabled: modo === "pedido" ? modo_garcom_enabled : false,
+      modo_garcom_enabled,
       fundo_estilo,
       cor_fundo: cor_fundo || null,
       fundo_cor_1: fundo_cor_1 || null,
@@ -2056,16 +2047,6 @@ async function initOwnerPage() {
     if (editForm.modo) editForm.modo.value = data.modo || "pedido";
     if (editForm.modo_garcom_enabled) editForm.modo_garcom_enabled.checked = Boolean(data.modo_garcom_enabled || false);
     
-    // Mostrar/ocultar opção de modo garçom baseado no tipo de cardápio
-    const modoGarcomWrap = document.querySelector("#modo-garcom-wrap");
-    if (modoGarcomWrap) {
-      const isModoPedido = data.modo === "pedido";
-      modoGarcomWrap.style.display = isModoPedido ? "block" : "none";
-      if (!isModoPedido) {
-        editForm.modo_garcom_enabled.checked = false;
-      }
-    }
-    
     editForm.horario_funcionamento.value = data.horario_funcionamento || "";
     editForm.abre_em.value = data.abre_em ? String(data.abre_em).slice(0, 5) : "";
     editForm.fecha_em.value = data.fecha_em ? String(data.fecha_em).slice(0, 5) : "";
@@ -2302,19 +2283,6 @@ async function initOwnerPage() {
     setOwnerMessage("Sessão encerrada.");
   });
 
-  // Event listener para mudança do tipo de cardápio
-  if (editForm.modo) {
-    editForm.modo.addEventListener("change", () => {
-      const modoGarcomWrap = document.querySelector("#modo-garcom-wrap");
-      if (modoGarcomWrap) {
-        const isModoPedido = editForm.modo.value === "pedido";
-        modoGarcomWrap.style.display = isModoPedido ? "block" : "none";
-        if (!isModoPedido && editForm.modo_garcom_enabled) {
-          editForm.modo_garcom_enabled.checked = false;
-        }
-      }
-    });
-  }
 }
 
 if (document.querySelector("#owner-page")) {
