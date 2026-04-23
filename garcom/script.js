@@ -28,9 +28,6 @@ let activeProdutos = [];
 let mesasAbertas = new Map(); // numero_mesa -> { pedidos: [], criado_em: Date }
 let mesaAtual = null;
 let mesaSearchTerm = "";
-let activeProdutos = [];
-let mesasAbertas = new Map(); // numero_mesa -> { pedidos: [], criado_em: Date }
-let mesaAtual = null;
 
 // Funções utilitárias
 function safeText(value) {
