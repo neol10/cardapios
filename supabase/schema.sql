@@ -339,6 +339,8 @@ begin
     nome = coalesce(nullif(trim(p_patch->>'nome'), ''), nome),
     whatsapp = coalesce(nullif(trim(p_patch->>'whatsapp'), ''), whatsapp),
     slogan = coalesce(nullif(trim(p_patch->>'slogan'), ''), slogan),
+    modo = coalesce(nullif(trim(p_patch->>'modo'), ''), modo),
+    modo_garcom_enabled = coalesce(p_patch->>'modo_garcom_enabled', modo_garcom_enabled),
     horario_funcionamento = coalesce(nullif(trim(p_patch->>'horario_funcionamento'), ''), horario_funcionamento),
     abre_em = case
       when nullif(trim(p_patch->>'abre_em'), '') is not null then (trim(p_patch->>'abre_em'))::time

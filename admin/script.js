@@ -1842,6 +1842,8 @@ function getOwnerCardapioEditPayload(editForm) {
     nome: String(editForm.nome.value || "").trim(),
     whatsapp: onlyDigits(editForm.whatsapp.value || ""),
     slogan: String(editForm.slogan.value || "").trim(),
+    modo: String(editForm.modo?.value || "pedido").trim(),
+    modo_garcom_enabled: Boolean(editForm.modo_garcom_enabled?.checked || false),
     horario_funcionamento: String(editForm.horario_funcionamento.value || "").trim(),
     abre_em: String(editForm.abre_em.value || "").trim(),
     fecha_em: String(editForm.fecha_em.value || "").trim(),
@@ -1948,7 +1950,7 @@ async function initOwnerPage() {
   const loadAndFill = async () => {
     const { data, error } = await supabase
       .from("cardapios")
-      .select("id,nome,slug,whatsapp,slogan,horario_funcionamento,abre_em,fecha_em,endereco,instagram_url,foto_url,banner_url")
+      .select("id,nome,slug,whatsapp,slogan,modo,modo_garcom_enabled,horario_funcionamento,abre_em,fecha_em,endereco,instagram_url,foto_url,banner_url")
       .eq("slug", slug)
       .single();
 
@@ -1961,6 +1963,19 @@ async function initOwnerPage() {
     editForm.nome.value = data.nome || "";
     editForm.whatsapp.value = maskTelefone(data.whatsapp || "");
     editForm.slogan.value = data.slogan || "";
+    if (editForm.modo) editForm.modo.value = data.modo || "pedido";
+    if (editForm.modo_garcom_enabled) editForm.modo_garcom_enabled.checked = Boolean(data.modo_garcom_enabled || false);
+    
+    // Mostrar/ocultar opção de modo garçom baseado no tipo de cardápio
+    const modoGarcomWrap = document.querySelector("#modo-garcom-wrap");
+    if (modoGarcomWrap) {
+      const isModoPedido = data.modo === "pedido";
+      modoGarcomWrap.style.display = isModoPedido ? "block" : "none";
+      if (!isModoPedido) {
+        editForm.modo_garcom_enabled.checked = false;
+      }
+    }
+    
     editForm.horario_funcionamento.value = data.horario_funcionamento || "";
     editForm.abre_em.value = data.abre_em ? String(data.abre_em).slice(0, 5) : "";
     editForm.fecha_em.value = data.fecha_em ? String(data.fecha_em).slice(0, 5) : "";
@@ -2028,6 +2043,13 @@ async function initOwnerPage() {
     }
 
     const patch = getOwnerCardapioEditPayload(editForm);
+    
+    // Debug: mostrar o que está sendo salvo
+    console.log("=== DEBUG ADMIN SAVE ===");
+    console.log("Patch completo:", patch);
+    console.log("Modo:", patch.modo);
+    console.log("Modo garçom enabled:", patch.modo_garcom_enabled);
+    console.log("Slug:", slug);
 
     setOwnerMessage("Salvando...");
     const { data, error } = await supabase.rpc("owner_update_cardapio", {
@@ -2182,6 +2204,20 @@ async function initOwnerPage() {
     }
     setOwnerMessage("Sessão encerrada.");
   });
+
+  // Event listener para mudança do tipo de cardápio
+  if (editForm.modo) {
+    editForm.modo.addEventListener("change", () => {
+      const modoGarcomWrap = document.querySelector("#modo-garcom-wrap");
+      if (modoGarcomWrap) {
+        const isModoPedido = editForm.modo.value === "pedido";
+        modoGarcomWrap.style.display = isModoPedido ? "block" : "none";
+        if (!isModoPedido && editForm.modo_garcom_enabled) {
+          editForm.modo_garcom_enabled.checked = false;
+        }
+      }
+    });
+  }
 }
 
 if (document.querySelector("#owner-page")) {

@@ -333,11 +333,25 @@ async function loadCardapio() {
     return;
   }
 
+  // Debug: mostrar dados do cardápio
+  console.log("=== DEBUG MODO GARÇOM ===");
+  console.log("Dados completos:", cardapioData);
+  console.log("Modo:", cardapioData.modo);
+  console.log("Modo garçom enabled:", cardapioData.modo_garcom_enabled);
+  console.log("Tipo do campo modo_garcom_enabled:", typeof cardapioData.modo_garcom_enabled);
+  console.log("Slug:", slug);
+  
   // Verificar se o modo garçom está habilitado e se é modo pedido
-  if (!cardapioData.modo_garcom_enabled || cardapioData.modo !== "pedido") {
+  const isModoPedido = cardapioData.modo === "pedido";
+  const isGarcomEnabled = cardapioData.modo_garcom_enabled === true;
+  
+  console.log("isModoPedido:", isModoPedido);
+  console.log("isGarcomEnabled:", isGarcomEnabled);
+  
+  if (!isGarcomEnabled || !isModoPedido) {
     cardapioNomeEl.textContent = "Modo garçom desabilitado";
-    cardapioSubtitle.textContent = "Este cardápio não permite acesso de garçom";
-    produtosContainer.innerHTML = '<p class="muted">Modo garçom não disponível</p>';
+    cardapioSubtitle.textContent = `Modo: ${cardapioData.modo || 'não definido'} | Garçom: ${isGarcomEnabled ? 'sim' : 'não'} | Pedido: ${isModoPedido ? 'sim' : 'não'}`;
+    produtosContainer.innerHTML = `<p class="muted">Modo garçom não disponível. Debug: modo=${cardapioData.modo}, garcom=${cardapioData.modo_garcom_enabled}</p>`;
     return;
   }
 
