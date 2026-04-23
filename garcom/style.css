@@ -1,0 +1,278 @@
+/* Importa estilos base do cardápio */
+@import url('../cardapio/style.css?v=22');
+
+/* Estilos específicos do modo garçom */
+.mesa-selector {
+  display: flex;
+  gap: 12px;
+  align-items: flex-end;
+  margin-bottom: 24px;
+  padding: 16px;
+  background: var(--surface, #ffffff);
+  border-radius: 12px;
+  border: 1px solid var(--border, #e5e5e5);
+}
+
+.mesa-selector label {
+  flex: 1;
+  margin: 0;
+}
+
+.mesa-selector input {
+  font-size: 1.2rem;
+  font-weight: 600;
+  text-align: center;
+  padding: 12px;
+}
+
+.mesa-selector button {
+  white-space: nowrap;
+}
+
+/* Produtos no modo garçom */
+.produtos-grid .produto-card {
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.produtos-grid .produto-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+}
+
+.produtos-grid .produto-card .add-to-cart {
+  background: var(--theme, #ff6a00);
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.produtos-grid .produto-card .add-to-cart:hover {
+  background: var(--theme2, #c8945b);
+  transform: scale(1.05);
+}
+
+/* Caixa de pedidos da mesa */
+.pedidos-box {
+  background: var(--surface, #ffffff);
+  border-radius: 12px;
+  padding: 20px;
+  border: 1px solid var(--border, #e5e5e5);
+  height: fit-content;
+  position: sticky;
+  top: 20px;
+}
+
+.pedidos-box h2 {
+  margin: 0 0 16px 0;
+  color: var(--text, #333333);
+  font-size: 1.3rem;
+  font-weight: 700;
+}
+
+.pedidos-mesa {
+  min-height: 200px;
+  max-height: 400px;
+  overflow-y: auto;
+  margin-bottom: 16px;
+  padding: 12px;
+  background: var(--bg, #fffaf3);
+  border-radius: 8px;
+  border: 1px solid var(--border, #e5e5e5);
+}
+
+.pedido-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 12px;
+  margin-bottom: 8px;
+  background: white;
+  border-radius: 6px;
+  border: 1px solid var(--border, #e5e5e5);
+  animation: slideIn 0.2s ease-out;
+}
+
+.pedido-item .pedido-info {
+  flex: 1;
+}
+
+.pedido-item .pedido-nome {
+  font-weight: 600;
+  color: var(--text, #333333);
+}
+
+.pedido-item .pedido-quantidade {
+  color: var(--muted, #666666);
+  font-size: 0.9rem;
+}
+
+.pedido-item .pedido-preco {
+  font-weight: 700;
+  color: var(--theme, #ff6a00);
+}
+
+.pedido-item .remover-pedido {
+  background: #ff4444;
+  color: white;
+  border: none;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 0.8rem;
+  cursor: pointer;
+  margin-left: 8px;
+}
+
+.pedido-item .remover-pedido:hover {
+  background: #cc0000;
+}
+
+/* Ações da mesa */
+.mesa-actions {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.mesa-actions button {
+  flex: 1;
+}
+
+/* Lista de mesas abertas */
+.mesas-list {
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.mesa-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px;
+  margin-bottom: 8px;
+  background: var(--bg, #fffaf3);
+  border-radius: 8px;
+  border: 1px solid var(--border, #e5e5e5);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.mesa-item:hover {
+  background: var(--surface, #ffffff);
+  border-color: var(--theme, #ff6a00);
+}
+
+.mesa-item.mesa-atual {
+  background: var(--theme, #ff6a00);
+  color: white;
+  border-color: var(--theme, #ff6a00);
+}
+
+.mesa-item .mesa-numero {
+  font-weight: 700;
+  font-size: 1.1rem;
+}
+
+.mesa-item .mesa-info {
+  text-align: right;
+}
+
+.mesa-item .mesa-pedidos {
+  font-size: 0.9rem;
+  opacity: 0.8;
+}
+
+.mesa-item .mesa-total {
+  font-weight: 700;
+}
+
+/* Resumo da mesa */
+.mesa-resumo {
+  padding: 12px;
+  background: var(--surface, #ffffff);
+  border-radius: 8px;
+  border: 1px solid var(--border, #e5e5e5);
+  margin-bottom: 16px;
+}
+
+.mesa-resumo .resumo-item {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.mesa-resumo .resumo-total {
+  font-weight: 700;
+  font-size: 1.1rem;
+  color: var(--theme, #ff6a00);
+  border-top: 2px solid var(--border, #e5e5e5);
+  padding-top: 8px;
+  margin-top: 8px;
+}
+
+/* Animações */
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateX(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes pulse {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+}
+
+.pulse {
+  animation: pulse 0.3s ease-in-out;
+}
+
+/* Responsivo */
+@media (max-width: 768px) {
+  .content-grid {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+
+  .mesa-selector {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .pedidos-box {
+    position: static;
+  }
+
+  .mesa-actions {
+    flex-direction: column;
+  }
+}
+
+/* Estados especiais */
+body.mesa-selecionada .mesa-selector {
+  background: var(--theme, #ff6a00);
+  color: white;
+  border-color: var(--theme, #ff6a00);
+}
+
+body.mesa-selecionada .mesa-selector input {
+  background: rgba(255, 255, 255, 0.2);
+  color: white;
+  border-color: rgba(255, 255, 255, 0.3);
+}
+
+body.mesa-selecionada .mesa-selector input::placeholder {
+  color: rgba(255, 255, 255, 0.7);
+}

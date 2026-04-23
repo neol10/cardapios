@@ -1,0 +1,58 @@
+{
+  "headers": [
+    {
+      "source": "/sw.js",
+      "headers": [
+        { "key": "Cache-Control", "value": "no-cache" }
+      ]
+    },
+    {
+      "source": "/(.*)\\.webmanifest",
+      "headers": [
+        { "key": "Cache-Control", "value": "no-cache" }
+      ]
+    },
+    {
+      "source": "/(.*)",
+      "headers": [
+        { "key": "X-Content-Type-Options", "value": "nosniff" },
+        { "key": "Referrer-Policy", "value": "strict-origin-when-cross-origin" },
+        { "key": "Permissions-Policy", "value": "camera=(), microphone=(), geolocation=()" }
+      ]
+    }
+  ],
+  "routes": [
+    { "src": "^/$", "dest": "/index.html" },
+
+    { "src": "^/cardapio/comunidade/?$", "dest": "/index.html" },
+
+    { "src": "^/admin/index\\.html$", "dest": "/admin", "status": 308 },
+    { "src": "^/admin/dashboard\\.html$", "dest": "/admin/dashboard", "status": 308 },
+    { "src": "^/admin/owner\\.html$", "dest": "/admin/owner", "status": 308 },
+    { "src": "^/cardapio/index\\.html$", "dest": "/cardapio", "status": 308 },
+
+    { "src": "^/dashboard(?:\\.html)?/?$", "dest": "/admin/dashboard", "status": 308 },
+    { "src": "^/owner(?:\\.html)?/?$", "dest": "/admin/owner", "status": 308 },
+
+    {
+      "src": "^/cardapio/([^/?#]+?)/?$",
+      "has": [
+        {
+          "type": "header",
+          "key": "user-agent",
+          "value": "(?i)(facebookexternalhit|whatsapp|twitterbot|slackbot|discordbot|telegrambot|linkedinbot|pinterest|embedly|googlebot|bingbot)"
+        }
+      ],
+      "dest": "/api/og-cardapio?slug=$1"
+    },
+
+    { "handle": "filesystem" },
+    { "src": "^/admin/?$", "dest": "/admin/index.html" },
+    { "src": "^/admin/dashboard/?$", "dest": "/admin/dashboard.html" },
+    { "src": "^/admin/owner/?$", "dest": "/admin/owner.html" },
+    { "src": "^/garcom/?$", "dest": "/garcom/index.html" },
+    { "src": "^/garcom/(.*)$", "dest": "/garcom/index.html" },
+    { "src": "^/cardapio/?$", "dest": "/cardapio/index.html" },
+    { "src": "^/cardapio/(.*)$", "dest": "/cardapio/index.html" }
+  ]
+}

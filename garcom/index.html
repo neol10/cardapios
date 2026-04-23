@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Bloco de Notas - Garçom</title>
+    <meta name="theme-color" content="#ff6a00" />
+    <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />
+    <link rel="preconnect" href="https://esm.sh" crossorigin />
+    <link rel="preconnect" href="https://uapwitkmxuoepnjlffqy.supabase.co" crossorigin />
+    <link rel="modulepreload" href="/shared/supabase.js" />
+    <link rel="modulepreload" href="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm" crossorigin />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Sora:wght@200;300;400;500;600;700;800&family=Inter:wght@200;300;400;500;600;700;800;900&family=Poppins:wght@200;300;400;500;600;700;800;900&family=Montserrat:wght@200;300;400;500;600;700;800;900&family=Nunito:wght@200;300;400;500;600;700;800;900&family=Rubik:wght@300;400;500;600;700;800;900&family=Outfit:wght@200;300;400;500;600;700;800;900&family=DM+Sans:wght@200;300;400;500;600;700;800;900&family=Work+Sans:wght@200;300;400;500;600;700;800;900&family=Lora:wght@400;500;600;700&family=Merriweather:wght@300;400;700;900&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="preload" as="style" href="./style.css?v=1" />
+    <link rel="stylesheet" href="./style.css?v=1" />
+    <style>
+      body.is-loading main,
+      body.is-loading aside {
+        visibility: hidden;
+      }
+
+      body {
+        background: #fffaf3;
+      }
+    </style>
+    <script>
+      window.__SUPABASE_CONFIG__ = {
+        url: "https://uapwitkmxuoepnjlffqy.supabase.co",
+        anonKey:
+          "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVhcHdpdGtteHVvZXBuamxmZnF5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ4OTcxMjUsImV4cCI6MjA5MDQ3MzEyNX0.YTz_EqzK4m0CMM25n3QJC1b3Nj9bikIrDDEEFi5n6ps"
+      };
+    </script>
+  </head>
+  <body class="is-loading">
+    <header class="hero">
+      <div class="hero-content">
+        <div>
+          <p class="chip">Bloco de Notas do Garçom</p>
+          <h1 id="cardapio-nome">Carregando cardápio...</h1>
+          <p id="cardapio-subtitle">Anote pedidos rapidamente por mesa.</p>
+        </div>
+        <div class="hero-media">
+          <img id="cardapio-foto" class="is-hidden" alt="" />
+        </div>
+      </div>
+    </header>
+
+    <main class="content-grid">
+      <section>
+        <!-- Mesa atual -->
+        <div class="mesa-selector">
+          <label>
+            Número da Mesa
+            <input type="number" id="numero-mesa" min="1" max="999" placeholder="Ex: 1" />
+          </label>
+          <button id="nova-mesa-btn" class="btn btn-secondary">Nova Mesa</button>
+        </div>
+
+        <!-- Produtos -->
+        <div id="produtos" class="produtos-grid">
+          <p class="muted">Carregando produtos...</p>
+        </div>
+      </section>
+
+      <!-- Pedidos da mesa atual -->
+      <aside class="pedidos-box">
+        <h2>Pedidos da Mesa <span id="mesa-atual">-</span></h2>
+        <div id="pedidos-mesa" class="pedidos-mesa">
+          <p class="muted">Selecione uma mesa ou adicione produtos.</p>
+        </div>
+        
+        <div class="mesa-actions">
+          <button id="limpar-mesa-btn" class="btn btn-ghost">Limpar Mesa</button>
+          <button id="finalizar-mesa-btn" class="btn btn-primary">Finalizar Mesa</button>
+        </div>
+
+        <!-- Lista de mesas -->
+        <details class="details" id="mesas-abertas">
+          <summary>Mesas Abertas (<span id="count-mesas">0</span>)</summary>
+          <div id="lista-mesas" class="mesas-list">
+            <p class="muted">Nenhuma mesa aberta.</p>
+          </div>
+        </details>
+      </aside>
+    </main>
+
+    <link rel="modulepreload" href="./script.js?v=1" />
+    <script type="module" src="./script.js?v=1"></script>
+  </body>
+</html>

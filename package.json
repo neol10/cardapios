@@ -1,0 +1,26 @@
+{
+  "name": "cardapios",
+  "version": "1.0.0",
+  "description": "Sistema de cardápios digitais com modo garçom",
+  "main": "server.js",
+  "scripts": {
+    "dev": "node server.js",
+    "start": "node server.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "cardapio",
+    "digital",
+    "garcom",
+    "restaurant",
+    "whatsapp",
+    "supabase"
+  ],
+  "author": "Neo Lucca",
+  "license": "MIT",
+  "engines": {
+    "node": ">=14.0.0"
+  },
+  "devDependencies": {},
+  "dependencies": {}
+}

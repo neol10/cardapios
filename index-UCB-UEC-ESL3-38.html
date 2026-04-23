@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Cardápios</title>
+    <meta name="theme-color" content="#ff6a00" />
+
+    <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />
+    <link rel="preconnect" href="https://esm.sh" crossorigin />
+    <link rel="preconnect" href="https://uapwitkmxuoepnjlffqy.supabase.co" crossorigin />
+    <link rel="modulepreload" href="/shared/supabase.js" />
+    <link rel="modulepreload" href="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm" crossorigin />
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Sora:wght@200;300;400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+
+    <!-- Reaproveita o design/tokens do cardápio público -->
+    <link rel="preload" as="style" href="/cardapio/style.css?v=22" />
+    <link rel="stylesheet" href="/cardapio/style.css?v=22" />
+
+    <style>
+      body.is-loading main {
+        visibility: hidden;
+      }
+
+      /* Tema dark somente na vitrine (não altera /cardapio nem /admin) */
+      :root {
+        --bg: #0f0d0b;
+        --surface: #171311;
+        --text: #f3ede7;
+        --muted: #b7aca3;
+        --border: #2f2722;
+        --shadow: 0 18px 50px rgba(0, 0, 0, 0.55);
+      }
+
+      body {
+        background:
+          radial-gradient(circle at 12% 12%, rgba(200, 148, 91, 0.14) 0%, transparent 48%),
+          radial-gradient(circle at 92% 0%, rgba(111, 78, 55, 0.16) 0%, transparent 54%),
+          var(--bg);
+        color: var(--text);
+      }
+
+      .hero {
+        background:
+          linear-gradient(180deg, rgba(255, 255, 255, 0.06) 0%, transparent 70%);
+      }
+
+      .hero {
+        padding-bottom: 22px;
+      }
+
+      .vitrine {
+        max-width: 1100px;
+        margin: 0 auto;
+        padding: 0 16px 22px;
+      }
+
+      .vitrine-head {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        align-items: baseline;
+        justify-content: space-between;
+        margin: 8px auto 0;
+      }
+
+      .vitrine-head h2 {
+        margin: 0;
+        font-size: 1.35rem;
+        letter-spacing: -0.02em;
+        font-weight: var(--heading-weight);
+      }
+
+      .vitrine-head p {
+        margin: 0;
+        color: color-mix(in srgb, var(--text) 72%, var(--muted));
+      }
+
+      .vitrine-message {
+        margin: 14px 0 0;
+        font-weight: 700;
+        color: color-mix(in srgb, var(--text) 78%, var(--muted));
+      }
+
+      .vitrine-message.error {
+        color: color-mix(in srgb, var(--text) 92%, white);
+        border: 1px solid color-mix(in srgb, var(--theme2) 18%, var(--border));
+        background: rgba(255, 255, 255, 0.06);
+        padding: 10px 12px;
+        border-radius: 14px;
+      }
+
+      .vitrine-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+        gap: 14px;
+        margin-top: 14px;
+      }
+
+      .vitrine-card {
+        display: grid;
+        gap: 10px;
+        padding: 14px;
+        border-radius: 18px;
+        border: 1px solid color-mix(in srgb, var(--border) 92%, transparent);
+        background: rgba(255, 255, 255, 0.05);
+        box-shadow:
+          0 18px 46px rgba(0, 0, 0, 0.45),
+          0 0 0 1px rgba(255, 255, 255, 0.04);
+        text-decoration: none;
+        color: inherit;
+        transition: transform 140ms ease, filter 140ms ease, border-color 140ms ease;
+        overflow: hidden;
+      }
+
+      .vitrine-card:hover {
+        transform: translateY(-1px);
+        filter: brightness(1.01);
+        border-color: color-mix(in srgb, var(--theme2) 26%, var(--border));
+      }
+
+      .vitrine-card:focus-visible {
+        outline: 3px solid color-mix(in srgb, var(--theme) 26%, transparent);
+        outline-offset: 3px;
+      }
+
+      .vitrine-media {
+        width: 100%;
+        aspect-ratio: 16 / 10;
+        max-height: 120px;
+        border-radius: 14px;
+        border: 1px solid color-mix(in srgb, var(--border) 95%, transparent);
+        background:
+          radial-gradient(circle at 18% 18%, rgba(200, 148, 91, 0.16) 0%, transparent 55%),
+          radial-gradient(circle at 88% 0%, rgba(111, 78, 55, 0.16) 0%, transparent 58%),
+          linear-gradient(135deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.02));
+        object-fit: cover;
+        display: block;
+      }
+
+      .vitrine-card h3 {
+        margin: 0;
+        font-size: 1.16rem;
+        line-height: 1.15;
+        letter-spacing: -0.015em;
+        font-weight: var(--heading-weight);
+      }
+
+      .vitrine-card .muted {
+        margin: 0;
+        color: color-mix(in srgb, var(--text) 72%, var(--muted));
+        line-height: 1.45;
+      }
+
+      .vitrine-actions {
+        margin-top: 4px;
+      }
+
+      .vitrine-actions .btn {
+        width: auto;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 11px 14px;
+        border-radius: 14px;
+      }
+
+      @media (min-width: 980px) {
+        .vitrine {
+          padding-bottom: 34px;
+        }
+
+        .vitrine-grid {
+          gap: 16px;
+          margin-top: 16px;
+        }
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        .vitrine-card {
+          transition: none;
+        }
+      }
+    </style>
+
+    <script>
+      window.__SUPABASE_CONFIG__ = {
+        url: "https://uapwitkmxuoepnjlffqy.supabase.co",
+        anonKey:
+          "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVhcHdpdGtteHVvZXBuamxmZnF5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ4OTcxMjUsImV4cCI6MjA5MDQ3MzEyNX0.YTz_EqzK4m0CMM25n3QJC1b3Nj9bikIrDDEEFi5n6ps"
+      };
+    </script>
+  </head>
+
+  <body class="is-loading">
+    <header class="hero">
+      <div class="hero-content">
+        <div>
+          <p class="chip">Cardápios disponíveis</p>
+          <h1>Escolha um cardápio</h1>
+          <p id="vitrine-subtitle" class="muted" style="max-width: 60ch;">
+            Toque em um cardápio para ver os produtos e fazer seu pedido.
+          </p>
+        </div>
+      </div>
+    </header>
+
+    <main class="vitrine">
+      <div class="vitrine-head">
+        <h2>Cardápios</h2>
+        <p id="vitrine-count">Carregando...</p>
+      </div>
+
+      <p id="vitrine-message" class="vitrine-message" aria-live="polite"></p>
+
+      <section id="cardapios" class="vitrine-grid" aria-label="Lista de cardápios"></section>
+    </main>
+
+    <script type="module" src="/index.js?v=5"></script>
+  </body>
+</html>

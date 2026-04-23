@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Admin | Cardápio Digital</title>
+    <meta name="theme-color" content="#0f0d0b" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <link rel="manifest" href="/admin/manifest.webmanifest" />
+    <link rel="icon" href="/pwa/icon.svg" type="image/svg+xml" />
+    <link rel="icon" href="/pwa/icon-32.png" type="image/png" sizes="32x32" />
+    <link rel="icon" href="/pwa/icon-16.png" type="image/png" sizes="16x16" />
+    <link rel="apple-touch-icon" href="/pwa/icon-180.png" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&family=Playfair+Display:wght@600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="/admin/style.css?v=9" />
+    <script>
+      window.__SUPABASE_CONFIG__ = {
+        url: "https://uapwitkmxuoepnjlffqy.supabase.co",
+        anonKey:
+          "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVhcHdpdGtteHVvZXBuamxmZnF5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ4OTcxMjUsImV4cCI6MjA5MDQ3MzEyNX0.YTz_EqzK4m0CMM25n3QJC1b3Nj9bikIrDDEEFi5n6ps"
+      };
+    </script>
+  </head>
+  <body class="admin-body">
+    <main class="auth-layout">
+      <section class="auth-card">
+        <h1>Painel do Cardápio</h1>
+        <p>Acesse para gerenciar cardápios, produtos e pedidos.</p>
+
+        <form id="login-form" class="stack-gap">
+          <label>
+            E-mail
+            <input
+              type="email"
+              name="email"
+              placeholder="admin@empresa.com"
+              required
+              autocomplete="email"
+            />
+          </label>
+
+          <label>
+            Senha
+            <input
+              type="password"
+              name="password"
+              placeholder="Sua senha"
+              required
+              autocomplete="current-password"
+            />
+          </label>
+
+          <button type="submit" class="btn btn-primary btn-lg">Entrar</button>
+        </form>
+
+        <small class="hint"
+          >Dica: salve a configuração do Supabase no navegador com:
+          localStorage.setItem('supabase.config', JSON.stringify({"url":"...","anonKey":"..."}))</small
+        >
+
+        <p id="auth-message" class="message" aria-live="polite"></p>
+        <div id="toast-container" class="toast-container" aria-live="polite" aria-atomic="true"></div>
+      </section>
+    </main>
+    <script type="module" src="/admin/script.js?v=24"></script>
+  </body>
+</html>

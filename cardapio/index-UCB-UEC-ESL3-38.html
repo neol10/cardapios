@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Cardápio Digital</title>
+    <meta name="theme-color" content="#ff6a00" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <script>
+      (function () {
+        try {
+          var segments = String(window.location.pathname || "").split("/").filter(Boolean);
+          var cardapioIndex = segments.indexOf("cardapio");
+          var slug = cardapioIndex >= 0 ? segments[cardapioIndex + 1] : "";
+          if (!slug || slug === "index.html") slug = "";
+
+          var bust = Date.now();
+          var manifestHref = slug
+            ? "/api/manifest.webmanifest?slug=" + encodeURIComponent(slug) + "&v=" + bust
+            : "/api/manifest.webmanifest?v=" + bust;
+
+          var iconHref = slug
+            ? "/api/icon?slug=" + encodeURIComponent(slug) + "&format=svg&v=" + bust
+            : "/pwa/icon-32.png?v=" + bust;
+
+          var appleHref = slug
+            ? "/api/icon?slug=" + encodeURIComponent(slug) + "&v=" + bust
+            : "/pwa/icon-192.png?v=" + bust;
+
+          var head = document.head || document.getElementsByTagName("head")[0];
+          if (!head) return;
+
+          var manifest = document.createElement("link");
+          manifest.setAttribute("rel", "manifest");
+          manifest.setAttribute("href", manifestHref);
+          head.appendChild(manifest);
+
+          var icon = document.createElement("link");
+          icon.setAttribute("rel", "icon");
+          icon.setAttribute("href", iconHref);
+          if (slug) icon.setAttribute("type", "image/svg+xml");
+          head.appendChild(icon);
+
+          var apple = document.createElement("link");
+          apple.setAttribute("rel", "apple-touch-icon");
+          apple.setAttribute("href", appleHref);
+          head.appendChild(apple);
+        } catch (e) {}
+      })();
+    </script>
+    <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />
+    <link rel="preconnect" href="https://esm.sh" crossorigin />
+    <link rel="preconnect" href="https://uapwitkmxuoepnjlffqy.supabase.co" crossorigin />
+    <link rel="modulepreload" href="/shared/supabase.js" />
+    <link rel="modulepreload" href="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm" crossorigin />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Sora:wght@200;300;400;500;600;700;800&family=Inter:wght@200;300;400;500;600;700;800;900&family=Poppins:wght@200;300;400;500;600;700;800;900&family=Montserrat:wght@200;300;400;500;600;700;800;900&family=Nunito:wght@200;300;400;500;600;700;800;900&family=Rubik:wght@300;400;500;600;700;800;900&family=Outfit:wght@200;300;400;500;600;700;800;900&family=DM+Sans:wght@200;300;400;500;600;700;800;900&family=Work+Sans:wght@200;300;400;500;600;700;800;900&family=Lora:wght@400;500;600;700&family=Merriweather:wght@300;400;700;900&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="preload" as="style" href="./style.css?v=22" />
+    <link rel="stylesheet" href="./style.css?v=22" />
+    <style>
+      body.is-loading main,
+      body.is-loading aside,
+      body.is-loading #whatsapp-fab {
+        visibility: hidden;
+      }
+
+      body {
+        background: #fffaf3;
+      }
+    </style>
+    <script>
+      window.__SUPABASE_CONFIG__ = {
+        url: "https://uapwitkmxuoepnjlffqy.supabase.co",
+        anonKey:
+          "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVhcHdpdGtteHVvZXBuamxmZnF5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ4OTcxMjUsImV4cCI6MjA5MDQ3MzEyNX0.YTz_EqzK4m0CMM25n3QJC1b3Nj9bikIrDDEEFi5n6ps"
+      };
+    </script>
+  </head>
+  <body class="is-loading">
+    <header class="hero">
+      <div class="hero-content">
+        <div>
+          <p class="chip">Pedido Rápido por WhatsApp</p>
+          <h1 id="cardapio-nome">Carregando cardápio...</h1>
+           <button id="owner-edit-btn" class="btn btn-owner-edit is-hidden" type="button">Editar cardápio</button>
+          <p id="cardapio-subtitle">Escolha seus itens e finalize em poucos passos.</p>
+        </div>
+        <div class="hero-media">
+          <img id="cardapio-foto" class="is-hidden" alt="" />
+
+          <div id="cardapio-info" class="cardapio-info is-hidden" aria-label="Informações da loja">
+            <div id="cardapio-status" class="status is-hidden"></div>
+            <p id="cardapio-horario" class="muted is-hidden"></p>
+            <p id="cardapio-endereco" class="muted is-hidden"></p>
+            <p id="cardapio-pagamentos" class="muted is-hidden"></p>
+
+            <div class="info-links">
+              <a id="cardapio-instagram" class="link is-hidden" target="_blank" rel="noopener">Instagram</a>
+              <a id="cardapio-maps" class="link is-hidden" target="_blank" rel="noopener">Como chegar</a>
+              <a id="cardapio-whatsapp-top" class="link is-hidden" target="_blank" rel="noopener">WhatsApp</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <main class="content-grid">
+      <section>
+        <div id="galeria-wrap" class="galeria-wrap is-hidden" aria-label="Imagens do estabelecimento">
+          <div id="galeria" class="galeria-grid"></div>
+        </div>
+        <div id="produtos" class="produtos-grid">
+          <p class="muted">Carregando produtos...</p>
+        </div>
+      </section>
+
+      <aside class="cart-box">
+        <h2>Seu pedido</h2>
+        <div id="cart-items" class="cart-items"></div>
+        <div class="totals">
+          <p id="cart-subtotal" class="muted total-line">
+            <span class="total-label" data-label>Subtotal</span>
+            <span class="total-value" data-value>R$ 0,00</span>
+          </p>
+          <p id="cart-taxa" class="muted total-line is-hidden">
+            <span class="total-label" data-label>Taxa de entrega</span>
+            <span class="total-value" data-value>R$ 0,00</span>
+          </p>
+          <p id="cart-total" class="cart-total total-line">
+            <span class="total-label" data-label>Total</span>
+            <span class="total-value" data-value>R$ 0,00</span>
+          </p>
+          <p id="cart-minimo" class="muted is-hidden"></p>
+        </div>
+
+        <form id="checkout-form" class="checkout-form">
+          <div class="form-row">
+            <label id="tipo-pedido-wrap" class="is-hidden">
+              Tipo de pedido
+              <select name="tipo_pedido" id="tipo_pedido">
+                <option value="entrega">Entrega</option>
+                <option value="retirada">Retirada</option>
+              </select>
+            </label>
+
+            <label id="pagamento-wrap" class="is-hidden">
+              Forma de pagamento
+              <select name="pagamento" id="pagamento"></select>
+            </label>
+          </div>
+
+          <div class="form-row">
+            <label>
+              Nome completo
+              <input type="text" name="nome" placeholder="Ex.: João da Silva" autocomplete="name" required />
+            </label>
+
+            <label>
+              Telefone
+              <input
+                type="text"
+                name="telefone"
+                id="telefone"
+                placeholder="(11) 99999-9999"
+                autocomplete="tel"
+                inputmode="tel"
+                required
+              />
+            </label>
+          </div>
+
+          <label id="endereco-wrap">
+            Endereço completo
+            <textarea
+              name="endereco"
+              rows="3"
+              placeholder="Rua, número, bairro, complemento"
+              autocomplete="street-address"
+              required
+            ></textarea>
+          </label>
+
+          <button class="btn btn-primary" type="submit">Finalizar pedido</button>
+        </form>
+
+        <p id="checkout-message" class="checkout-message" aria-live="polite"></p>
+      </aside>
+    </main>
+
+    <a id="whatsapp-fab" class="whatsapp-fab is-hidden" target="_blank" rel="noopener">WhatsApp</a>
+
+    <link rel="modulepreload" href="./script.js?v=24" />
+    <script type="module" src="./script.js?v=24"></script>
+  </body>
+</html>

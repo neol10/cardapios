@@ -187,6 +187,30 @@ function escapeHtml(value) {
     .replaceAll("'", "&#39;");
 }
 
+function safeImageUrl(value) {
+  const raw = String(value ?? "").trim();
+  if (!raw) return "";
+  if (raw.startsWith("data:image/")) return raw;
+  return safeHttpUrl(raw);
+}
+
+async function fileToDataUrl(file) {
+  if (!(file instanceof File)) return "";
+  if (!file.type.startsWith("image/")) {
+    throw new Error("Selecione um arquivo de imagem válido.");
+  }
+  if (file.size > 2_500_000) {
+    throw new Error("A imagem precisa ter no máximo 2,5 MB.");
+  }
+
+  return await new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(String(reader.result || ""));
+    reader.onerror = () => reject(new Error("Não foi possível ler a imagem."));
+    reader.readAsDataURL(file);
+  });
+}
+
 function safeHttpUrl(value) {
   const raw = String(value ?? "").trim();
   if (!raw) return "";
@@ -778,7 +802,7 @@ function renderProdutos() {
       const nome = escapeHtml(item.nome);
       const categoria = escapeHtml(item.categoria || "");
       const descricao = escapeHtml(item.descricao || "");
-      const imageUrl = safeHttpUrl(item.imagem_url);
+      const imageUrl = safeImageUrl(item.imagem_url);
       return `
       <article class="list-item" data-id="${item.id}">
         <h3>${nome}</h3>
@@ -1764,7 +1788,7 @@ function renderOwnerProdutos() {
       const nome = escapeHtml(item.nome);
       const categoria = escapeHtml(item.categoria || "");
       const descricao = escapeHtml(item.descricao || "");
-      const imagem = safeHttpUrl(item.imagem_url);
+      const imagem = safeImageUrl(item.imagem_url);
 
       return `
         <article class="list-item" data-id="${item.id}">
@@ -2050,6 +2074,19 @@ async function initOwnerPage() {
       return;
     }
 
+    const imagemFileInput = ownerProdutoForm.querySelector('input[name="imagem_file"]');
+    const imagemFile = imagemFileInput instanceof HTMLInputElement ? imagemFileInput.files?.[0] : null;
+    let imagemFinal = payload.imagem_url;
+
+    if (imagemFile instanceof File && imagemFile.size > 0) {
+      try {
+        imagemFinal = await fileToDataUrl(imagemFile);
+      } catch (error) {
+        setOwnerMessage(error?.message ? String(error.message) : "Não foi possível ler a imagem.", "error");
+        return;
+      }
+    }
+
     const { data, error } = await supabase.rpc("owner_upsert_produto", {
       p_slug: slug,
       p_pin: pin,
@@ -2059,7 +2096,7 @@ async function initOwnerPage() {
         categoria: payload.categoria || null,
         descricao: payload.descricao || null,
         preco: payload.preco,
-        imagem_url: payload.imagem_url || null
+        imagem_url: imagemFinal || null
       }
     });
 

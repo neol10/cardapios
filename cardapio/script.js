@@ -14,6 +14,7 @@ if ("serviceWorker" in navigator) {
 const cart = [];
 let activeCardapio = null;
 let activeProdutos = [];
+let produtoModal = null;
 
 function isCatalogMode(cardapio) {
   const value = safeText(cardapio?.modo) || "pedido";
@@ -378,6 +379,13 @@ function safeHttpUrl(value) {
   }
 }
 
+function safeImageUrl(value) {
+  const raw = String(value ?? "").trim();
+  if (!raw) return "";
+  if (raw.startsWith("data:image/")) return raw;
+  return safeHttpUrl(raw);
+}
+
 function upsertHeadLink(rel, href, extra = {}) {
   const safeHref = safeHttpUrl(href);
   if (!safeHref) return;
@@ -602,11 +610,11 @@ function renderProdutos() {
         const nome = escapeHtml(produto.nome);
         const categoria = escapeHtml(produto.categoria || "");
         const descricao = escapeHtml(produto.descricao || "");
-        const imageUrl = safeHttpUrl(produto.imagem_url) ||
+        const imageUrl = safeImageUrl(produto.imagem_url) ||
           "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=800&q=80";
         return `
-      <article class="produto-card">
-        <div class="produto-media">
+      <article class="produto-card" data-id="${produto.id}">
+        <div class="produto-media js-open-produto-modal" data-id="${produto.id}" role="button" tabindex="0" aria-label="Ver detalhes de ${nome}">
           <img src="${imageUrl}" alt="${nome}" loading="lazy" decoding="async" />
         </div>
         <div class="produto-body">
@@ -625,6 +633,99 @@ function renderProdutos() {
       }
     )
     .join("");
+}
+
+function ensureProdutoModal() {
+  if (produtoModal) return produtoModal;
+
+  const root = document.createElement("div");
+  root.id = "produto-modal";
+  root.className = "produto-modal is-hidden";
+  root.innerHTML = `
+    <div class="produto-modal-backdrop" data-close-modal="true"></div>
+    <div class="produto-modal-dialog" role="dialog" aria-modal="true" aria-labelledby="produto-modal-title">
+      <button type="button" class="produto-modal-close" data-close-modal="true" aria-label="Fechar detalhes">×</button>
+      <img id="produto-modal-image" class="produto-modal-image" alt="" loading="lazy" decoding="async" />
+      <div class="produto-modal-body">
+        <h3 id="produto-modal-title"></h3>
+        <p id="produto-modal-categoria" class="muted is-hidden"></p>
+        <p id="produto-modal-descricao" class="muted is-hidden"></p>
+        <p id="produto-modal-preco" class="price"></p>
+      </div>
+    </div>
+  `;
+
+  document.body.appendChild(root);
+
+  const imageEl = root.querySelector("#produto-modal-image");
+  const titleEl = root.querySelector("#produto-modal-title");
+  const categoriaEl = root.querySelector("#produto-modal-categoria");
+  const descricaoEl = root.querySelector("#produto-modal-descricao");
+  const precoEl = root.querySelector("#produto-modal-preco");
+
+  root.addEventListener("click", (event) => {
+    const target = event.target;
+    if (!(target instanceof HTMLElement)) return;
+    if (target.dataset.closeModal === "true") {
+      closeProdutoModal();
+    }
+  });
+
+  document.addEventListener("keydown", (event) => {
+    if (event.key === "Escape" && produtoModal && !produtoModal.root.classList.contains("is-hidden")) {
+      closeProdutoModal();
+    }
+  });
+
+  produtoModal = {
+    root,
+    imageEl,
+    titleEl,
+    categoriaEl,
+    descricaoEl,
+    precoEl
+  };
+
+  return produtoModal;
+}
+
+function closeProdutoModal() {
+  if (!produtoModal) return;
+  produtoModal.root.classList.add("is-hidden");
+  document.body.classList.remove("modal-open");
+}
+
+function openProdutoModal(produtoId) {
+  const selected = activeProdutos.find((item) => String(item.id) === String(produtoId || ""));
+  if (!selected) return;
+
+  const modal = ensureProdutoModal();
+  if (!(modal.imageEl instanceof HTMLImageElement)) return;
+  if (!(modal.titleEl instanceof HTMLElement)) return;
+  if (!(modal.categoriaEl instanceof HTMLElement)) return;
+  if (!(modal.descricaoEl instanceof HTMLElement)) return;
+  if (!(modal.precoEl instanceof HTMLElement)) return;
+
+  const nome = safeText(selected.nome) || "Produto";
+  const categoria = safeText(selected.categoria);
+  const descricao = safeText(selected.descricao);
+  const imageUrl =
+    safeImageUrl(selected.imagem_url) ||
+    "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=1200&q=80";
+
+  modal.imageEl.src = imageUrl;
+  modal.imageEl.alt = nome;
+  modal.titleEl.textContent = nome;
+  modal.precoEl.textContent = formatPriceBRL(selected.preco);
+
+  modal.categoriaEl.textContent = categoria;
+  modal.categoriaEl.classList.toggle("is-hidden", !categoria);
+
+  modal.descricaoEl.textContent = descricao;
+  modal.descricaoEl.classList.toggle("is-hidden", !descricao);
+
+  modal.root.classList.remove("is-hidden");
+  document.body.classList.add("modal-open");
 }
 
 function applyCardapioModeUI() {
@@ -1121,6 +1222,12 @@ function attachEvents() {
     const target = event.target;
     if (!(target instanceof HTMLElement)) return;
 
+    const modalTrigger = target.closest(".js-open-produto-modal");
+    if (modalTrigger instanceof HTMLElement) {
+      openProdutoModal(modalTrigger.dataset.id);
+      return;
+    }
+
     if (target.classList.contains("add-to-cart")) {
       addToCart(target.dataset.id, target);
     }
@@ -1128,6 +1235,18 @@ function attachEvents() {
     if (target.classList.contains("remove-item")) {
       removeFromCart(target.dataset.id);
     }
+  });
+
+  document.body.addEventListener("keydown", (event) => {
+    const target = event.target;
+    if (!(target instanceof HTMLElement)) return;
+    if (event.key !== "Enter" && event.key !== " ") return;
+
+    const modalTrigger = target.closest(".js-open-produto-modal");
+    if (!(modalTrigger instanceof HTMLElement)) return;
+
+    event.preventDefault();
+    openProdutoModal(modalTrigger.dataset.id);
   });
 
   tipoPedidoSelect?.addEventListener("change", () => {

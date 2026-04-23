@@ -156,6 +156,14 @@ function handleRequest(req, res) {
     }
   }
 
+  if (pathname === "/admin/dashboard") {
+    const dashboardPath = path.join(ROOT, "admin", "dashboard.html");
+    if (fileExists(dashboardPath)) {
+      serveFile(res, dashboardPath);
+      return;
+    }
+  }
+
   if (pathname === "/cardapio/comunidade" || pathname === "/cardapio/comunidade/") {
     const indexPath = path.join(ROOT, "index.html");
     if (fileExists(indexPath)) {

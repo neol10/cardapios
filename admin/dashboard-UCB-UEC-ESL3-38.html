@@ -1,0 +1,508 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Dashboard | Cardápio Digital</title>
+    <meta name="theme-color" content="#0f0d0b" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <link rel="manifest" href="/admin/manifest.webmanifest" />
+    <link rel="icon" href="/pwa/icon.svg" type="image/svg+xml" />
+    <link rel="icon" href="/pwa/icon-32.png" type="image/png" sizes="32x32" />
+    <link rel="icon" href="/pwa/icon-16.png" type="image/png" sizes="16x16" />
+    <link rel="apple-touch-icon" href="/pwa/icon-180.png" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&family=Playfair+Display:wght@600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="/admin/style.css?v=9" />
+    <script>
+      window.__SUPABASE_CONFIG__ = {
+        url: "https://uapwitkmxuoepnjlffqy.supabase.co",
+        anonKey:
+          "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVhcHdpdGtteHVvZXBuamxmZnF5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ4OTcxMjUsImV4cCI6MjA5MDQ3MzEyNX0.YTz_EqzK4m0CMM25n3QJC1b3Nj9bikIrDDEEFi5n6ps"
+      };
+    </script>
+  </head>
+  <body class="admin-body">
+    <header class="topbar">
+      <h1>Cardápio Digital</h1>
+      <div class="topbar-actions">
+        <span id="session-email" class="pill"></span>
+        <button id="logout-btn" class="btn">Sair</button>
+      </div>
+    </header>
+
+    <div id="toast-container" class="toast-container" aria-live="polite" aria-atomic="true"></div>
+
+    <main class="dashboard-grid">
+      <section class="panel" id="cardapios-panel">
+        <h2>Cardápios</h2>
+
+        <form id="cardapio-form" class="stack-gap compact">
+          <input type="hidden" name="id" />
+
+          <label>
+            Nome
+            <input type="text" name="nome" placeholder="Pizzaria do João" required />
+          </label>
+
+          <label>
+            Slug
+            <input type="text" name="slug" placeholder="pizzaria-do-joao" required />
+          </label>
+
+          <label>
+            WhatsApp (somente números)
+            <input type="text" name="whatsapp" placeholder="5511999999999" required />
+          </label>
+
+          <details class="details details-sub">
+            <summary>Acesso do proprietário</summary>
+
+            <label>
+              <input type="checkbox" name="owner_edit_enabled" />
+              Permitir que o proprietário edite este cardápio
+            </label>
+
+            <label>
+              PIN do proprietário
+              <input
+                type="password"
+                name="owner_pin"
+                placeholder="Defina um PIN (ex.: 1664800)"
+                inputmode="numeric"
+                autocomplete="off"
+              />
+              <div class="muted">O PIN não é exibido. Para trocar, digite um novo e salve.</div>
+            </label>
+
+            <button type="button" class="btn js-copy-owner-link">Copiar link do editor</button>
+          </details>
+
+          <label>
+            Cor do tema
+            <div class="color-row">
+              <input type="color" name="cor_tema" value="#ff6a00" required />
+              <span class="color-swatch" aria-hidden="true"></span>
+              <input class="color-hex color-hex-input" value="#FF6A00" aria-label="Código da cor (HEX)" inputmode="text" autocapitalize="none" autocomplete="off" maxlength="7" spellcheck="false" />
+            </div>
+          </label>
+
+          <details class="details">
+            <summary>Personalização da loja</summary>
+
+            <details class="details details-sub" open>
+              <summary>Fundo</summary>
+
+              <label>
+                Fundo da loja
+                <select name="fundo_estilo">
+                  <option value="padrao" selected>Padrão</option>
+                  <option value="solido">Cor sólida</option>
+                  <option value="degrade_linear">Degradê linear</option>
+                  <option value="degrade_radial">Degradê radial</option>
+                </select>
+              </label>
+
+              <div class="two-cols">
+                <label class="js-fundo-solido">
+                  Cor do fundo (para "Cor sólida")
+                  <div class="color-row">
+                    <input type="color" name="cor_fundo" value="#fffaf3" />
+                    <span class="color-swatch" aria-hidden="true"></span>
+                    <input class="color-hex color-hex-input" value="#FFFAF3" aria-label="Código da cor (HEX)" inputmode="text" autocapitalize="none" autocomplete="off" maxlength="7" spellcheck="false" />
+                  </div>
+                </label>
+
+                <label class="js-fundo-angulo">
+                  Ângulo do degradê (0 a 360)
+                  <input type="number" name="fundo_angulo" min="0" max="360" step="1" value="135" />
+                </label>
+              </div>
+
+              <div class="two-cols">
+                <label class="js-fundo-degrade">
+                  Degradê - cor 1
+                  <div class="color-row">
+                    <input type="color" name="fundo_cor_1" value="#ff6a00" />
+                    <span class="color-swatch" aria-hidden="true"></span>
+                    <input class="color-hex color-hex-input" value="#FF6A00" aria-label="Código da cor (HEX)" inputmode="text" autocapitalize="none" autocomplete="off" maxlength="7" spellcheck="false" />
+                  </div>
+                </label>
+
+                <label class="js-fundo-degrade">
+                  Degradê - cor 2
+                  <div class="color-row">
+                    <input type="color" name="fundo_cor_2" value="#ffe6ce" />
+                    <span class="color-swatch" aria-hidden="true"></span>
+                    <input class="color-hex color-hex-input" value="#FFE6CE" aria-label="Código da cor (HEX)" inputmode="text" autocapitalize="none" autocomplete="off" maxlength="7" spellcheck="false" />
+                  </div>
+                </label>
+              </div>
+            </details>
+
+            <details class="details details-sub">
+              <summary>Cores e bordas</summary>
+
+              <label>
+                Paleta de cores (cole HEX)
+                <div class="palette-row">
+                  <input
+                    type="text"
+                    id="palette-input"
+                    placeholder="Ex.: #FF6A00 #C8945B #FFFAF3 #2A211D"
+                    autocomplete="off"
+                    autocapitalize="none"
+                    spellcheck="false"
+                  />
+                  <button type="button" class="btn js-apply-palette">Aplicar</button>
+                </div>
+                <div class="muted palette-hint">Use 4+ cores: tema, secundária, fundo e texto.</div>
+              </label>
+
+              <label>
+                Cor secundária (opcional)
+                <div class="color-row">
+                  <input type="color" name="cor_secundaria" value="#c8945b" />
+                  <span class="color-swatch" aria-hidden="true"></span>
+                  <input class="color-hex color-hex-input" value="#C8945B" aria-label="Código da cor (HEX)" inputmode="text" autocapitalize="none" autocomplete="off" maxlength="7" spellcheck="false" />
+                </div>
+              </label>
+
+              <div class="two-cols">
+                <label>
+                  Cor dos cards (opcional)
+                  <div class="color-row">
+                    <input type="color" name="cor_surface" value="#ffffff" />
+                    <span class="color-swatch" aria-hidden="true"></span>
+                    <input class="color-hex color-hex-input" value="#FFFFFF" aria-label="Código da cor (HEX)" inputmode="text" autocapitalize="none" autocomplete="off" maxlength="7" spellcheck="false" />
+                  </div>
+                </label>
+
+                <label>
+                  Cor da borda (opcional)
+                  <div class="color-row">
+                    <input type="color" name="cor_borda" value="#f0dfd1" />
+                    <span class="color-swatch" aria-hidden="true"></span>
+                    <input class="color-hex color-hex-input" value="#F0DFD1" aria-label="Código da cor (HEX)" inputmode="text" autocapitalize="none" autocomplete="off" maxlength="7" spellcheck="false" />
+                  </div>
+                </label>
+              </div>
+
+              <div class="two-cols">
+                <label>
+                  Cor do texto (opcional)
+                  <div class="color-row">
+                    <input type="color" name="cor_texto" value="#2a211d" />
+                    <span class="color-swatch" aria-hidden="true"></span>
+                    <input class="color-hex color-hex-input" value="#2A211D" aria-label="Código da cor (HEX)" inputmode="text" autocapitalize="none" autocomplete="off" maxlength="7" spellcheck="false" />
+                  </div>
+                </label>
+
+                <label>
+                  Cor do texto secundário (opcional)
+                  <div class="color-row">
+                    <input type="color" name="cor_muted" value="#756960" />
+                    <span class="color-swatch" aria-hidden="true"></span>
+                    <input class="color-hex color-hex-input" value="#756960" aria-label="Código da cor (HEX)" inputmode="text" autocapitalize="none" autocomplete="off" maxlength="7" spellcheck="false" />
+                  </div>
+                </label>
+              </div>
+
+              <div id="theme-preview" class="theme-preview" aria-label="Prévia do tema">
+                <div class="theme-preview-surface">
+                  <div class="theme-preview-card">
+                    <div class="theme-preview-title">Prévia</div>
+                    <div class="theme-preview-text">Texto principal</div>
+                    <div class="theme-preview-muted">Texto secundário</div>
+                    <div class="theme-preview-btn">Botão</div>
+                  </div>
+                </div>
+                <div class="theme-preview-hint">Mostra como o card/textos/botão ficam com essas cores.</div>
+              </div>
+            </details>
+
+            <details class="details details-sub">
+              <summary>Tipografia</summary>
+
+              <label>
+                Fonte do cardápio
+                <select name="fonte_key">
+                  <option value="sora" selected>Padrão (Sora)</option>
+                  <option value="inter">Inter (moderna)</option>
+                  <option value="poppins">Poppins (arredondada)</option>
+                  <option value="montserrat">Montserrat (títulos fortes)</option>
+                  <option value="nunito">Nunito (suave)</option>
+                  <option value="rubik">Rubik (geométrica)</option>
+                  <option value="outfit">Outfit (clean)</option>
+                  <option value="dm_sans">DM Sans (neutra)</option>
+                  <option value="work_sans">Work Sans (corporativa)</option>
+                  <option value="lora">Lora (serif elegante)</option>
+                  <option value="merriweather">Merriweather (serif clássica)</option>
+                  <option value="system">Sistema</option>
+                </select>
+              </label>
+
+              <div class="two-cols">
+                <label>
+                  Peso do texto
+                  <select name="fonte_peso_texto">
+                    <option value="300">Fina (300)</option>
+                    <option value="400" selected>Normal (400)</option>
+                    <option value="500">Média (500)</option>
+                    <option value="600">Semi-negrita (600)</option>
+                    <option value="700">Negrita (700)</option>
+                  </select>
+                </label>
+
+                <label>
+                  Peso do título
+                  <select name="fonte_peso_titulo">
+                    <option value="600">600</option>
+                    <option value="700">700</option>
+                    <option value="800" selected>800</option>
+                    <option value="900">900</option>
+                  </select>
+                </label>
+              </div>
+            </details>
+
+            <details class="details details-sub">
+              <summary>Informações da loja</summary>
+
+              <label>
+                Slogan (opcional)
+                <input type="text" name="slogan" placeholder="Ex.: Forno a lenha desde 2008" />
+              </label>
+
+              <label>
+                Horário de funcionamento (opcional)
+                <input type="text" name="horario_funcionamento" placeholder="Ex.: Seg-Dom 18h às 23h" />
+              </label>
+
+              <div class="two-cols">
+                <label>
+                  Abre (opcional)
+                  <input type="time" name="abre_em" />
+                </label>
+
+                <label>
+                  Fecha (opcional)
+                  <input type="time" name="fecha_em" />
+                </label>
+              </div>
+
+              <label>
+                Endereço (opcional)
+                <input type="text" name="endereco" placeholder="Ex.: Rua X, 123 - Centro" />
+              </label>
+
+              <label>
+                Instagram (opcional)
+                <input type="url" name="instagram_url" placeholder="https://instagram.com/seuperfil" />
+              </label>
+            </details>
+
+            <details class="details details-sub">
+              <summary>Mídia (logo e banner)</summary>
+
+              <label>
+                Foto do cardápio (perfil)
+                <input type="file" name="foto" accept="image/*" />
+              </label>
+
+              <label>
+                URL da foto (opcional)
+                <input type="url" name="foto_url" placeholder="https://..." />
+              </label>
+
+              <label>
+                Banner do topo (opcional)
+                <input type="file" name="banner" accept="image/*" />
+              </label>
+
+              <label>
+                URL do banner (opcional)
+                <input type="url" name="banner_url" placeholder="https://..." />
+              </label>
+
+              <label>
+                Imagens do estabelecimento (galeria)
+                <input type="file" name="galeria" accept="image/*" multiple />
+                <input type="hidden" name="galeria_urls" value="[]" />
+                <div id="galeria-preview" class="gallery-preview is-hidden" aria-live="polite"></div>
+              </label>
+            </details>
+
+            <details class="details details-sub">
+              <summary>Entrega e pagamento</summary>
+
+              <div class="two-cols">
+                <label>
+                  Taxa de entrega (R$)
+                  <input type="text" name="taxa_entrega" placeholder="0,00" />
+                </label>
+
+                <label>
+                  Pedido mínimo (R$)
+                  <input type="text" name="pedido_minimo" placeholder="0,00" />
+                </label>
+              </div>
+
+              <label>
+                Formas de pagamento (opcional)
+                <input type="text" name="formas_pagamento" placeholder="Ex.: Pix, Cartão, Dinheiro" />
+              </label>
+
+              <div class="two-cols">
+                <label>
+                  Aceita entrega
+                  <select name="aceita_entrega">
+                    <option value="true" selected>Sim</option>
+                    <option value="false">Não</option>
+                  </select>
+                </label>
+
+                <label>
+                  Aceita retirada
+                  <select name="aceita_retirada">
+                    <option value="true" selected>Sim</option>
+                    <option value="false">Não</option>
+                  </select>
+                </label>
+              </div>
+            </details>
+
+            <label>
+              Layout dos produtos
+              <select name="layout_produtos">
+                <option value="grid" selected>Grade</option>
+                <option value="lista">Lista</option>
+              </select>
+            </label>
+
+            <label>
+              Densidade
+              <select name="densidade">
+                <option value="confortavel" selected>Confortável</option>
+                <option value="compacta">Compacta</option>
+              </select>
+            </label>
+
+            <label>
+              Modo do cardápio
+              <select name="modo">
+                <option value="pedido" selected>Pedido (carrinho e checkout)</option>
+                <option value="catalogo">Catálogo (somente visualizar)</option>
+              </select>
+            </label>
+
+            <label>
+              Botão do WhatsApp
+              <select name="whatsapp_botao">
+                <option value="flutuante" selected>Flutuante</option>
+                <option value="topo">No topo</option>
+                <option value="nenhum">Nenhum</option>
+              </select>
+            </label>
+
+            <label>
+              Template da mensagem do WhatsApp (opcional)
+              <textarea name="mensagem_whatsapp_template" rows="7" placeholder="Exemplo (pode editar):
+*Novo pedido - {LOJA}*
+-------------------------
+RESUMO
+Tipo: {TIPO_PEDIDO}
+Pagamento: {PAGAMENTO}
+
+CLIENTE
+Nome: {NOME}
+Telefone: {TELEFONE}
+
+ENDERECO
+{ENDERECO}
+
+ITENS
+{ITENS}
+
+VALORES
+Subtotal: {SUBTOTAL}
+Taxa de entrega: {TAXA_ENTREGA}
+TOTAL: {TOTAL}
+
+Tags: {LOJA} {ITENS} {SUBTOTAL} {TAXA_ENTREGA} {TOTAL} {NOME} {TELEFONE} {ENDERECO} {TIPO_PEDIDO} {PAGAMENTO}"></textarea>
+              <small class="hint">
+                Dica: você pode usar tags como <strong>{LOJA}</strong>, <strong>{ITENS}</strong>, <strong>{TOTAL}</strong> (também aceita <strong>{{LOJA}}</strong>). Se deixar em branco, o sistema usa um modelo padrão.
+              </small>
+            </label>
+          </details>
+
+          <button class="btn btn-primary" type="submit">Salvar cardápio</button>
+          <button class="btn" type="button" id="cancel-cardapio-edit">Cancelar edição</button>
+        </form>
+      </section>
+
+      <section class="panel" id="cardapios-criados-panel">
+        <h2>Cardápios criados</h2>
+        <div id="cardapios-list" class="list"></div>
+      </section>
+
+      <section class="panel is-hidden" id="produtos-panel">
+        <h2>Produtos</h2>
+        <p id="produto-contexto" class="muted">Selecione um cardápio para gerenciar produtos.</p>
+
+        <form id="produto-form" class="stack-gap compact" enctype="multipart/form-data">
+          <input type="hidden" name="id" />
+
+          <label>
+            Nome
+            <input type="text" name="nome" required />
+          </label>
+
+          <label>
+            Categoria (opcional)
+            <input type="text" name="categoria" placeholder="Ex.: Bolos, Doces, Bebidas" />
+          </label>
+
+          <label>
+            Descrição (opcional)
+            <textarea name="descricao" rows="2" placeholder="Ex.: Bolo caseiro, fatia generosa..."></textarea>
+          </label>
+
+          <label>
+            Preço (R$)
+            <input type="text" name="preco" placeholder="49,90" required />
+          </label>
+
+          <label>
+            Imagem do produto
+            <input type="file" name="imagem" accept="image/*" />
+          </label>
+
+          <label>
+            URL da imagem (opcional)
+            <input type="url" name="imagem_url" placeholder="https://..." />
+          </label>
+
+          <button class="btn btn-primary" type="submit">Salvar produto</button>
+          <button class="btn" type="button" id="cancel-produto-edit">Cancelar edição</button>
+        </form>
+
+        <div id="produtos-list" class="list"></div>
+      </section>
+
+      <section class="panel panel-full is-hidden" id="pedidos-panel">
+        <h2>Pedidos</h2>
+        <p class="muted">Mostra pedidos do cardápio selecionado. Se nada estiver selecionado, lista todos.</p>
+        <div id="pedidos-list" class="list"></div>
+      </section>
+    </main>
+
+    <script type="module" src="/admin/script.js?v=24"></script>
+  </body>
+</html>
