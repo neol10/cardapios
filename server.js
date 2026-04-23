@@ -122,6 +122,11 @@ function handleRequest(req, res) {
     res.end();
     return;
   }
+  if (pathname === "/garcom/index.html") {
+    res.writeHead(308, { Location: "/garcom" });
+    res.end();
+    return;
+  }
   if (pathname === "/cardapio/index.html") {
     res.writeHead(308, { Location: "/cardapio" });
     res.end();
@@ -146,6 +151,14 @@ function handleRequest(req, res) {
     res.writeHead(302, { Location: "/cardapio/" });
     res.end();
     return;
+  }
+
+  if (pathname === "/garcom") {
+    const garcomPath = path.join(ROOT, "garcom", "index.html");
+    if (fileExists(garcomPath)) {
+      serveFile(res, garcomPath);
+      return;
+    }
   }
 
   if (pathname === "/admin/owner") {
@@ -193,6 +206,14 @@ function handleRequest(req, res) {
     const cardapioIndex = path.join(ROOT, "cardapio", "index.html");
     if (fileExists(cardapioIndex)) {
       serveFile(res, cardapioIndex);
+      return;
+    }
+  }
+
+  if (pathname.startsWith("/garcom/")) {
+    const garcomIndex = path.join(ROOT, "garcom", "index.html");
+    if (fileExists(garcomIndex)) {
+      serveFile(res, garcomIndex);
       return;
     }
   }

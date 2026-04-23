@@ -730,6 +730,7 @@ function renderCardapios() {
         <p class="muted">Modo: ${modo}</p>
         <div class="list-actions">
           <a class="btn" href="/cardapio/${slugHref}" target="_blank" rel="noopener">Abrir cardápio</a>
+          <a class="btn" href="/garcom/${slugHref}" target="_blank" rel="noopener">Abrir garçom</a>
           <button class="btn js-manage-cardapio" data-id="${item.id}">${isSelected ? "Gerenciando" : "Gerenciar"}</button>
           <button class="btn js-edit-cardapio" data-id="${item.id}">Editar dados</button>
           <button class="btn js-delete-cardapio" data-id="${item.id}">Excluir</button>
@@ -1035,6 +1036,7 @@ function fillCardapioForm(item) {
   if (form.layout_produtos) form.layout_produtos.value = item.layout_produtos || "grid";
   if (form.densidade) form.densidade.value = item.densidade || "confortavel";
   if (form.modo) form.modo.value = item.modo || "pedido";
+  if (form.modo_garcom_enabled) form.modo_garcom_enabled.checked = Boolean(item.modo_garcom_enabled);
   if (form.whatsapp_botao) form.whatsapp_botao.value = item.whatsapp_botao || "flutuante";
   if (form.mensagem_whatsapp_template) {
     const current = String(item.mensagem_whatsapp_template || "").trim();
@@ -1114,6 +1116,12 @@ function getOwnerEditLink(slug) {
   const safe = String(slug || "").trim();
   if (!safe) return "";
   return `${window.location.origin}/admin/owner?slug=${encodeURIComponent(safe)}`;
+}
+
+function getGarcomLink(slug) {
+  const safe = String(slug || "").trim();
+  if (!safe) return "";
+  return `${window.location.origin}/garcom/${encodeURIComponent(safe)}`;
 }
 
 
@@ -1232,6 +1240,25 @@ async function setupDashboardPage() {
     }
   });
 
+  const copyGarcomBtn = document.querySelector(".js-copy-garcom-link");
+  copyGarcomBtn?.addEventListener("click", async () => {
+    const form = document.querySelector("#cardapio-form");
+    const idField = getHiddenIdField(form);
+    const id = String(idField?.value || "").trim();
+    const cardapio = id ? state.cardapios.find((c) => c.id === id) : null;
+    if (!cardapio) {
+      toast("Selecione um cardápio primeiro.", "error");
+      return;
+    }
+    const link = getGarcomLink(cardapio.slug);
+    try {
+      await writeClipboard(link);
+      toast("Link do garçom copiado.", "success");
+    } catch {
+      toast("Não foi possível copiar.", "error");
+    }
+  });
+
   await loadCardapios();
   setEditingMode(false);
 
@@ -1301,6 +1328,7 @@ async function setupDashboardPage() {
     const layout_produtos = String(formData.get("layout_produtos") || "grid");
     const densidade = String(formData.get("densidade") || "confortavel");
     const modo = String(formData.get("modo") || "pedido");
+    const modo_garcom_enabled = formData.get("modo_garcom_enabled") === "on";
     const whatsapp_botao = String(formData.get("whatsapp_botao") || "flutuante");
     const mensagem_whatsapp_template = String(formData.get("mensagem_whatsapp_template") || "").trim();
 
@@ -1344,6 +1372,7 @@ async function setupDashboardPage() {
       cor_tema,
       cor_secundaria: cor_secundaria || null,
       modo,
+      modo_garcom_enabled: modo === "pedido" ? modo_garcom_enabled : false,
       fundo_estilo,
       cor_fundo: cor_fundo || null,
       fundo_cor_1: fundo_cor_1 || null,

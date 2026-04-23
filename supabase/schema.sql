@@ -122,6 +122,7 @@ create table if not exists public.cardapios (
   slug text not null unique,
   whatsapp text not null,
   modo text not null default 'pedido' check (modo in ('pedido','catalogo')),
+  modo_garcom_enabled boolean not null default false,
   owner_edit_enabled boolean not null default false,
   cor_tema text not null default '#ff6a00',
   cor_secundaria text,
@@ -167,6 +168,8 @@ alter table public.cardapios add column if not exists abre_em time;
 alter table public.cardapios add column if not exists fecha_em time;
 alter table public.cardapios add column if not exists modo text;
 alter table public.cardapios alter column modo set default 'pedido';
+alter table public.cardapios add column if not exists modo_garcom_enabled boolean;
+alter table public.cardapios alter column modo_garcom_enabled set default false;
 alter table public.cardapios add column if not exists owner_edit_enabled boolean;
 alter table public.cardapios add column if not exists fundo_estilo text;
 alter table public.cardapios add column if not exists fundo_cor_1 text;
@@ -205,6 +208,7 @@ update public.cardapios set pedido_minimo = 0 where pedido_minimo is null;
 update public.cardapios set aceita_entrega = true where aceita_entrega is null;
 update public.cardapios set aceita_retirada = true where aceita_retirada is null;
 update public.cardapios set modo = 'pedido' where modo is null;
+update public.cardapios set modo_garcom_enabled = false where modo_garcom_enabled is null;
 update public.cardapios set layout_produtos = 'grid' where layout_produtos is null;
 update public.cardapios set densidade = 'confortavel' where densidade is null;
 update public.cardapios set whatsapp_botao = 'flutuante' where whatsapp_botao is null;
@@ -340,7 +344,11 @@ begin
     whatsapp = coalesce(nullif(trim(p_patch->>'whatsapp'), ''), whatsapp),
     slogan = coalesce(nullif(trim(p_patch->>'slogan'), ''), slogan),
     modo = coalesce(nullif(trim(p_patch->>'modo'), ''), modo),
-    modo_garcom_enabled = coalesce(p_patch->>'modo_garcom_enabled', modo_garcom_enabled),
+    modo_garcom_enabled = case
+      when lower(coalesce(trim(p_patch->>'modo_garcom_enabled'), '')) in ('true', 't', '1', 'yes', 'on') then true
+      when lower(coalesce(trim(p_patch->>'modo_garcom_enabled'), '')) in ('false', 'f', '0', 'no', 'off') then false
+      else modo_garcom_enabled
+    end,
     horario_funcionamento = coalesce(nullif(trim(p_patch->>'horario_funcionamento'), ''), horario_funcionamento),
     abre_em = case
       when nullif(trim(p_patch->>'abre_em'), '') is not null then (trim(p_patch->>'abre_em'))::time

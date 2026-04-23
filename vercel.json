@@ -29,6 +29,7 @@
     { "src": "^/admin/index\\.html$", "dest": "/admin", "status": 308 },
     { "src": "^/admin/dashboard\\.html$", "dest": "/admin/dashboard", "status": 308 },
     { "src": "^/admin/owner\\.html$", "dest": "/admin/owner", "status": 308 },
+    { "src": "^/garcom/index\\.html$", "dest": "/garcom", "status": 308 },
     { "src": "^/cardapio/index\\.html$", "dest": "/cardapio", "status": 308 },
 
     { "src": "^/dashboard(?:\\.html)?/?$", "dest": "/admin/dashboard", "status": 308 },
@@ -50,6 +51,8 @@
     { "src": "^/admin/?$", "dest": "/admin/index.html" },
     { "src": "^/admin/dashboard/?$", "dest": "/admin/dashboard.html" },
     { "src": "^/admin/owner/?$", "dest": "/admin/owner.html" },
+    { "src": "^/garcom/?$", "dest": "/garcom/index.html" },
+    { "src": "^/garcom/(.*)$", "dest": "/garcom/index.html" },
     { "src": "^/cardapio/?$", "dest": "/cardapio/index.html" },
     { "src": "^/cardapio/(.*)$", "dest": "/cardapio/index.html" }
   ]

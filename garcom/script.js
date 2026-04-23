@@ -40,6 +40,13 @@ function safeHttpUrl(value) {
   }
 }
 
+function safeImageUrl(value) {
+  const raw = String(value ?? "").trim();
+  if (!raw) return "";
+  if (raw.startsWith("data:image/")) return raw;
+  return safeHttpUrl(raw);
+}
+
 function escapeHtml(value) {
   const str = String(value ?? "");
   return str
@@ -100,7 +107,7 @@ function selecionarMesa(numero) {
   atualizarListaMesas();
 }
 
-function adicionarPedidoMesa(produto) {
+function adicionarPedidoMesa(produto, triggerEl = null) {
   if (!mesaAtual) {
     alert("Selecione uma mesa primeiro!");
     return;
@@ -126,8 +133,10 @@ function adicionarPedidoMesa(produto) {
   atualizarListaMesas();
   
   // Animação de feedback
-  event.target.classList.add("pulse");
-  setTimeout(() => event.target.classList.remove("pulse"), 300);
+  if (triggerEl instanceof HTMLElement) {
+    triggerEl.classList.add("pulse");
+    setTimeout(() => triggerEl.classList.remove("pulse"), 300);
+  }
 }
 
 function removerPedidoMesa(produtoId) {
@@ -205,7 +214,7 @@ function renderProdutos() {
       const nome = escapeHtml(produto.nome);
       const categoria = escapeHtml(produto.categoria || "");
       const descricao = escapeHtml(produto.descricao || "");
-      const imageUrl = safeHttpUrl(produto.imagem_url) ||
+      const imageUrl = safeImageUrl(produto.imagem_url) ||
         "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=800&q=80";
       
       return `
@@ -333,25 +342,13 @@ async function loadCardapio() {
     return;
   }
 
-  // Debug: mostrar dados do cardápio
-  console.log("=== DEBUG MODO GARÇOM ===");
-  console.log("Dados completos:", cardapioData);
-  console.log("Modo:", cardapioData.modo);
-  console.log("Modo garçom enabled:", cardapioData.modo_garcom_enabled);
-  console.log("Tipo do campo modo_garcom_enabled:", typeof cardapioData.modo_garcom_enabled);
-  console.log("Slug:", slug);
-  
-  // Verificar se o modo garçom está habilitado e se é modo pedido
-  const isModoPedido = cardapioData.modo === "pedido";
-  const isGarcomEnabled = cardapioData.modo_garcom_enabled === true;
-  
-  console.log("isModoPedido:", isModoPedido);
-  console.log("isGarcomEnabled:", isGarcomEnabled);
+  const isModoPedido = String(cardapioData.modo || "pedido").toLowerCase() === "pedido";
+  const isGarcomEnabled = Boolean(cardapioData.modo_garcom_enabled);
   
   if (!isGarcomEnabled || !isModoPedido) {
     cardapioNomeEl.textContent = "Modo garçom desabilitado";
-    cardapioSubtitle.textContent = `Modo: ${cardapioData.modo || 'não definido'} | Garçom: ${isGarcomEnabled ? 'sim' : 'não'} | Pedido: ${isModoPedido ? 'sim' : 'não'}`;
-    produtosContainer.innerHTML = `<p class="muted">Modo garçom não disponível. Debug: modo=${cardapioData.modo}, garcom=${cardapioData.modo_garcom_enabled}</p>`;
+    cardapioSubtitle.textContent = "Este cardápio não está com modo garçom ativo.";
+    produtosContainer.innerHTML = '<p class="muted">O modo garçom está desabilitado para este cardápio.</p>';
     return;
   }
 
@@ -422,7 +419,7 @@ function attachEvents() {
       const produtoId = target.dataset.id;
       const produto = activeProdutos.find(p => p.id === produtoId);
       if (produto) {
-        adicionarPedidoMesa(produto);
+        adicionarPedidoMesa(produto, target);
       }
     }
 
