@@ -106,10 +106,35 @@
           <span>Pesquisar mesas / pedidos</span>
           <input type="search" id="mesa-search" placeholder="Número ou produto..." />
         </label>
-        <h2>Pedidos da Mesa <span id="mesa-atual">-</span></h2>
-        <div id="pedidos-mesa" class="pedidos-mesa">
-          <p class="muted">Selecione uma mesa ou adicione produtos.</p>
-        </div>
+
+        <section id="mesa-detalhes" class="panel is-hidden">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+            <h2 id="mesa-titulo">Mesa</h2>
+            <button class="btn btn-ghost" id="fechar-detalhes">Voltar</button>
+          </div>
+
+          <div class="calculator-card">
+            <h3>🧮 Dividir Conta</h3>
+            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:12px; margin-top:8px;">
+              <label>
+                <span class="muted" style="font-size:0.75rem;">Total</span>
+                <input type="text" id="calc-total" readonly style="background:rgba(255,255,255,0.05); font-weight:800;">
+              </label>
+              <label>
+                <span class="muted" style="font-size:0.75rem;">Pessoas</span>
+                <input type="number" id="calc-pessoas" value="1" min="1" step="1">
+              </label>
+            </div>
+            <div style="margin-top:12px; padding:12px; background:rgba(128,128,128,0.1); border-radius:12px; text-align:center;">
+              <span class="muted">Valor por pessoa:</span>
+              <strong id="calc-resultado" style="display:block; font-size:1.5rem; color:var(--primary);">R$ 0,00</strong>
+            </div>
+          </div>
+
+          <div id="pedidos-mesa" class="pedidos-mesa">
+            <p class="muted">Selecione uma mesa ou adicione produtos.</p>
+          </div>
+        </section>
         
         <div class="mesa-actions">
           <button id="limpar-mesa-btn" class="btn btn-ghost">Limpar Mesa</button>

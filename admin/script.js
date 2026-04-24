@@ -803,20 +803,30 @@ function renderProdutos() {
   container.innerHTML = state.produtos
     .map((item) => {
       const nome = escapeHtml(item.nome);
-      const categoria = escapeHtml(item.categoria || "");
-      const descricao = escapeHtml(item.descricao || "");
-      const imageUrl = safeImageUrl(item.imagem_url);
+      const categoria = escapeHtml(item.categoria);
+      const preco = formatPriceBRL(item.preco);
+      const imagemUrl = safeHttpUrl(item.imagem_url);
+      const disponivel = item.disponivel !== false;
+
       return `
       <article class="list-item" data-id="${item.id}">
-        <h3>${nome}</h3>
-        ${categoria ? `<p class="muted"><strong>Categoria:</strong> ${categoria}</p>` : ""}
-        ${descricao ? `<p class="muted">${descricao}</p>` : ""}
-        <p>${formatPriceBRL(item.preco)}</p>
-        ${
-          imageUrl
-            ? `<img src="${imageUrl}" alt="${nome}" loading="lazy" decoding="async" style="width: 100%; max-height: 180px; object-fit: cover; border-radius: 10px;" />`
-            : ""
-        }
+        <div style="display:flex; gap:12px; align-items:center;">
+          ${imagemUrl ? `<img src="${imagemUrl}" alt="${nome}" style="width:48px; height:48px; border-radius:8px; object-fit:cover;" />` : ""}
+          <div>
+            <h3 style="margin:0;">${nome}</h3>
+            ${categoria ? `<p class="muted" style="font-size:0.8rem;">${categoria}</p>` : ""}
+          </div>
+        </div>
+        <p class="price" style="font-weight:800; color:var(--primary); margin: 8px 0;">${preco}</p>
+        
+        <div class="stock-toggle">
+          <span class="stat-label" style="font-size:0.75rem;">${disponivel ? "Disponível" : "Esgotado"}</span>
+          <label class="switch">
+            <input type="checkbox" class="js-toggle-stock" data-id="${item.id}" ${disponivel ? "checked" : ""}>
+            <span class="slider"></span>
+          </label>
+        </div>
+
         <div class="list-actions">
           <button class="btn js-edit-produto" data-id="${item.id}">Editar</button>
           <button class="btn js-delete-produto" data-id="${item.id}">Excluir</button>
@@ -825,6 +835,97 @@ function renderProdutos() {
     `;
     })
     .join("");
+}
+
+async function loadAnalytics() {
+  const period = parseInt(document.getElementById("analytics-period")?.value || "7");
+  const dateLimit = new Date();
+  dateLimit.setDate(dateLimit.getDate() - period);
+
+  const { data: pedidos, error } = await supabase
+    .from("pedidos")
+    .select("*")
+    .gte("created_at", dateLimit.toISOString());
+
+  if (error) {
+    console.warn("Falha ao carregar analytics:", error);
+    return;
+  }
+
+  const totalVendas = pedidos.reduce((acc, p) => {
+    const itens = Array.isArray(p.itens) ? p.itens : [];
+    return acc + itens.reduce((s, i) => s + (Number(i.preco || 0) * Number(i.quantidade || 0)), 0);
+  }, 0);
+
+  const totalPedidos = pedidos.length;
+  const ticketMedio = totalPedidos > 0 ? totalVendas / totalPedidos : 0;
+
+  const produtoCount = {};
+  pedidos.forEach(p => {
+    const itens = Array.isArray(p.itens) ? p.itens : [];
+    itens.forEach(i => {
+      produtoCount[i.nome] = (produtoCount[i.nome] || 0) + (i.quantidade || 1);
+    });
+  });
+  const topProduto = Object.entries(produtoCount).sort((a, b) => b[1] - a[1])[0]?.[0] || "-";
+
+  if (document.getElementById("stat-total-vendas")) document.getElementById("stat-total-vendas").textContent = formatPriceBRL(totalVendas);
+  if (document.getElementById("stat-total-pedidos")) document.getElementById("stat-total-pedidos").textContent = totalPedidos;
+  if (document.getElementById("stat-ticket-medio")) document.getElementById("stat-ticket-medio").textContent = formatPriceBRL(ticketMedio);
+  if (document.getElementById("stat-top-produto")) document.getElementById("stat-top-produto").textContent = topProduto;
+
+  renderSalesChart(pedidos, period);
+  renderProductsChart(produtoCount);
+}
+
+function renderSalesChart(pedidos, period) {
+  const chartEl = document.getElementById("chart-sales");
+  if (!chartEl) return;
+  const dailyData = {};
+  for (let i = 0; i < period; i++) {
+    const d = new Date();
+    d.setDate(d.getDate() - i);
+    dailyData[d.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' })] = 0;
+  }
+  pedidos.forEach(p => {
+    const date = new Date(p.created_at).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' });
+    if (dailyData[date] !== undefined) {
+      const itens = Array.isArray(p.itens) ? p.itens : [];
+      dailyData[date] += itens.reduce((s, i) => s + (Number(i.preco || 0) * Number(i.quantidade || 0)), 0);
+    }
+  });
+  const entries = Object.entries(dailyData).reverse();
+  const max = Math.max(...entries.map(e => e[1]), 1);
+  chartEl.innerHTML = `
+    <div style="display:flex; align-items:flex-end; gap:8px; height:100%; padding-top:20px; min-height:150px;">
+      ${entries.map(([date, val]) => `
+        <div style="flex:1; display:flex; flex-direction:column; align-items:center; gap:8px;">
+          <div style="width:100%; height:${(val / max) * 100}px; background:var(--primary); border-radius:4px 4px 0 0; position:relative;" title="${formatPriceBRL(val)}"></div>
+          <span style="font-size:10px; color:var(--muted);">${date}</span>
+        </div>
+      `).join("")}
+    </div>
+  `;
+}
+
+function renderProductsChart(produtoCount) {
+  const chartEl = document.getElementById("chart-products");
+  if (!chartEl) return;
+  const top5 = Object.entries(produtoCount).sort((a, b) => b[1] - a[1]).slice(0, 5);
+  const max = Math.max(...top5.map(e => e[1]), 1);
+  chartEl.innerHTML = `
+    <div style="display:grid; gap:12px; padding:10px;">
+      ${top5.map(([name, count]) => `
+        <div style="display:grid; grid-template-columns: 80px 1fr 30px; align-items:center; gap:12px;">
+          <span style="font-size:11px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${name}</span>
+          <div style="background:rgba(255,255,255,0.05); height:12px; border-radius:6px; overflow:hidden;">
+            <div style="width:${(count / max) * 100}%; height:100%; background:var(--primary);"></div>
+          </div>
+          <span style="font-size:11px; font-weight:bold;">${count}</span>
+        </div>
+      `).join("")}
+    </div>
+  `;
 }
 
 function formatPedidoText(pedido, cardapioNome) {
@@ -1271,6 +1372,7 @@ async function setupDashboardPage() {
   });
 
   await loadCardapios();
+  await loadAnalytics();
   setEditingMode(false);
 
   const cardapioForm = document.querySelector("#cardapio-form");
@@ -1295,6 +1397,25 @@ async function setupDashboardPage() {
       }
     });
   }
+
+  const analyticsPeriod = document.getElementById("analytics-period");
+  analyticsPeriod?.addEventListener("change", loadAnalytics);
+
+  document.body.addEventListener("change", async (e) => {
+    if (e.target.classList.contains("js-toggle-stock")) {
+      const id = e.target.dataset.id;
+      const checked = e.target.checked;
+      const { error } = await supabase.from("produtos").update({ disponivel: checked }).eq("id", id);
+      if (error) {
+        toast("Erro ao atualizar estoque: " + error.message, "error");
+        e.target.checked = !checked;
+      } else {
+        const label = e.target.closest(".stock-toggle")?.querySelector(".stat-label");
+        if (label) label.textContent = checked ? "Disponível" : "Esgotado";
+        toast("Estoque atualizado.");
+      }
+    }
+  });
 
   const whatsappInput = cardapioForm?.querySelector('input[name="whatsapp"]');
   whatsappInput?.addEventListener("input", (event) => {

@@ -14,7 +14,10 @@ if ("serviceWorker" in navigator) {
 const cart = [];
 let activeCardapio = null;
 let activeProdutos = [];
+let filteredProdutos = [];
+let activeCategory = "Todos";
 let produtoModal = null;
+let lightboxModal = null;
 
 function isCatalogMode(cardapio) {
   const value = safeText(cardapio?.modo) || "pedido";
@@ -54,6 +57,11 @@ const pagamentoWrap = document.querySelector("#pagamento-wrap");
 const pagamentoSelect = document.querySelector("#pagamento");
 
 const cardapioNomeEl = document.querySelector("#cardapio-nome");
+const categoriesContainer = document.querySelector("#categories");
+const searchInput = document.querySelector("#produto-search");
+const lightbox = document.querySelector("#lightbox");
+const lightboxImage = document.querySelector("#lightbox-image");
+const lightboxClose = document.querySelector(".lightbox-close");
 const CHECKOUT_DRAFT_KEY_PREFIX = "cardapio.checkoutDraft.";
 
 function withTimeout(promise, ms, label) {
@@ -597,14 +605,23 @@ function updateOpenClosedUI() {
 }
 
 function renderProdutos() {
-  if (!activeProdutos.length) {
-    produtosContainer.innerHTML = '<p class="muted">Nenhum produto disponível neste cardápio.</p>';
+  const container = document.querySelector("#produtos");
+  const list = filteredProdutos.length > 0 ? filteredProdutos : activeProdutos;
+  
+  if (activeProdutos.length === 0) {
+    container.innerHTML = '<p class="muted">Nenhum produto disponível neste cardápio.</p>';
+    return;
+  }
+
+  // Se tem termo de busca ou categoria mas não achou nada
+  if (list.length === 0) {
+    container.innerHTML = '<p class="muted">Nenhum produto encontrado.</p>';
     return;
   }
 
   const catalogo = isCatalogMode(activeCardapio);
 
-  produtosContainer.innerHTML = activeProdutos
+  container.innerHTML = list
     .map(
       (produto) => {
         const nome = escapeHtml(produto.nome);
@@ -612,20 +629,24 @@ function renderProdutos() {
         const descricao = escapeHtml(produto.descricao || "");
         const imageUrl = safeImageUrl(produto.imagem_url) ||
           "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=800&q=80";
+        const disponivel = produto.disponivel !== false;
         return `
-      <article class="produto-card" data-id="${produto.id}">
-        <div class="produto-media js-open-produto-modal" data-id="${produto.id}" role="button" tabindex="0" aria-label="Ver detalhes de ${nome}">
-          <img src="${imageUrl}" alt="${nome}" loading="lazy" decoding="async" />
+      <article class="produto-card ${!disponivel ? 'is-sold-out' : ''}" data-id="${produto.id}">
+        <div class="produto-media js-open-lightbox" data-url="${imageUrl}" role="button" tabindex="0" aria-label="Ver imagem de ${nome}">
+          <img src="${imageUrl}" alt="${nome}" loading="lazy" decoding="async" style="${!disponivel ? 'filter: grayscale(1); opacity: 0.6;' : ''}" />
+          ${!disponivel ? '<span class="sold-out-badge">Esgotado</span>' : ''}
         </div>
         <div class="produto-body">
-          <h3>${nome}</h3>
+          <h3 class="js-open-produto-modal" data-id="${produto.id}" style="cursor:pointer">${nome}</h3>
           ${categoria ? `<p class="muted"><strong>${categoria}</strong></p>` : ""}
           ${descricao ? `<p class="muted">${descricao}</p>` : ""}
           <p class="price">${formatPriceBRL(produto.preco)}</p>
           ${
             catalogo
               ? ""
-              : `<button type="button" class="btn btn-primary add-to-cart" data-id="${produto.id}">Adicionar ao pedido</button>`
+              : disponivel 
+                ? `<button type="button" class="btn btn-primary add-to-cart" data-id="${produto.id}">Adicionar ao pedido</button>`
+                : `<button type="button" class="btn btn-disabled" disabled>Indisponível</button>`
           }
         </div>
       </article>
@@ -633,6 +654,113 @@ function renderProdutos() {
       }
     )
     .join("");
+}
+
+function renderSkeletons() {
+  const container = document.querySelector("#produtos");
+  container.innerHTML = Array(6).fill(0).map(() => `
+    <article class="produto-card is-skeleton">
+      <div class="produto-media skeleton"></div>
+      <div class="produto-body">
+        <div class="skeleton skeleton-title"></div>
+        <div class="skeleton skeleton-price"></div>
+        <div class="skeleton skeleton-btn"></div>
+      </div>
+    </article>
+  `).join("");
+}
+
+function renderCategories() {
+  if (!categoriesContainer) return;
+  const categories = ["Todos", ...new Set(activeProdutos.map(p => p.categoria).filter(Boolean))];
+  
+  categoriesContainer.innerHTML = categories
+    .map(cat => `
+      <button class="category-pill ${activeCategory === cat ? 'active' : ''}" data-category="${cat}">
+        ${cat}
+      </button>
+    `)
+    .join("");
+
+  categoriesContainer.querySelectorAll(".category-pill").forEach(btn => {
+    btn.addEventListener("click", () => {
+      activeCategory = btn.dataset.category;
+      applyFilters();
+      renderCategories();
+    });
+  });
+}
+
+function applyFilters() {
+  const term = normalizarTexto(searchInput?.value || "");
+  
+  filteredProdutos = activeProdutos.filter(p => {
+    const matchCategory = activeCategory === "Todos" || p.categoria === activeCategory;
+    const matchSearch = !term || normalizarTexto(p.nome).includes(term) || normalizarTexto(p.descricao || "").includes(term) || normalizarTexto(p.categoria || "").includes(term);
+    return matchCategory && matchSearch;
+  });
+  
+  renderProdutos();
+}
+
+function normalizarTexto(t) {
+  return String(t || "").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+}
+
+function initSearch() {
+  searchInput?.addEventListener("input", () => {
+    applyFilters();
+  });
+}
+
+function initLightbox() {
+  if (!lightbox || !lightboxImage || !lightboxClose) return;
+
+  document.body.addEventListener("click", (e) => {
+    const target = e.target.closest(".js-open-lightbox");
+    if (target) {
+      const url = target.dataset.url;
+      lightboxImage.src = url;
+      lightbox.classList.add("active");
+      document.body.classList.add("modal-open");
+    }
+  });
+
+  const close = () => {
+    lightbox.classList.remove("active");
+    document.body.classList.remove("modal-open");
+  };
+
+  lightboxClose.addEventListener("click", close);
+  lightbox.addEventListener("click", (e) => {
+    if (e.target === lightbox) close();
+  });
+}
+
+function animateAddToCart(btn) {
+  const rect = btn.getBoundingClientRect();
+  const cartIcon = document.querySelector(".cart-box h2");
+  const cartRect = cartIcon.getBoundingClientRect();
+
+  const flying = document.createElement("div");
+  flying.className = "flying-item";
+  flying.innerHTML = "🛒";
+  flying.style.left = `${rect.left + rect.width / 2 - 20}px`;
+  flying.style.top = `${rect.top + rect.height / 2 - 20}px`;
+
+  document.body.appendChild(flying);
+
+  requestAnimationFrame(() => {
+    flying.style.left = `${cartRect.left + cartRect.width / 2 - 20}px`;
+    flying.style.top = `${cartRect.top + cartRect.height / 2 - 20}px`;
+    flying.style.transform = "scale(0.5)";
+    flying.style.opacity = "0";
+  });
+
+  setTimeout(() => {
+    flying.remove();
+    pulseCart();
+  }, 600);
 }
 
 function ensureProdutoModal() {
@@ -802,6 +930,29 @@ function renderCart() {
     }
   }
 
+function animateAddToCart(button) {
+  const cartIcon = document.querySelector(".btn-cart-float") || document.querySelector("#cart-btn");
+  if (!cartIcon) return;
+
+  const btnRect = button.getBoundingClientRect();
+  const cartRect = cartIcon.getBoundingClientRect();
+
+  const flyer = document.createElement("div");
+  flyer.className = "flying-icon";
+  flyer.innerHTML = "🛍️";
+  flyer.style.left = `${btnRect.left + btnRect.width / 2}px`;
+  flyer.style.top = `${btnRect.top + btnRect.height / 2}px`;
+  document.body.appendChild(flyer);
+
+  flyer.animate([
+    { transform: "scale(1)", opacity: 1 },
+    { transform: `translate(${cartRect.left - btnRect.left}px, ${cartRect.top - btnRect.top}px) scale(0.2)`, opacity: 0 }
+  ], {
+    duration: 600,
+    easing: "cubic-bezier(0.42, 0, 0.58, 1)"
+  }).onfinish = () => flyer.remove();
+}
+
   setTotalLineValue(cartTotal, "Total", formatPriceBRL(calculateTotal()));
 
   updateCheckoutAvailability();
@@ -823,6 +974,7 @@ function addToCart(produtoId, buttonElement) {
     });
   }
 
+  if (buttonElement) animateAddToCart(buttonElement);
   renderCart();
   pulseCart();
 
@@ -1027,6 +1179,8 @@ async function loadCardapio() {
     }
   }
 
+  renderSkeletons();
+
   applyBrandIcons(getSlugFromUrl());
   renderGaleria(parseGaleriaUrls(data.galeria_urls));
 
@@ -1191,6 +1345,9 @@ async function loadCardapio() {
   }
 
   activeProdutos = produtos || [];
+  renderCategories();
+  initSearch();
+  initLightbox();
   renderProdutos();
   renderCart();
 }

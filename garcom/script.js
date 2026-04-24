@@ -322,7 +322,6 @@ function adicionarPedidoMesa(produto, triggerEl = null) {
   const mesa = mesasAbertas.get(mesaAtual);
   if (!mesa) return;
 
-  // Verificar se o produto já está na mesa
   const pedidoExistente = mesa.pedidos.find(p => p.id === produto.id);
   if (pedidoExistente) {
     pedidoExistente.quantidade += 1;
@@ -339,8 +338,8 @@ function adicionarPedidoMesa(produto, triggerEl = null) {
   renderPedidosMesa();
   atualizarListaMesas();
   salvarMesasLocalStorage();
+  syncMesaToSupabase(mesaAtual, mesa.pedidos);
   
-  // Animação de feedback
   if (triggerEl instanceof HTMLElement) {
     triggerEl.classList.add("pulse");
     setTimeout(() => triggerEl.classList.remove("pulse"), 300);
@@ -365,6 +364,7 @@ function removerPedidoMesa(produtoId) {
   renderPedidosMesa();
   atualizarListaMesas();
   salvarMesasLocalStorage();
+  syncMesaToSupabase(mesaAtual, mesa.pedidos);
 }
 
 function limparMesa() {
@@ -377,6 +377,7 @@ function limparMesa() {
       renderPedidosMesa();
       atualizarListaMesas();
       salvarMesasLocalStorage();
+      syncMesaToSupabase(mesaAtual, []);
     }
   }
 }
@@ -396,6 +397,13 @@ function finalizarMesa() {
   if (confirmar) {
     adicionarFechamentoDinheiro(total);
     mesasAbertas.delete(mesaAtual);
+    
+    // Atualiza status no Supabase
+    supabase.from("mesas_garcom")
+      .update({ status: 'fechada' })
+      .eq("cardapio_id", activeCardapio.id)
+      .eq("numero_mesa", mesaAtual);
+
     mesaAtual = null;
     numeroMesaInput.value = "";
     mesaAtualEl.textContent = "-";
@@ -536,6 +544,7 @@ function renderPedidosMesa() {
 
   // Resumo da mesa
   const subtotal = calcularTotalMesa(mesa);
+  updateCalculatorTotal(subtotal);
   const resumoHtml = `
     <div class="mesa-resumo">
       <div class="resumo-item">
@@ -832,16 +841,6 @@ async function init() {
     
     // Carregar dados salvos
     carregarMesasLocalStorage();
-    
-    await loadCardapio();
-    
-    // Iniciar backup automático
-    iniciarBackupAutomatico();
-  } catch (error) {
-    console.error("Erro ao inicializar:", error);
-    cardapioNomeEl.textContent = "Erro ao carregar";
-    cardapioSubtitle.textContent = "Tente recarregar a página";
-    produtosContainer.innerHTML = `<p class="muted">Erro: ${error.message}</p>`;
   } finally {
     document.body.classList.remove("is-loading");
   }

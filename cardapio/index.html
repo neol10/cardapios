@@ -110,6 +110,15 @@
       </div>
     </header>
 
+    <div class="search-container">
+      <div class="search-input-wrapper">
+        <span class="search-icon">🔍</span>
+        <input type="text" id="produto-search" class="search-input" placeholder="O que você está procurando?" />
+      </div>
+    </div>
+
+    <div id="categories" class="categories-container"></div>
+
     <main class="content-grid">
       <section>
         <div id="galeria-wrap" class="galeria-wrap is-hidden" aria-label="Imagens do estabelecimento">
@@ -194,6 +203,13 @@
     </main>
 
     <a id="whatsapp-fab" class="whatsapp-fab is-hidden" target="_blank" rel="noopener">WhatsApp</a>
+
+    <div id="lightbox" class="lightbox" role="dialog" aria-modal="true">
+      <div class="lightbox-content">
+        <button type="button" class="lightbox-close" aria-label="Fechar">×</button>
+        <img id="lightbox-image" class="lightbox-image" src="" alt="" />
+      </div>
+    </div>
 
     <link rel="modulepreload" href="./script.js?v=24" />
     <script type="module" src="./script.js?v=24"></script>

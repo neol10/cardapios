@@ -40,6 +40,49 @@
     <div id="toast-container" class="toast-container" aria-live="polite" aria-atomic="true"></div>
 
     <main class="dashboard-grid">
+      <section class="panel panel-full" id="analytics-panel">
+        <div class="panel-header">
+          <h2>📊 Visão Geral</h2>
+          <div class="header-actions">
+            <select id="analytics-period">
+              <option value="7">Últimos 7 dias</option>
+              <option value="30">Últimos 30 dias</option>
+              <option value="90">Últimos 90 dias</option>
+            </select>
+          </div>
+        </div>
+        <div class="stats-grid">
+          <div class="stat-card">
+            <span class="stat-label">Vendas Totais</span>
+            <strong class="stat-value" id="stat-total-vendas">R$ 0,00</strong>
+            <span class="stat-diff" id="stat-diff-vendas">...</span>
+          </div>
+          <div class="stat-card">
+            <span class="stat-label">Total de Pedidos</span>
+            <strong class="stat-value" id="stat-total-pedidos">0</strong>
+            <span class="stat-diff" id="stat-diff-pedidos">...</span>
+          </div>
+          <div class="stat-card">
+            <span class="stat-label">Ticket Médio</span>
+            <strong class="stat-value" id="stat-ticket-medio">R$ 0,00</strong>
+          </div>
+          <div class="stat-card">
+            <span class="stat-label">Produto Top</span>
+            <strong class="stat-value" id="stat-top-produto">-</strong>
+          </div>
+        </div>
+        <div class="charts-grid">
+          <div class="chart-container">
+            <h3>Vendas por Dia</h3>
+            <div id="chart-sales" class="chart-placeholder">Carregando gráfico...</div>
+          </div>
+          <div class="chart-container">
+            <h3>Top 5 Produtos</h3>
+            <div id="chart-products" class="chart-placeholder">Carregando gráfico...</div>
+          </div>
+        </div>
+      </section>
+
       <section class="panel" id="cardapios-panel">
         <h2>Cardápios</h2>
 
