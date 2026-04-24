@@ -1,3 +1,23 @@
+/* Painel de contador de dinheiro */
+.dinheiro-panel {
+  margin: 18px 0 0 0;
+  padding: 0;
+}
+.dinheiro-panel .summary-card {
+  margin-bottom: 10px;
+}
+.dinheiro-panel .btn-xs {
+  font-size: 0.85rem;
+  padding: 4px 10px;
+  margin-right: 4px;
+}
+.dinheiro-historico {
+  margin-top: 8px;
+  background: #fffaf3;
+  border-radius: 8px;
+  padding: 8px 10px;
+  border: 1px solid #eee;
+}
 /* Importa estilos base do cardápio */
 @import url('../cardapio/style.css?v=22');
 

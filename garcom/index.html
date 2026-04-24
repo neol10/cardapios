@@ -84,6 +84,23 @@
             <strong id="total-aberto-valor">R$ 0,00</strong>
           </div>
         </div>
+        <!-- Painel de contador de dinheiro -->
+        <div class="dinheiro-panel">
+          <div class="summary-card">
+            <span>Total Fechado (acumulado)</span>
+            <strong id="dinheiro-total-fechado">R$ 0,00</strong>
+            <div style="margin-top:8px;">
+              <button id="btn-filtrar-hoje" class="btn btn-ghost btn-xs">Hoje</button>
+              <button id="btn-filtrar-mes" class="btn btn-ghost btn-xs">Mês</button>
+              <button id="btn-filtrar-tudo" class="btn btn-ghost btn-xs">Tudo</button>
+            </div>
+            <button id="btn-resetar-dinheiro" class="btn btn-secondary btn-xs" style="margin-top:8px;">Reiniciar contador</button>
+          </div>
+          <div class="dinheiro-historico">
+            <span style="font-size:0.9em;color:#666;">Últimos fechamentos:</span>
+            <ul id="dinheiro-historico-lista" style="margin:0;padding:0;list-style:none;font-size:0.95em;"></ul>
+          </div>
+        </div>
 
         <label class="mesa-search">
           <span>Pesquisar mesas / pedidos</span>

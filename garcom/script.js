@@ -32,6 +32,86 @@ let mesaSearchTerm = "";
 let backupInterval = null;
 
 // Persistência de dados
+// Histórico de fechamentos de mesas (para contador de dinheiro)
+function salvarHistoricoDinheiroLocalStorage(historico) {
+  try {
+    localStorage.setItem("garcom-dinheiro-historico", JSON.stringify(historico));
+  } catch (e) { console.warn("Erro ao salvar histórico de dinheiro", e); }
+}
+
+function carregarHistoricoDinheiroLocalStorage() {
+  try {
+    return JSON.parse(localStorage.getItem("garcom-dinheiro-historico")) || [];
+  } catch (e) { return []; }
+}
+
+let dinheiroHistorico = carregarHistoricoDinheiroLocalStorage();
+let filtroDinheiro = "tudo"; // "hoje", "mes", "tudo"
+
+function adicionarFechamentoDinheiro(valor) {
+  dinheiroHistorico.push({
+    valor,
+    data: new Date().toISOString()
+  });
+  salvarHistoricoDinheiroLocalStorage(dinheiroHistorico);
+}
+
+function resetarDinheiroHistorico() {
+  dinheiroHistorico = [];
+  salvarHistoricoDinheiroLocalStorage(dinheiroHistorico);
+  renderizarDinheiroPanel();
+}
+
+function filtrarHistoricoPorPeriodo(periodo) {
+  const agora = new Date();
+  if (periodo === "hoje") {
+    return dinheiroHistorico.filter(item => {
+      const d = new Date(item.data);
+      return d.toDateString() === agora.toDateString();
+    });
+  } else if (periodo === "mes") {
+    return dinheiroHistorico.filter(item => {
+      const d = new Date(item.data);
+      return d.getMonth() === agora.getMonth() && d.getFullYear() === agora.getFullYear();
+    });
+  }
+  return dinheiroHistorico;
+}
+
+function calcularTotalFechado(periodo) {
+  return filtrarHistoricoPorPeriodo(periodo).reduce((s, i) => s + i.valor, 0);
+}
+
+function renderizarDinheiroPanel() {
+  const total = calcularTotalFechado(filtroDinheiro);
+  const elTotal = document.getElementById("dinheiro-total-fechado");
+  if (elTotal) elTotal.textContent = formatPriceBRL(total);
+
+  // Lista de fechamentos
+  const lista = document.getElementById("dinheiro-historico-lista");
+  if (lista) {
+    const historicoFiltrado = filtrarHistoricoPorPeriodo(filtroDinheiro).slice(-10).reverse();
+    lista.innerHTML = historicoFiltrado.map(item => {
+      const d = new Date(item.data);
+      return `<li>${d.toLocaleString("pt-BR")} — <b>${formatPriceBRL(item.valor)}</b></li>`;
+    }).join("") || '<li style="color:#aaa;">Nenhum fechamento registrado.</li>';
+  }
+}
+
+// Inicializar painel ao carregar
+window.addEventListener("DOMContentLoaded", renderizarDinheiroPanel);
+
+// Eventos dos botões do painel
+window.addEventListener("DOMContentLoaded", () => {
+  document.getElementById("btn-filtrar-hoje")?.addEventListener("click", () => { filtroDinheiro = "hoje"; renderizarDinheiroPanel(); });
+  document.getElementById("btn-filtrar-mes")?.addEventListener("click", () => { filtroDinheiro = "mes"; renderizarDinheiroPanel(); });
+  document.getElementById("btn-filtrar-tudo")?.addEventListener("click", () => { filtroDinheiro = "tudo"; renderizarDinheiroPanel(); });
+  document.getElementById("btn-resetar-dinheiro")?.addEventListener("click", () => {
+    if (confirm("Deseja realmente reiniciar o contador de dinheiro? Isso apagará o histórico.")) {
+      resetarDinheiroHistorico();
+    }
+  });
+});
 function salvarMesasLocalStorage() {
   try {
     const data = {
@@ -311,19 +391,19 @@ function finalizarMesa() {
   }
 
   const total = calcularTotalMesa(mesa);
-  const confirmar = confirm(`Finalizar mesa ${mesaAtual}?\n\nTotal: ${formatPriceBRL(total)}\n\nA mesa será removida da lista de mesas abertas.`);
+  const confirmar = confirm(`Finalizar mesa ${mesaAtual}?\n\nTotal: ${formatPriceBRL(total)}\n\nA mesa será removida da lista de mesas abertas e o valor será somado ao contador de dinheiro.`);
   
   if (confirmar) {
+    adicionarFechamentoDinheiro(total);
     mesasAbertas.delete(mesaAtual);
     mesaAtual = null;
     numeroMesaInput.value = "";
     mesaAtualEl.textContent = "-";
-    
     document.body.classList.remove("mesa-selecionada");
-    
     renderPedidosMesa();
     atualizarListaMesas();
     salvarMesasLocalStorage();
+    renderizarDinheiroPanel();
   }
 }
 
