@@ -975,6 +975,7 @@ function renderPedidos(pedidos) {
   }
 
   container.innerHTML = pedidos
+    .sort((a, b) => String(a.endereco || "").localeCompare(String(b.endereco || "")))
     .map((pedido) => {
       const itens = Array.isArray(pedido.itens) ? pedido.itens : [];
       const itensText = itens
@@ -988,22 +989,27 @@ function renderPedidos(pedidos) {
 
       return `
       <article class="list-item" data-id="${pedido.id}">
-        <h3>${nomeCliente}</h3>
-        <p><strong>Telefone:</strong> ${telefone}</p>
-        <p><strong>Endereço:</strong> ${endereco}</p>
+        <div style="display:flex; justify-content:space-between; align-items:flex-start;">
+          <div>
+            <h3 style="margin:0;">${nomeCliente}</h3>
+            <p style="margin:4px 0;"><strong>${telefone}</strong></p>
+          </div>
+          <div class="badge" style="background: var(--theme); color: white;">${status}</div>
+        </div>
+        <p style="margin:8px 0; padding:8px; background:rgba(0,0,0,0.03); border-radius:8px;">
+          📍 <strong>Endereço:</strong> ${endereco}
+        </p>
         <p><strong>Itens:</strong> ${itensText || "Sem itens"}</p>
-        <div class="list-actions" style="gap: 8px; align-items: center;">
-          <label style="display:flex; gap:8px; align-items:center;">
-            <span class="muted">Status</span>
-            <select class="js-pedido-status" data-id="${pedido.id}" aria-label="Status do pedido">
-              <option value="novo" ${status === "novo" ? "selected" : ""}>novo</option>
-              <option value="confirmado" ${status === "confirmado" ? "selected" : ""}>confirmado</option>
-              <option value="entregue" ${status === "entregue" ? "selected" : ""}>entregue</option>
-            </select>
-          </label>
+        <div class="list-actions" style="gap: 8px; margin-top:12px;">
+          <select class="js-pedido-status" data-id="${pedido.id}" style="flex:1;">
+            <option value="novo" ${status === "novo" ? "selected" : ""}>Novo</option>
+            <option value="confirmado" ${status === "confirmado" ? "selected" : ""}>Confirmado</option>
+            <option value="entregue" ${status === "entregue" ? "selected" : ""}>Entregue</option>
+          </select>
+          <button class="btn js-notificar-saida" data-id="${pedido.id}" style="background:#25D366; color:white; border:none;">🚀 Saiu</button>
           <button class="btn js-copy-pedido" data-id="${pedido.id}">Copiar</button>
         </div>
-        <p class="muted"><strong>Data:</strong> ${new Date(pedido.created_at).toLocaleString("pt-BR")}</p>
+        <p class="muted" style="font-size:0.8rem; margin-top:8px;">${new Date(pedido.created_at).toLocaleString("pt-BR")}</p>
       </article>
     `;
     })
@@ -1146,14 +1152,9 @@ function fillCardapioForm(item) {
   if (form.marmita_horarios_retirada) form.marmita_horarios_retirada.value = item.marmita_horarios_retirada || "";
   if (form.marmita_dias_semana) form.marmita_dias_semana.value = item.marmita_dias_semana || "1,2,3,4,5";
   if (form.marmita_instrucoes) form.marmita_instrucoes.value = item.marmita_instrucoes || "";
+  if (form.marmita_deadline) form.marmita_deadline.value = item.marmita_deadline ? String(item.marmita_deadline).slice(0, 5) : "";
   if (form.whatsapp_botao) form.whatsapp_botao.value = item.whatsapp_botao || "flutuante";
   if (form.mensagem_whatsapp_template) {
-    const current = String(item.mensagem_whatsapp_template || "").trim();
-    const hasReplacementChar = current.includes("\uFFFD") || current.includes("�");
-    const looksLikeDefault =
-      current.includes("Novo pedido") &&
-      current.includes("{LOJA}") &&
-      current.includes("{ITENS}") &&
       current.includes("{TOTAL}") &&
       (current.includes("RESUMO") || current.includes("Resumo")) &&
       (current.includes("ITENS") || current.includes("Itens")) &&
@@ -1427,6 +1428,9 @@ async function setupDashboardPage() {
     }
     if (e.target.classList.contains("js-print-etiqueta")) {
       imprimirEtiqueta(e.target.dataset.id);
+    }
+    if (e.target.classList.contains("js-notificar-saida")) {
+      notificarSaidaWhatsApp(e.target.dataset.id);
     }
     if (e.target.classList.contains("js-venda-manual")) {
       const id = e.target.dataset.id;
@@ -2671,17 +2675,40 @@ function renderResumoCozinha() {
     return;
   }
 
-  summaryEl.innerHTML = Object.values(aggregate).map(item => `
-    <div class="list-item" style="display:flex; justify-content:space-between; align-items:center; padding:16px;">
-      <div style="flex:1;">
-        <strong style="font-size:1.1rem;">${escapeHtml(item.nome)}${item.tamanho ? ` (${escapeHtml(item.tamanho)})` : ""}</strong>
-        ${item.opcoes ? `<div class="muted" style="font-size:0.85rem; margin-top:4px;">${item.opcoes.map(o => `• ${escapeHtml(o.grupo)}: ${escapeHtml(o.itens.join(", "))}`).join("<br>")}</div>` : ""}
-      </div>
-      <div style="font-size:1.5rem; font-weight:800; color:var(--theme); background:rgba(0,0,0,0.05); padding:8px 16px; border-radius:12px;">
-        ${item.quantidade}x
+  summaryEl.innerHTML = `
+    <div style="background:var(--theme); color:white; padding:12px; border-radius:12px; margin-bottom:16px; text-align:center;">
+      <strong>${pedidosHoje.length} pedidos hoje</strong>
+    </div>
+  ` + Object.values(aggregate).map(item => `
+    <div class="list-item" style="padding:16px; margin-bottom:12px; border-left:4px solid var(--theme);">
+      <div style="display:flex; justify-content:space-between; align-items:flex-start;">
+        <div style="flex:1;">
+          <strong style="font-size:1.2rem; display:block; margin-bottom:4px;">${escapeHtml(item.nome)}${item.tamanho ? ` (${escapeHtml(item.tamanho)})` : ""}</strong>
+          ${item.opcoes ? `
+            <div style="background:rgba(0,0,0,0.03); padding:8px; border-radius:8px; font-size:0.9rem;">
+              ${item.opcoes.map(o => `<div style="margin-bottom:2px;">• <strong>${escapeHtml(o.grupo)}:</strong> ${escapeHtml(o.itens.join(", "))}</div>`).join("")}
+            </div>
+          ` : ""}
+        </div>
+        <div style="font-size:2rem; font-weight:900; color:var(--theme); padding-left:16px;">
+          ${item.quantidade}x
+        </div>
       </div>
     </div>
   `).join("");
+}
+
+function notificarSaidaWhatsApp(pedidoId) {
+  const pedido = state.pedidos.find(p => p.id === pedidoId);
+  if (!pedido) return;
+
+  const cardapio = state.cardapios.find(c => c.id === pedido.cardapio_id);
+  const loja = cardapio ? cardapio.nome : "Nossa Loja";
+  
+  const msg = encodeURIComponent(`Olá ${pedido.nome_cliente}! Sua marmita da *${loja}* acabou de sair para entrega. Já já chega aí! 🚀🥘`);
+  const tel = onlyDigits(pedido.telefone);
+  
+  window.open(`https://wa.me/55${tel}?text=${msg}`, "_blank");
 }
 
 function imprimirEtiqueta(pedidoId) {

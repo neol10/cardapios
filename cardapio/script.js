@@ -26,7 +26,18 @@ function isCatalogMode(cardapio) {
 
 function isMarmitaMode(cardapio) {
   const value = safeText(cardapio?.modo_marmita_enabled) || "false";
-  return value === "true";
+  return value === "true" || cardapio?.modo === "marmita";
+}
+
+function isMarmitaDeadlinePassed(cardapio) {
+  if (!isMarmitaMode(cardapio) || !cardapio.marmita_deadline) return false;
+  
+  const now = new Date();
+  const [h, m] = cardapio.marmita_deadline.split(':');
+  const deadline = new Date();
+  deadline.setHours(parseInt(h), parseInt(m), 0);
+  
+  return now > deadline;
 }
 
 function isMarmitaAgendamentoMode(cardapio) {
@@ -629,7 +640,15 @@ function renderProdutos() {
     return;
   }
 
+  const deadlinePassed = isMarmitaDeadlinePassed(activeCardapio);
   const catalogo = isCatalogMode(activeCardapio);
+
+  if (deadlinePassed && !catalogo) {
+    const alert = document.createElement("div");
+    alert.style = "background:#fff5f5; color:#c53030; padding:16px; border-radius:12px; margin-bottom:20px; border:1px solid #feb2b2; text-align:center;";
+    alert.innerHTML = `<strong>⚠️ Horário encerrado:</strong> Já passamos do horário limite (${activeCardapio.marmita_deadline.slice(0,5)}) para pedidos de hoje.`;
+    container.prepend(alert);
+  }
 
   container.innerHTML = list
     .map(
@@ -654,9 +673,9 @@ function renderProdutos() {
           ${
             catalogo
               ? ""
-              : disponivel 
+              : (disponivel && !deadlinePassed)
                 ? `<button type="button" class="btn btn-primary add-to-cart" data-id="${produto.id}">Adicionar ao pedido</button>`
-                : `<button type="button" class="btn btn-disabled" disabled>Indisponível</button>`
+                : `<button type="button" class="btn btn-disabled" disabled>${deadlinePassed ? 'Horário Encerrado' : 'Indisponível'}</button>`
           }
         </div>
       </article>

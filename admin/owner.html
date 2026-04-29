@@ -112,7 +112,30 @@
               Banner do cardápio (URL)
               <input type="url" name="banner_url" placeholder="https://..." />
             </label>
+          <details class="details details-sub">
+            <summary>Configurações de Marmita</summary>
+            <label>
+              <input type="checkbox" name="modo_marmita_enabled" />
+              Ativar Modo Marmita
+            </label>
+            <label>
+              <input type="checkbox" name="marmita_agendamento_enabled" />
+              Habilitar agendamento
+            </label>
+            <label>
+              Horário limite (Hoje)
+              <input type="time" name="marmita_deadline" />
+            </label>
+            <label>
+              Dias da semana (1-7)
+              <input type="text" name="marmita_dias_semana" placeholder="1,2,3,4,5" />
+            </label>
+            <label>
+              Horários de retirada
+              <input type="text" name="marmita_horarios_retirada" placeholder="11:30, 12:00, 12:30" />
+            </label>
           </details>
+        </details>
 
           <button type="submit" class="btn btn-primary btn-lg">Salvar</button>
           <button type="button" class="btn" id="owner-logout">Sair</button>

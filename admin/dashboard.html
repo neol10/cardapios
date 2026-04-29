@@ -543,6 +543,33 @@ Tags: {LOJA} {ITENS} {SUBTOTAL} {TAXA_ENTREGA} {TOTAL} {NOME} {TELEFONE} {ENDERE
                 Dica: você pode usar tags como <strong>{LOJA}</strong>, <strong>{ITENS}</strong>, <strong>{TOTAL}</strong> (também aceita <strong>{{LOJA}}</strong>). Se deixar em branco, o sistema usa um modelo padrão.
               </small>
             </label>
+            <details class="details details-sub">
+              <summary>Configurações de Marmita</summary>
+              <label>
+                <input type="checkbox" name="modo_marmita_enabled" />
+                Ativar Modo Marmita (muda o visual para menu do dia)
+              </label>
+              <label>
+                <input type="checkbox" name="marmita_agendamento_enabled" />
+                Habilitar agendamento de retirada/entrega
+              </label>
+              <label>
+                Horário limite para pedidos (Hoje)
+                <input type="time" name="marmita_deadline" />
+              </label>
+              <label>
+                Dias da semana ativos (1-7, separados por vírgula)
+                <input type="text" name="marmita_dias_semana" placeholder="1,2,3,4,5" />
+              </label>
+              <label>
+                Horários de retirada (separados por vírgula)
+                <input type="text" name="marmita_horarios_retirada" placeholder="11:30, 12:00, 12:30" />
+              </label>
+              <label>
+                Instruções adicionais de marmita
+                <textarea name="marmita_instrucoes" rows="2" placeholder="Ex: Pedidos após as 11h somente para o dia seguinte."></textarea>
+              </label>
+            </details>
           </details>
 
           <button class="btn btn-primary" type="submit">Salvar cardápio</button>
@@ -585,15 +612,10 @@ Tags: {LOJA} {ITENS} {SUBTOTAL} {TAXA_ENTREGA} {TOTAL} {NOME} {TELEFONE} {ENDERE
           <details class="details details-sub">
             <summary>Preços por Tamanho (Opcional)</summary>
             <div class="two-cols">
-              <label>
-                Preço P (R$)
-                <input type="text" name="preco_p" placeholder="0,00" />
-              </label>
-              <label>
-                Preço M (R$)
-                <input type="text" name="preco_m" placeholder="0,00" />
-              </label>
-            </div>
+            <label>
+              Preço M (R$)
+              <input type="text" name="preco_m" placeholder="0,00" />
+            </label>
             <label>
               Preço G (R$)
               <input type="text" name="preco_g" placeholder="0,00" />
