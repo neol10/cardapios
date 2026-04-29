@@ -2665,10 +2665,10 @@ function imprimirEtiqueta(pedidoId) {
   const loja = cardapio ? cardapio.nome : "Marmitaria";
 
   const win = window.open('', 'PRINT', 'height=600,width=800');
-  win.document.write(\`
+  win.document.write(`
     <html>
       <head>
-        <title>Etiqueta - \${pedido.nome_cliente}</title>
+        <title>Etiqueta - ${pedido.nome_cliente}</title>
         <style>
           body { font-family: sans-serif; padding: 20px; color: #000; }
           .etiqueta { border: 2px solid #000; padding: 15px; width: 300px; margin: 0 auto; }
@@ -2682,23 +2682,23 @@ function imprimirEtiqueta(pedidoId) {
       </head>
       <body>
         <div class="etiqueta">
-          <div class="loja">\${escapeHtml(loja)}</div>
-          <div class="cliente">\${escapeHtml(pedido.nome_cliente)}</div>
-          <div class="muted">\${pedido.tipo_pedido === 'retirada' ? 'RETIRADA NO BALCÃO' : escapeHtml(pedido.endereco)}</div>
+          <div class="loja">${escapeHtml(loja)}</div>
+          <div class="cliente">${escapeHtml(pedido.nome_cliente)}</div>
+          <div class="muted">${pedido.tipo_pedido === 'retirada' ? 'RETIRADA NO BALCÃO' : escapeHtml(pedido.endereco)}</div>
           <div class="itens">
-            \${pedido.itens.map(i => \`
+            ${pedido.itens.map(i => `
               <div class="item">
-                <strong>\${i.quantidade}x \${escapeHtml(i.nome)}\${i.tamanho ? ' (' + i.tamanho + ')' : ''}</strong>
-                \${i.opcoes ? '<div class=\"opcoes\">' + i.opcoes.map(o => '• ' + o.itens.join(\", \")).join(\"<br>\") + '</div>' : ''}
+                <strong>${i.quantidade}x ${escapeHtml(i.nome)}${i.tamanho ? ' (' + i.tamanho + ')' : ''}</strong>
+                ${i.opcoes ? '<div class="opcoes">' + i.opcoes.map(o => '• ' + o.itens.join(", ")).join("<br>") + '</div>' : ''}
               </div>
-            \`).join(\"\")}
+            `).join("")}
           </div>
-          <div class="footer">\${new Date(pedido.created_at).toLocaleString('pt-BR')}</div>
+          <div class="footer">${new Date(pedido.created_at).toLocaleString('pt-BR')}</div>
         </div>
         <script>window.print(); setTimeout(() => window.close(), 500);</script>
       </body>
     </html>
-  \`);
+  `);
   win.document.close();
 }
 
