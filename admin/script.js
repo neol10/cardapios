@@ -734,6 +734,7 @@ function renderCardapios() {
           <a class="btn" href="/cardapio/${slugHref}" target="_blank" rel="noopener">Abrir cardápio</a>
           <a class="btn" href="/garcom/${slugHref}" target="_blank" rel="noopener">Abrir garçom</a>
           <button class="btn js-manage-cardapio" data-id="${item.id}">${isSelected ? "Gerenciando" : "Gerenciar"}</button>
+          <button class="btn js-venda-manual" data-id="${item.id}" title="Lançar venda manual">💰</button>
           <button class="btn js-edit-cardapio" data-id="${item.id}">Editar dados</button>
           <button class="btn js-delete-cardapio" data-id="${item.id}">Excluir</button>
         </div>
@@ -1426,6 +1427,31 @@ async function setupDashboardPage() {
     if (e.target.classList.contains("js-print-etiqueta")) {
       imprimirEtiqueta(e.target.dataset.id);
     }
+    if (e.target.classList.contains("js-venda-manual")) {
+      const id = e.target.dataset.id;
+      const valor = window.prompt("Quanto foi o valor da venda?");
+      if (!valor) return;
+      const numValor = parseFloat(valor.replace(",", "."));
+      if (isNaN(numValor)) {
+        toast("Valor inválido", "error");
+        return;
+      }
+      try {
+        const { error } = await supabase.from("pedidos").insert({
+          cardapio_id: id,
+          nome_cliente: "Venda Manual",
+          telefone: "0",
+          endereco: "Lançado manualmente",
+          status: "entregue",
+          itens: [{ nome: "Venda Manual", quantidade: 1, preco_unitario: numValor }]
+        });
+        if (error) throw error;
+        toast("Venda lançada com sucesso!");
+        await loadAnalytics();
+      } catch (err) {
+        toast("Erro ao lançar venda: " + err.message, "error");
+      }
+    }
   });
 
   const openTemplatesBtn = cardapioForm?.querySelector(".js-open-templates");
@@ -1553,8 +1579,8 @@ async function setupDashboardPage() {
       return;
     }
 
-    if (modo !== "pedido" && modo !== "catalogo") {
-      toast("Modo inválido. Selecione Pedido ou Catálogo.", "error");
+    if (modo !== "pedido" && modo !== "catalogo" && modo !== "marmita") {
+      toast("Modo inválido. Selecione Pedido, Catálogo ou Marmita.", "error");
       return;
     }
 
