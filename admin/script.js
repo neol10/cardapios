@@ -1417,7 +1417,7 @@ async function setupDashboardPage() {
     updateModoGarcomAvailability(cardapioForm);
   });
 
-  document.body.addEventListener("click", (e) => {
+  document.body.addEventListener("click", async (e) => {
     if (e.target.classList.contains("js-open-cozinha")) {
       showCozinha(true);
     }
