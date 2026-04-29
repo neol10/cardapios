@@ -625,6 +625,31 @@ function updateOpenClosedUI() {
   }
 }
 
+function renderCategorias() {
+  const container = document.querySelector("#categories");
+  if (!container) return;
+
+  const cats = ["Todos", ...new Set(activeProdutos.map(p => p.categoria).filter(Boolean))];
+  
+  container.innerHTML = cats.map(cat => `
+    <button type="button" class="category-btn ${activeCategory === cat ? 'active' : ''}" data-category="${cat}">
+      ${cat}
+    </button>
+  `).join("");
+
+  container.querySelectorAll(".category-btn").forEach(btn => {
+    btn.onclick = () => {
+      activeCategory = btn.dataset.category;
+      filteredProdutos = activeCategory === "Todos" 
+        ? activeProdutos 
+        : activeProdutos.filter(p => p.categoria === activeCategory);
+      
+      renderCategorias();
+      renderProdutos();
+    };
+  });
+}
+
 function renderProdutos() {
   const container = document.querySelector("#produtos");
   const list = filteredProdutos.length > 0 ? filteredProdutos : activeProdutos;
