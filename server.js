@@ -214,6 +214,18 @@ function handleRequest(req, res) {
   res.end("404 - Arquivo nao encontrado.");
 }
 
+const { exec } = require("child_process");
+
 http.createServer(handleRequest).listen(PORT, () => {
-  console.log(`Servidor ativo em http://localhost:${PORT}`);
+  const url = `http://localhost:${PORT}`;
+  console.log(`Servidor ativo em ${url}`);
+  
+  // Abre o navegador automaticamente (apenas em ambiente de desenvolvimento local)
+  if (process.platform === "win32") {
+    exec(`start ${url}`);
+  } else if (process.platform === "darwin") {
+    exec(`open ${url}`);
+  } else {
+    exec(`xdg-open ${url}`);
+  }
 });

@@ -37,6 +37,11 @@ BEGIN
     slogan = coalesce(nullif(trim(p_patch->>'slogan'), ''), slogan),
     modo = coalesce(nullif(trim(p_patch->>'modo'), ''), modo),
     modo_garcom_enabled = coalesce(p_patch->>'modo_garcom_enabled', modo_garcom_enabled),
+    modo_marmita_enabled = coalesce(p_patch->>'modo_marmita_enabled', modo_marmita_enabled),
+    marmita_agendamento_enabled = coalesce(p_patch->>'marmita_agendamento_enabled', marmita_agendamento_enabled),
+    marmita_horarios_retirada = coalesce(nullif(trim(p_patch->>'marmita_horarios_retirada'), ''), marmita_horarios_retirada),
+    marmita_dias_semana = coalesce(nullif(trim(p_patch->>'marmita_dias_semana'), ''), marmita_dias_semana),
+    marmita_instrucoes = coalesce(nullif(trim(p_patch->>'marmita_instrucoes'), ''), marmita_instrucoes),
     horario_funcionamento = coalesce(nullif(trim(p_patch->>'horario_funcionamento'), ''), horario_funcionamento),
     abre_em = CASE
       WHEN nullif(trim(p_patch->>'abre_em'), '') IS NOT NULL THEN (trim(p_patch->>'abre_em'))::time

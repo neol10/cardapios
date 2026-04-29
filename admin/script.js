@@ -1140,6 +1140,11 @@ function fillCardapioForm(item) {
   if (form.densidade) form.densidade.value = item.densidade || "confortavel";
   if (form.modo) form.modo.value = item.modo || "pedido";
   if (form.modo_garcom_enabled) form.modo_garcom_enabled.checked = Boolean(item.modo_garcom_enabled);
+  if (form.modo_marmita_enabled) form.modo_marmita_enabled.checked = Boolean(item.modo_marmita_enabled);
+  if (form.marmita_agendamento_enabled) form.marmita_agendamento_enabled.checked = Boolean(item.marmita_agendamento_enabled);
+  if (form.marmita_horarios_retirada) form.marmita_horarios_retirada.value = item.marmita_horarios_retirada || "";
+  if (form.marmita_dias_semana) form.marmita_dias_semana.value = item.marmita_dias_semana || "1,2,3,4,5";
+  if (form.marmita_instrucoes) form.marmita_instrucoes.value = item.marmita_instrucoes || "";
   if (form.whatsapp_botao) form.whatsapp_botao.value = item.whatsapp_botao || "flutuante";
   if (form.mensagem_whatsapp_template) {
     const current = String(item.mensagem_whatsapp_template || "").trim();
@@ -1164,6 +1169,10 @@ function fillCardapioForm(item) {
     form.owner_pin.value = "";
   }
 
+  if (form.templates_json) {
+    form.templates_json.value = JSON.stringify(item.templates || []);
+  }
+
   refreshAllColorPreviews(form);
   updateFundoVisibility(form);
   updateThemePreview(form);
@@ -1181,6 +1190,17 @@ function fillProdutoForm(item) {
   form.preco.value = String(item.preco).replace(".", ",");
   form.imagem_url.value = item.imagem_url || "";
 
+  // Preços por tamanho
+  const precos = item.precos || {};
+  if (form.preco_p) form.preco_p.value = String(precos.P ?? "").replace(".", ",");
+  if (form.preco_m) form.preco_m.value = String(precos.M ?? "").replace(".", ",");
+  if (form.preco_g) form.preco_g.value = String(precos.G ?? "").replace(".", ",");
+
+  // Estoque e Opções
+  if (form.estoque_diario) form.estoque_diario.value = item.estoque_diario ?? "";
+  if (form.opcoes_json) form.opcoes_json.value = JSON.stringify(item.opcoes || []);
+  renderProductOptionGroups(form);
+
   try {
     form.nome?.focus();
   } catch {
@@ -1197,6 +1217,17 @@ function fillOwnerProdutoForm(form, item) {
   if (form.descricao) form.descricao.value = item?.descricao || "";
   if (form.preco) form.preco.value = String(item?.preco ?? "").replace(".", ",");
   if (form.imagem_url) form.imagem_url.value = item?.imagem_url || "";
+
+  // Preços por tamanho
+  const precos = item?.precos || {};
+  if (form.preco_p) form.preco_p.value = String(precos.P ?? "").replace(".", ",");
+  if (form.preco_m) form.preco_m.value = String(precos.M ?? "").replace(".", ",");
+  if (form.preco_g) form.preco_g.value = String(precos.G ?? "").replace(".", ",");
+
+  // Estoque e Opções
+  if (form.estoque_diario) form.estoque_diario.value = item?.estoque_diario ?? "";
+  if (form.opcoes_json) form.opcoes_json.value = JSON.stringify(item?.opcoes || []);
+  renderProductOptionGroups(form);
 }
 
 function resetOwnerProdutoForm(form) {
@@ -1385,6 +1416,25 @@ async function setupDashboardPage() {
     updateModoGarcomAvailability(cardapioForm);
   });
 
+  document.body.addEventListener("click", (e) => {
+    if (e.target.classList.contains("js-open-cozinha")) {
+      showCozinha(true);
+    }
+    if (e.target.classList.contains("js-close-cozinha")) {
+      showCozinha(false);
+    }
+    if (e.target.classList.contains("js-print-etiqueta")) {
+      imprimirEtiqueta(e.target.dataset.id);
+    }
+  });
+
+  const openTemplatesBtn = cardapioForm?.querySelector(".js-open-templates");
+  if (cardapioForm && openTemplatesBtn) {
+    openTemplatesBtn.addEventListener("click", () => {
+      openTemplatesModal(cardapioForm);
+    });
+  }
+
   const paletteInput = document.querySelector("#palette-input");
   const applyPaletteBtn = document.querySelector(".js-apply-palette");
   if (cardapioForm && paletteInput instanceof HTMLInputElement && applyPaletteBtn) {
@@ -1466,8 +1516,14 @@ async function setupDashboardPage() {
     const densidade = String(formData.get("densidade") || "confortavel");
     const modo = String(formData.get("modo") || "pedido");
     const modo_garcom_enabled = formData.get("modo_garcom_enabled") === "on";
+    const modo_marmita_enabled = formData.get("modo_marmita_enabled") === "on";
+    const marmita_agendamento_enabled = formData.get("marmita_agendamento_enabled") === "on";
+    const marmita_horarios_retirada = String(formData.get("marmita_horarios_retirada") || "").trim();
+    const marmita_dias_semana = String(formData.get("marmita_dias_semana") || "1,2,3,4,5").trim();
+    const marmita_instrucoes = String(formData.get("marmita_instrucoes") || "").trim();
     const whatsapp_botao = String(formData.get("whatsapp_botao") || "flutuante");
     const mensagem_whatsapp_template = String(formData.get("mensagem_whatsapp_template") || "").trim();
+    const templates = parseTemplates(formData.get("templates_json") || "[]");
 
     const owner_edit_enabled = formData.get("owner_edit_enabled") === "on";
     const owner_pin = String(formData.get("owner_pin") || "").trim();
@@ -1537,9 +1593,15 @@ async function setupDashboardPage() {
       densidade,
       whatsapp_botao,
       mensagem_whatsapp_template: mensagem_whatsapp_template || null,
+      modo_marmita_enabled,
+      marmita_agendamento_enabled,
+      marmita_horarios_retirada: marmita_horarios_retirada || null,
+      marmita_dias_semana: marmita_dias_semana || null,
+      marmita_instrucoes: marmita_instrucoes || null,
       foto_url: foto_url || null,
       banner_url: banner_url || null,
-      galeria_urls: galeriaUrlsBase.length ? galeriaUrlsBase : null
+      galeria_urls: galeriaUrlsBase.length ? galeriaUrlsBase : null,
+      templates: templates.length ? templates : null
     };
 
     let savedId = id;
@@ -1781,13 +1843,28 @@ async function setupDashboardPage() {
       }
     }
 
+    const preco_p = parseMoneyInput(String(formData.get("preco_p") || ""));
+    const preco_m = parseMoneyInput(String(formData.get("preco_m") || ""));
+    const preco_g = parseMoneyInput(String(formData.get("preco_g") || ""));
+
+    const estoque_diario = formData.get("estoque_diario") ? parseInt(formData.get("estoque_diario")) : null;
+    const opcoes = parseProductOptions(formData.get("opcoes_json"));
+
+    const precos = {};
+    if (Number.isFinite(preco_p) && preco_p > 0) precos.P = preco_p;
+    if (Number.isFinite(preco_m) && preco_m > 0) precos.M = preco_m;
+    if (Number.isFinite(preco_g) && preco_g > 0) precos.G = preco_g;
+
     const payload = {
       cardapio_id: state.selectedCardapioId,
       nome,
       categoria: categoria || null,
       descricao: descricao || null,
       preco,
-      imagem_url: imagem_url || null
+      imagem_url: imagem_url || null,
+      precos: Object.keys(precos).length ? precos : null,
+      estoque_diario,
+      opcoes: opcoes.length ? opcoes : null
     };
 
     let query;
@@ -2020,13 +2097,19 @@ function getOwnerCardapioEditPayload(editForm) {
     slogan: String(editForm.slogan.value || "").trim(),
     modo: String(editForm.modo?.value || "pedido").trim(),
     modo_garcom_enabled: Boolean(editForm.modo_garcom_enabled?.checked || false),
+    modo_marmita_enabled: Boolean(editForm.modo_marmita_enabled?.checked || false),
+    marmita_agendamento_enabled: Boolean(editForm.marmita_agendamento_enabled?.checked || false),
+    marmita_horarios_retirada: String(editForm.marmita_horarios_retirada?.value || "").trim(),
+    marmita_dias_semana: String(editForm.marmita_dias_semana?.value || "1,2,3,4,5").trim(),
+    marmita_instrucoes: String(editForm.marmita_instrucoes?.value || "").trim(),
     horario_funcionamento: String(editForm.horario_funcionamento.value || "").trim(),
     abre_em: String(editForm.abre_em.value || "").trim(),
     fecha_em: String(editForm.fecha_em.value || "").trim(),
     endereco: String(editForm.endereco.value || "").trim(),
     instagram_url: String(editForm.instagram_url.value || "").trim(),
     foto_url: String(editForm.foto_url?.value || "").trim(),
-    banner_url: String(editForm.banner_url?.value || "").trim()
+    banner_url: String(editForm.banner_url?.value || "").trim(),
+    templates: parseTemplates(editForm.templates_json?.value || "[]")
   };
 }
 
@@ -2037,6 +2120,11 @@ function getOwnerProdutoPayload(form) {
     categoria: String(form?.categoria?.value || "").trim(),
     descricao: String(form?.descricao?.value || "").trim(),
     preco: String(form?.preco?.value || "").trim(),
+    preco_p: String(form?.preco_p?.value || "").trim(),
+    preco_m: String(form?.preco_m?.value || "").trim(),
+    preco_g: String(form?.preco_g?.value || "").trim(),
+    estoque_diario: String(form?.estoque_diario?.value || "").trim(),
+    opcoes_json: String(form?.opcoes_json?.value || "[]").trim(),
     imagem_url: String(form?.imagem_url?.value || "").trim()
   };
 }
@@ -2049,12 +2137,88 @@ if (document.querySelector("#cardapio-form")) {
   setupDashboardPage();
 }
 
-function getOwnerSessionKey(slug) {
-  return `owner.pin.ok:${String(slug || "").trim().toLowerCase()}`;
+function parseTemplates(val) {
+  try {
+    const arr = JSON.parse(String(val || "[]"));
+    return Array.isArray(arr) ? arr : [];
+  } catch {
+    return [];
+  }
 }
 
-function getOwnerPinCacheKey(slug) {
-  return `owner.pin.value:${String(slug || "").trim().toLowerCase()}`;
+function openTemplatesModal(cardapioForm) {
+  const templatesJson = cardapioForm.templates_json.value;
+  const templates = parseTemplates(templatesJson);
+  
+  const overlay = document.createElement("div");
+  overlay.className = "auth-layout";
+  overlay.id = "templates-modal";
+  overlay.style.zIndex = "1100";
+  overlay.innerHTML = `
+    <section class="auth-card" style="width: min(500px, 94vw);">
+      <h1>Modelos de Texto</h1>
+      <p class="muted">Salve textos prontos para usar no slogan/descrição.</p>
+      
+      <div id="templates-list" class="stack-gap" style="max-height: 300px; overflow-y: auto; margin: 16px 0;">
+        ${templates.length ? templates.map((t, i) => `
+          <div class="list-item" style="padding: 10px; border: 1px solid var(--border); border-radius: 8px; margin-bottom: 8px;">
+            <div style="font-weight: bold; margin-bottom: 4px;">${escapeHtml(t.label || `Modelo ${i+1}`)}</div>
+            <div class="muted" style="font-size: 0.85rem; margin-bottom: 8px;">${escapeHtml(t.text)}</div>
+            <div style="display: flex; gap: 8px;">
+              <button type="button" class="btn js-apply-template" data-idx="${i}">Usar</button>
+              <button type="button" class="btn js-remove-template" data-idx="${i}" style="color: red; border-color: red;">×</button>
+            </div>
+          </div>
+        `).join("") : '<p class="muted">Nenhum modelo salvo.</p>'}
+      </div>
+
+      <div class="stack-gap" style="border-top: 1px solid var(--border); padding-top: 16px;">
+        <label>
+          Título do Modelo
+          <input type="text" id="new-template-label" placeholder="Ex: Cardápio Segunda" />
+        </label>
+        <label>
+          Texto
+          <textarea id="new-template-text" rows="3" placeholder="Paste o texto aqui..."></textarea>
+        </label>
+        <button type="button" class="btn btn-primary" id="add-template-btn">Adicionar Novo Modelo</button>
+      </div>
+
+      <button type="button" class="btn" style="margin-top: 16px;" onclick="this.closest('.auth-layout').remove()">Fechar</button>
+    </section>
+  `;
+
+  document.body.appendChild(overlay);
+
+  overlay.addEventListener("click", (e) => {
+    const target = e.target;
+    if (target.classList.contains("js-apply-template")) {
+      const idx = target.dataset.idx;
+      cardapioForm.slogan.value = templates[idx].text;
+      overlay.remove();
+      toast("Modelo aplicado.");
+    }
+    if (target.classList.contains("js-remove-template")) {
+      const idx = target.dataset.idx;
+      templates.splice(idx, 1);
+      cardapioForm.templates_json.value = JSON.stringify(templates);
+      overlay.remove();
+      openTemplatesModal(cardapioForm);
+    }
+  });
+
+  overlay.querySelector("#add-template-btn")?.addEventListener("click", () => {
+    const label = overlay.querySelector("#new-template-label").value.trim();
+    const text = overlay.querySelector("#new-template-text").value.trim();
+    if (!label || !text) {
+      toast("Preencha título e texto.", "error");
+      return;
+    }
+    templates.push({ label, text });
+    cardapioForm.templates_json.value = JSON.stringify(templates);
+    overlay.remove();
+    openTemplatesModal(cardapioForm);
+  });
 }
 
 function clearOwnerSession(slug) {
@@ -2167,6 +2331,11 @@ async function initOwnerPage() {
     editForm.slogan.value = data.slogan || "";
     if (editForm.modo) editForm.modo.value = data.modo || "pedido";
     if (editForm.modo_garcom_enabled) editForm.modo_garcom_enabled.checked = Boolean(data.modo_garcom_enabled || false);
+    if (editForm.modo_marmita_enabled) editForm.modo_marmita_enabled.checked = Boolean(data.modo_marmita_enabled || false);
+    if (editForm.marmita_agendamento_enabled) editForm.marmita_agendamento_enabled.checked = Boolean(data.marmita_agendamento_enabled || false);
+    if (editForm.marmita_horarios_retirada) editForm.marmita_horarios_retirada.value = data.marmita_horarios_retirada || "";
+    if (editForm.marmita_dias_semana) editForm.marmita_dias_semana.value = data.marmita_dias_semana || "1,2,3,4,5";
+    if (editForm.marmita_instrucoes) editForm.marmita_instrucoes.value = data.marmita_instrucoes || "";
     
     editForm.horario_funcionamento.value = data.horario_funcionamento || "";
     editForm.abre_em.value = data.abre_em ? String(data.abre_em).slice(0, 5) : "";
@@ -2175,6 +2344,7 @@ async function initOwnerPage() {
     editForm.instagram_url.value = data.instagram_url || "";
     if (editForm.foto_url) editForm.foto_url.value = data.foto_url || "";
     if (editForm.banner_url) editForm.banner_url.value = data.banner_url || "";
+    if (editForm.templates_json) editForm.templates_json.value = JSON.stringify(data.templates || []);
     ownerCardapio = data;
     await loadOwnerProdutos();
     return true;
@@ -2267,6 +2437,13 @@ async function initOwnerPage() {
     await loadAndFill();
   });
 
+  const ownerTemplatesBtn = editForm.querySelector(".js-open-templates");
+  if (ownerTemplatesBtn) {
+    ownerTemplatesBtn.addEventListener("click", () => {
+      openTemplatesModal(editForm);
+    });
+  }
+
   ownerProdutoCancel?.addEventListener("click", () => {
     if (!(ownerProdutoForm instanceof HTMLFormElement)) return;
     resetOwnerProdutoForm(ownerProdutoForm);
@@ -2304,6 +2481,18 @@ async function initOwnerPage() {
       }
     }
 
+    const preco_p = parseMoneyInput(payload.preco_p);
+    const preco_m = parseMoneyInput(payload.preco_m);
+    const preco_g = parseMoneyInput(payload.preco_g);
+
+    const precos = {};
+    if (Number.isFinite(preco_p) && preco_p > 0) precos.P = preco_p;
+    if (Number.isFinite(preco_m) && preco_m > 0) precos.M = preco_m;
+    if (Number.isFinite(preco_g) && preco_g > 0) precos.G = preco_g;
+
+    const estoque_diario = payload.estoque_diario ? parseInt(payload.estoque_diario) : null;
+    const opcoes = parseProductOptions(payload.opcoes_json);
+
     const { data, error } = await supabase.rpc("owner_upsert_produto", {
       p_slug: slug,
       p_pin: pin,
@@ -2313,7 +2502,10 @@ async function initOwnerPage() {
         categoria: payload.categoria || null,
         descricao: payload.descricao || null,
         preco: payload.preco,
-        imagem_url: imagemFinal || null
+        imagem_url: imagemFinal || null,
+        precos: Object.keys(precos).length ? precos : null,
+        estoque_diario,
+        opcoes: opcoes.length ? opcoes : null
       }
     });
 
@@ -2405,6 +2597,184 @@ async function initOwnerPage() {
   });
 
 }
+
+function showCozinha(visible) {
+  const panel = document.querySelector("#cozinha-panel");
+  const pedidosPanel = document.querySelector("#pedidos-panel");
+  if (!panel || !pedidosPanel) return;
+  
+  panel.classList.toggle("is-hidden", !visible);
+  pedidosPanel.classList.toggle("is-hidden", visible);
+  
+  if (visible) renderResumoCozinha();
+}
+
+function renderResumoCozinha() {
+  const summaryEl = document.querySelector("#cozinha-summary");
+  if (!summaryEl) return;
+
+  const hoje = new Date().toLocaleDateString('pt-BR');
+  const pedidosHoje = state.pedidos.filter(p => {
+    return new Date(p.created_at).toLocaleDateString('pt-BR') === hoje && p.status !== 'cancelado';
+  });
+
+  const aggregate = {};
+
+  pedidosHoje.forEach(p => {
+    const itens = Array.isArray(p.itens) ? p.itens : [];
+    itens.forEach(i => {
+      const size = i.tamanho ? ` (${i.tamanho})` : "";
+      const options = i.opcoes ? `\n  ${i.opcoes.map(o => `• ${o.grupo}: ${o.itens.join(", ")}`).join("\n  ")}` : "";
+      const key = `${i.nome}${size}${options}`;
+      
+      if (!aggregate[key]) {
+        aggregate[key] = {
+          nome: i.nome,
+          tamanho: i.tamanho,
+          opcoes: i.opcoes,
+          quantidade: 0
+        };
+      }
+      aggregate[key].quantidade += (i.quantidade || 1);
+    });
+  });
+
+  if (Object.keys(aggregate).length === 0) {
+    summaryEl.innerHTML = '<p class="muted">Nenhum item para produzir hoje.</p>';
+    return;
+  }
+
+  summaryEl.innerHTML = Object.values(aggregate).map(item => `
+    <div class="list-item" style="display:flex; justify-content:space-between; align-items:center; padding:16px;">
+      <div style="flex:1;">
+        <strong style="font-size:1.1rem;">${escapeHtml(item.nome)}${item.tamanho ? ` (${escapeHtml(item.tamanho)})` : ""}</strong>
+        ${item.opcoes ? `<div class="muted" style="font-size:0.85rem; margin-top:4px;">${item.opcoes.map(o => `• ${escapeHtml(o.grupo)}: ${escapeHtml(o.itens.join(", "))}`).join("<br>")}</div>` : ""}
+      </div>
+      <div style="font-size:1.5rem; font-weight:800; color:var(--theme); background:rgba(0,0,0,0.05); padding:8px 16px; border-radius:12px;">
+        ${item.quantidade}x
+      </div>
+    </div>
+  `).join("");
+}
+
+function imprimirEtiqueta(pedidoId) {
+  const pedido = state.pedidos.find(p => p.id === pedidoId);
+  if (!pedido) return;
+
+  const cardapio = state.cardapios.find(c => c.id === pedido.cardapio_id);
+  const loja = cardapio ? cardapio.nome : "Marmitaria";
+
+  const win = window.open('', 'PRINT', 'height=600,width=800');
+  win.document.write(\`
+    <html>
+      <head>
+        <title>Etiqueta - \${pedido.nome_cliente}</title>
+        <style>
+          body { font-family: sans-serif; padding: 20px; color: #000; }
+          .etiqueta { border: 2px solid #000; padding: 15px; width: 300px; margin: 0 auto; }
+          .loja { font-weight: bold; font-size: 1.2rem; border-bottom: 1px solid #000; margin-bottom: 10px; padding-bottom: 5px; text-align: center; }
+          .cliente { font-size: 1.1rem; font-weight: bold; margin-bottom: 10px; }
+          .itens { font-size: 0.9rem; margin-top: 10px; border-top: 1px dashed #ccc; padding-top: 10px; }
+          .item { margin-bottom: 8px; }
+          .opcoes { font-size: 0.8rem; color: #666; margin-left: 10px; }
+          .footer { margin-top: 15px; font-size: 0.75rem; text-align: center; border-top: 1px solid #000; padding-top: 5px; }
+        </style>
+      </head>
+      <body>
+        <div class="etiqueta">
+          <div class="loja">\${escapeHtml(loja)}</div>
+          <div class="cliente">\${escapeHtml(pedido.nome_cliente)}</div>
+          <div class="muted">\${pedido.tipo_pedido === 'retirada' ? 'RETIRADA NO BALCÃO' : escapeHtml(pedido.endereco)}</div>
+          <div class="itens">
+            \${pedido.itens.map(i => \`
+              <div class="item">
+                <strong>\${i.quantidade}x \${escapeHtml(i.nome)}\${i.tamanho ? ' (' + i.tamanho + ')' : ''}</strong>
+                \${i.opcoes ? '<div class=\"opcoes\">' + i.opcoes.map(o => '• ' + o.itens.join(\", \")).join(\"<br>\") + '</div>' : ''}
+              </div>
+            \`).join(\"\")}
+          </div>
+          <div class="footer">\${new Date(pedido.created_at).toLocaleString('pt-BR')}</div>
+        </div>
+        <script>window.print(); setTimeout(() => window.close(), 500);</script>
+      </body>
+    </html>
+  \`);
+  win.document.close();
+}
+
+function parseProductOptions(val) {
+  try {
+    const arr = JSON.parse(String(val || "[]"));
+    return Array.isArray(arr) ? arr : [];
+  } catch {
+    return [];
+  }
+}
+
+function renderProductOptionGroups(form) {
+  const container = form.querySelector("#product-options-container");
+  if (!container) return;
+
+  const options = parseProductOptions(form.opcoes_json.value);
+  
+  container.innerHTML = options.map((group, gIdx) => `
+    <div class="list-item" style="padding: 12px; border: 1px solid var(--border); border-radius: 12px; background: color-mix(in srgb, var(--surface) 95%, transparent); margin-bottom: 12px;">
+      <div class="two-cols">
+        <label>
+          Título do Grupo
+          <input type="text" value="${escapeHtml(group.titulo)}" oninput="updateOptionGroup(${gIdx}, 'titulo', this.value)" placeholder="Ex: Escolha o Arroz" />
+        </label>
+        <div class="two-cols">
+          <label>Mín <input type="number" value="${group.min || 0}" oninput="updateOptionGroup(${gIdx}, 'min', this.value)" /></label>
+          <label>Máx <input type="number" value="${group.max || 1}" oninput="updateOptionGroup(${gIdx}, 'max', this.value)" /></label>
+        </div>
+      </div>
+      <label style="margin-top: 8px;">
+        Opções (separadas por vírgula)
+        <input type="text" value="${(group.itens || []).join(", ")}" oninput="updateOptionGroup(${gIdx}, 'itens', this.value)" placeholder="Branco, Integral, Grega" />
+      </label>
+      <button type="button" class="btn" style="color: red; margin-top: 8px; border-color: red;" onclick="removeOptionGroup(${gIdx})">Remover Grupo</button>
+    </div>
+  `).join("");
+}
+
+window.updateOptionGroup = (gIdx, field, value) => {
+  const form = document.querySelector("#produto-form") || document.querySelector("#owner-produto-form");
+  if (!form) return;
+  const options = parseProductOptions(form.opcoes_json.value);
+  if (field === 'itens') {
+    options[gIdx][field] = value.split(",").map(i => i.trim()).filter(i => i);
+  } else if (field === 'min' || field === 'max') {
+    options[gIdx][field] = parseInt(value) || 0;
+  } else {
+    options[gIdx][field] = value;
+  }
+  form.opcoes_json.value = JSON.stringify(options);
+};
+
+window.removeOptionGroup = (gIdx) => {
+  const form = document.querySelector("#produto-form") || document.querySelector("#owner-produto-form");
+  if (!form) return;
+  const options = parseProductOptions(form.opcoes_json.value);
+  options.splice(gIdx, 1);
+  form.opcoes_json.value = JSON.stringify(options);
+  renderProductOptionGroups(form);
+};
+
+function setupProductOptionsHandlers() {
+  document.body.addEventListener("click", (e) => {
+    if (e.target.id === "add-option-group-btn") {
+      const form = e.target.closest("form");
+      if (!form) return;
+      const options = parseProductOptions(form.opcoes_json.value);
+      options.push({ titulo: "Novo Grupo", min: 0, max: 1, itens: [] });
+      form.opcoes_json.value = JSON.stringify(options);
+      renderProductOptionGroups(form);
+    }
+  });
+}
+
+setupProductOptionsHandlers();
 
 if (document.querySelector("#owner-page")) {
   initOwnerPage();

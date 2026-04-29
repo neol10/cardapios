@@ -24,6 +24,16 @@ function isCatalogMode(cardapio) {
   return value === "catalogo";
 }
 
+function isMarmitaMode(cardapio) {
+  const value = safeText(cardapio?.modo_marmita_enabled) || "false";
+  return value === "true";
+}
+
+function isMarmitaAgendamentoMode(cardapio) {
+  return isMarmitaMode(cardapio) && 
+    (safeText(cardapio?.marmita_agendamento_enabled) === "true");
+}
+
 const produtosContainer = document.querySelector("#produtos");
 const cartItemsContainer = document.querySelector("#cart-items");
 const cartTotal = document.querySelector("#cart-total");
@@ -779,6 +789,19 @@ function ensureProdutoModal() {
         <p id="produto-modal-categoria" class="muted is-hidden"></p>
         <p id="produto-modal-descricao" class="muted is-hidden"></p>
         <p id="produto-modal-preco" class="price"></p>
+        
+        <div id="produto-modal-sizes" class="produto-sizes is-hidden">
+          <p class="sizes-label">Escolha o tamanho:</p>
+          <div class="sizes-grid"></div>
+        </div>
+
+        <div id="produto-modal-options" class="produto-options is-hidden">
+          <!-- Grupos de opções via JS -->
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" id="produto-modal-add" class="btn btn-primary btn-block">Adicionar ao pedido</button>
+        </div>
       </div>
     </div>
   `;
@@ -805,14 +828,40 @@ function ensureProdutoModal() {
     }
   });
 
+  const sizesEl = root.querySelector("#produto-modal-sizes");
+  const optionsEl = root.querySelector("#produto-modal-options");
+  const addBtn = root.querySelector("#produto-modal-add");
+
   produtoModal = {
     root,
     imageEl,
     titleEl,
     categoriaEl,
     descricaoEl,
-    precoEl
+    precoEl,
+    sizesEl,
+    optionsEl,
+    addBtn,
+    selectedProdutoId: null,
+    selectedSize: null
   };
+
+  if (addBtn) {
+    addBtn.addEventListener("click", () => {
+      if (produtoModal.selectedProdutoId) {
+        const selectedOptions = captureSelectedOptions();
+        const validation = validateOptions(selectedOptions);
+        
+        if (!validation.ok) {
+          toast(validation.message, "error");
+          return;
+        }
+
+        addToCart(produtoModal.selectedProdutoId, addBtn, produtoModal.selectedSize, selectedOptions);
+        closeProdutoModal();
+      }
+    });
+  }
 
   return produtoModal;
 }
@@ -852,13 +901,83 @@ function openProdutoModal(produtoId) {
   modal.descricaoEl.textContent = descricao;
   modal.descricaoEl.classList.toggle("is-hidden", !descricao);
 
+  modal.selectedProdutoId = selected.id;
+  modal.selectedSize = null;
+
+  const precos = selected.precos || {};
+  const hasSizes = Object.keys(precos).length > 0;
+
+  if (modal.sizesEl) {
+    modal.sizesEl.classList.toggle("is-hidden", !hasSizes);
+    const grid = modal.sizesEl.querySelector(".sizes-grid");
+    if (grid) {
+      if (hasSizes) {
+        const sizes = Object.entries(precos);
+        grid.innerHTML = sizes.map(([size, price]) => `
+          <label class="size-option">
+            <input type="radio" name="modal_size" value="${size}" data-price="${price}">
+            <span class="size-name">${size}</span>
+            <span class="size-price">${formatPriceBRL(price)}</span>
+          </label>
+        `).join("");
+
+        grid.querySelectorAll('input[name="modal_size"]').forEach(input => {
+          input.addEventListener("change", () => {
+            modal.selectedSize = input.value;
+            modal.precoEl.textContent = formatPriceBRL(input.dataset.price);
+          });
+        });
+
+        // Seleciona o primeiro por padrão ou deixa vazio se preferir
+        const first = grid.querySelector('input[name="modal_size"]');
+        if (first instanceof HTMLInputElement) {
+          first.checked = true;
+          modal.selectedSize = first.value;
+          modal.precoEl.textContent = formatPriceBRL(first.dataset.price);
+        }
+      } else {
+        grid.innerHTML = "";
+      }
+    }
+  }
+
+  if (modal.addBtn) {
+    modal.addBtn.classList.toggle("is-hidden", isCatalogMode(activeCardapio));
+  }
+
+  // Renderizar Opções
+  if (modal.optionsEl) {
+    const opcoes = selected.opcoes || [];
+    modal.optionsEl.classList.toggle("is-hidden", !opcoes.length);
+    if (opcoes.length) {
+      modal.optionsEl.innerHTML = opcoes.map((group, gIdx) => `
+        <div class="option-group" data-gidx="${gIdx}" data-min="${group.min}" data-max="${group.max}">
+          <div class="option-group-header">
+            <span class="option-group-title">${escapeHtml(group.titulo)}</span>
+            <span class="option-group-badge">${group.min > 0 ? `Obrigatório (mín. ${group.min})` : `Opcional (máx. ${group.max})`}</span>
+          </div>
+          <div class="option-items">
+            ${(group.itens || []).map((item, iIdx) => `
+              <label class="option-item">
+                <input type="${group.max === 1 && group.min === 1 ? 'radio' : 'checkbox'}" name="group_${gIdx}" value="${escapeHtml(item)}">
+                <span class="option-name">${escapeHtml(item)}</span>
+              </label>
+            `).join("")}
+          </div>
+        </div>
+      `).join("");
+    }
+  }
+
   modal.root.classList.remove("is-hidden");
   document.body.classList.add("modal-open");
 }
 
 function applyCardapioModeUI() {
   const catalogo = isCatalogMode(activeCardapio);
+  const marmita = isMarmitaMode(activeCardapio);
   document.body.classList.toggle("modo-catalogo", catalogo);
+  document.body.classList.toggle("modo-marmita", marmita);
 
   if (catalogo && cardapioSubtitle && activeCardapio) {
     const slogan = safeText(activeCardapio.slogan);
@@ -866,6 +985,69 @@ function applyCardapioModeUI() {
       cardapioSubtitle.textContent = "Veja os produtos e os valores.";
     }
   }
+
+  // Modo Marmita: configura checkout específico
+  if (marmita) {
+    applyMarmitaModeCheckout();
+  }
+}
+
+function applyMarmitaModeCheckout() {
+  const aceitaEntrega = Boolean(activeCardapio?.aceita_entrega ?? true);
+  const aceitaRetirada = Boolean(activeCardapio?.aceita_retirada ?? true);
+
+  // Se aceita os dois, mostra o seletor. Se não, oculta e força o correto.
+  if (tipoPedidoWrap) {
+    tipoPedidoWrap.classList.toggle("is-hidden", !(aceitaEntrega && aceitaRetirada));
+  }
+
+  updateAddressVisibility();
+  
+  // Adicionar campo de agendamento se habilitado
+  if (isMarmitaAgendamentoMode(activeCardapio)) {
+    addMarmitaAgendamentoField();
+  }
+}
+
+function addMarmitaAgendamentoField() {
+  let agendamentoWrap = document.getElementById("marmita-agendamento-wrap");
+  
+  if (agendamentoWrap) return; // Já existe
+
+  // Criar campo de agendamento antes do pagamento
+  const pagamentoLabel = pagamentoWrap?.closest("label");
+  if (pagamentoLabel) {
+    const horarios = parseMarmitaHorarios(activeCardapio?.marmita_horarios_retirada);
+    const diasSemana = parseMarmitaDias(activeCardapio?.marmita_dias_semana);
+    
+    const options = horarios.map(h => 
+      `<option value="${h}">${h}</option>`
+    ).join("");
+
+    agendamentoWrap = document.createElement("div");
+    agendamentoWrap.id = "marmita-agendamento-wrap";
+    agendamentoWrap.className = "field";
+    agendamentoWrap.innerHTML = `
+      <label for="marmita_horario">🕐 Horário de Retirada</label>
+      <select name="marmita_horario" id="marmita_horario" required>
+        <option value="">Selecione um horário</option>
+        ${options}
+      </select>
+      <small class="help">Escolha o melhor horário para retirar seu pedido</small>
+    `;
+    
+    pagamentoLabel.parentNode?.insertBefore(agendamentoWrap, pagamentoLabel);
+  }
+}
+
+function parseMarmitaHorarios(horariosStr) {
+  if (!horariosStr) return ["11:00", "11:30", "12:00", "12:30", "13:00"];
+  return horariosStr.split(",").map(h => h.trim()).filter(h => h);
+}
+
+function parseMarmitaDias(diasStr) {
+  if (!diasStr) return [1, 2, 3, 4, 5];
+  return diasStr.split(",").map(d => parseInt(d.trim())).filter(d => !isNaN(d));
 }
 
 function calculateTotal() {
@@ -895,13 +1077,18 @@ function renderCart() {
         <div class="cart-item-main">
           <div class="cart-item-title">
             <span class="cart-qty">${item.quantidade}x</span>
-            <span class="cart-name">${escapeHtml(item.nome)}</span>
+            <span class="cart-name">${escapeHtml(item.nome)}${item.size ? ` (${item.size})` : ""}</span>
           </div>
+          ${item.options?.length ? `
+            <div class="cart-item-options muted">
+              ${item.options.map(o => `<span>${o.itens.join(", ")}</span>`).join("")}
+            </div>
+          ` : ""}
           <div class="cart-item-sub">
             <span class="cart-price">${formatPriceBRL(item.preco * item.quantidade)}</span>
           </div>
         </div>
-        <button class="btn btn-ghost remove-item" data-id="${item.id}" aria-label="Remover 1 unidade de ${escapeHtml(item.nome)}">Remover 1</button>
+        <button class="btn btn-ghost remove-item" data-id="${item.cartKey}" aria-label="Remover 1 unidade de ${escapeHtml(item.nome)}">Remover 1</button>
       </div>
     `
     )
@@ -958,18 +1145,34 @@ function animateAddToCart(button) {
   updateCheckoutAvailability();
 }
 
-function addToCart(produtoId, buttonElement) {
+function addToCart(produtoId, buttonElement, size = null, options = []) {
   const selected = activeProdutos.find((item) => item.id === produtoId);
   if (!selected) return;
 
-  const existing = cart.find((item) => item.id === produtoId);
+  // Verificação de Estoque
+  if (selected.estoque_diario !== null) {
+    const totalVendido = calculateVendidos(selected.id);
+    if (totalVendido >= selected.estoque_diario) {
+      toast("Este item esgotou por hoje.", "error");
+      return;
+    }
+  }
+
+  const preco = size && selected.precos?.[size] ? Number(selected.precos[size]) : Number(selected.preco);
+  const optionsKey = options.map(o => `${o.grupo}:${o.itens.join(",")}`).join("|");
+  const cartKey = `${produtoId}-${size || 'default'}-${optionsKey}`;
+
+  const existing = cart.find((item) => item.cartKey === cartKey);
   if (existing) {
     existing.quantidade += 1;
   } else {
     cart.push({
       id: selected.id,
+      cartKey,
       nome: selected.nome,
-      preco: Number(selected.preco),
+      size,
+      options,
+      preco: preco,
       quantidade: 1
     });
   }
@@ -994,8 +1197,8 @@ function addToCart(produtoId, buttonElement) {
   }
 }
 
-function removeFromCart(produtoId) {
-  const index = cart.findIndex((item) => item.id === produtoId);
+function removeFromCart(cartKey) {
+  const index = cart.findIndex((item) => item.cartKey === cartKey);
   if (index < 0) return;
 
   if (cart[index].quantidade > 1) {
@@ -1015,13 +1218,23 @@ function buildWhatsappMessage({ nome, telefone, endereco }) {
   const tipoPedido = getTipoPedido();
   const tipoPedidoLabel = tipoPedido === "retirada" ? "Retirada" : "Entrega";
   const pagamento = String(pagamentoSelect?.value || "").trim();
+  const marmita = isMarmitaMode(activeCardapio);
+  const agendamentoEl = document.getElementById("marmita_horario");
+  const horarioRetirada = agendamentoEl?.value || "";
 
   const itensTexto = cart
     .map((item) => {
       const totalItem = item.preco * item.quantidade;
       const unit = formatPriceBRL(item.preco);
       const totalLine = formatPriceBRL(totalItem);
-      return `- ${item.quantidade}x ${item.nome} (${unit}) = ${totalLine}`;
+      const sizeLabel = item.size ? ` (${item.size})` : "";
+      let txt = `- ${item.quantidade}x ${item.nome}${sizeLabel} (${unit}) = ${totalLine}`;
+      if (item.options?.length) {
+        item.options.forEach(o => {
+          txt += `\n  - ${o.grupo}: ${o.itens.join(", ")}`;
+        });
+      }
+      return txt;
     })
     .join("\n");
 
@@ -1073,12 +1286,13 @@ function buildWhatsappMessage({ nome, telefone, endereco }) {
     "ENDERECO",
     `${enderecoLinha || "Nao informado"}`,
     "",
+    ...(marmita && horarioRetirada ? ["RETIRADA", `Horário: ${horarioRetirada}`, ""] : []),
     "ITENS",
     itensTexto,
     "",
     "VALORES",
     `Subtotal: ${formatPriceBRL(subtotal)}`,
-    `Taxa de entrega: ${formatPriceBRL(taxaEntrega)}`,
+    ...(marmita ? [] : [`Taxa de entrega: ${formatPriceBRL(taxaEntrega)}`]),
     `TOTAL: ${formatPriceBRL(total)}`
   ];
 
@@ -1096,6 +1310,7 @@ async function savePedido({ nome, telefone, endereco }) {
     itens: cart.map((item) => ({
       produto_id: item.id,
       nome: item.nome,
+      tamanho: item.size || null,
       quantidade: item.quantidade,
       preco_unitario: item.preco
     }))
@@ -1344,12 +1559,75 @@ async function loadCardapio() {
     return;
   }
 
-  activeProdutos = produtos || [];
-  renderCategories();
+  activeProdutos = produtos;
+    
+  // Buscar resumo de vendas de hoje para estoque
+  try {
+    const { data: salesSummary } = await supabase.rpc("get_today_sales_summary", { p_cardapio_id: activeCardapio.id });
+    if (salesSummary) {
+      activeProdutos.forEach(p => {
+        p.vendidos_hoje = salesSummary[p.id] || 0;
+      });
+    }
+  } catch (e) {
+    console.warn("Falha ao carregar resumo de vendas:", e);
+  }
+
+  renderCategorias();
   initSearch();
   initLightbox();
   renderProdutos();
   renderCart();
+}
+
+function captureSelectedOptions() {
+  if (!produtoModal || !produtoModal.optionsEl) return [];
+  
+  const groups = produtoModal.optionsEl.querySelectorAll(".option-group");
+  const selections = [];
+
+  groups.forEach(group => {
+    const gIdx = group.dataset.gidx;
+    const title = group.querySelector(".option-group-title").textContent;
+    const checked = group.querySelectorAll('input:checked');
+    const itens = Array.from(checked).map(i => i.value);
+    
+    if (itens.length > 0) {
+      selections.push({ grupo: title, itens });
+    }
+  });
+
+  return selections;
+}
+
+function validateOptions(selections) {
+  if (!produtoModal || !produtoModal.optionsEl) return { ok: true };
+  
+  const groups = produtoModal.optionsEl.querySelectorAll(".option-group");
+  for (const group of groups) {
+    const title = group.querySelector(".option-group-title").textContent;
+    const min = parseInt(group.dataset.min);
+    const max = parseInt(group.dataset.max);
+    
+    const selection = selections.find(s => s.grupo === title);
+    const count = selection ? selection.itens.length : 0;
+    
+    if (count < min) {
+      return { ok: false, message: `O grupo "${title}" exige no mínimo ${min} opções.` };
+    }
+    if (count > max) {
+      return { ok: false, message: `O grupo "${title}" permite no máximo ${max} opções.` };
+    }
+  }
+  
+  return { ok: true };
+}
+
+function calculateVendidos(produtoId) {
+  const selected = activeProdutos.find(p => p.id === produtoId);
+  const vindoDoBanco = selected ? (selected.vendidos_hoje || 0) : 0;
+  const noCarrinho = cart.filter(item => item.id === produtoId).reduce((acc, item) => acc + item.quantidade, 0);
+  return vindoDoBanco + noCarrinho;
 }
 
 function attachEvents() {

@@ -1,10 +1,10 @@
 -- Execute este script no SQL Editor do Supabase.
--- Cria tabelas, chaves, políticas de acesso e bucket de imagens.
+-- Cria tabelas, chaves, polÃƒÂ­ticas de acesso e bucket de imagens.
 
 create extension if not exists pgcrypto with schema extensions;
 
--- Allowlist de admins (melhora segurança: não basta estar autenticado)
--- Para liberar o seu usuário como admin, rode no SQL Editor:
+-- Allowlist de admins (melhora seguranÃƒÂ§a: nÃƒÂ£o basta estar autenticado)
+-- Para liberar o seu usuÃƒÂ¡rio como admin, rode no SQL Editor:
 --   insert into public.admins (user_id) values ('<SEU_AUTH_UID>');
 -- Dica: pegue o UID em Authentication > Users.
 
@@ -33,8 +33,8 @@ $$;
 revoke all on function public.is_admin(uuid) from public;
 grant execute on function public.is_admin(uuid) to anon, authenticated;
 
--- PIN extra do admin (2a etapa após e-mail/senha)
--- Mantém somente o HASH no banco. Para trocar o PIN depois:
+-- PIN extra do admin (2a etapa apÃƒÂ³s e-mail/senha)
+-- MantÃƒÂ©m somente o HASH no banco. Para trocar o PIN depois:
 --   update public.admin_settings
 --   set admin_pin_hash = crypt('NOVO_PIN', gen_salt('bf')), updated_at = now()
 --   where id = 1;
@@ -47,10 +47,10 @@ create table if not exists public.admin_settings (
 
 alter table public.admin_settings enable row level security;
 
--- Ninguém deve ler/editar diretamente pelo cliente.
+-- NinguÃƒÂ©m deve ler/editar diretamente pelo cliente.
 revoke all on table public.admin_settings from anon, authenticated;
 
--- Cria um hash inicial aleatório (ninguém sabe o PIN ainda).
+-- Cria um hash inicial aleatÃƒÂ³rio (ninguÃƒÂ©m sabe o PIN ainda).
 -- Depois, defina o seu PIN diretamente no Supabase (SQL Editor), por exemplo:
 --   update public.admin_settings
 --   set admin_pin_hash = crypt('1664800', gen_salt('bf')), updated_at = now()
@@ -121,8 +121,11 @@ create table if not exists public.cardapios (
   nome text not null,
   slug text not null unique,
   whatsapp text not null,
-  modo text not null default 'pedido' check (modo in ('pedido','catalogo')),
+  modo text not null default 'pedido' check (modo in ('pedido','catalogo','marmita')),
   modo_garcom_enabled boolean not null default false,
+  modo_marmita_enabled boolean not null default false,
+  marmita_agendamento_enabled boolean not null default false,
+  marmita_horarios_retirada text,
   owner_edit_enabled boolean not null default false,
   cor_tema text not null default '#ff6a00',
   cor_secundaria text,
@@ -155,11 +158,12 @@ create table if not exists public.cardapios (
   densidade text not null default 'confortavel' check (densidade in ('compacta','confortavel')),
   whatsapp_botao text not null default 'flutuante' check (whatsapp_botao in ('nenhum','topo','flutuante')),
   mensagem_whatsapp_template text,
+  templates jsonb,
   formas_pagamento text,
   created_at timestamptz not null default now()
 );
 
--- Se você já executou este schema antes, rode também este patch (não quebra se já existir).
+-- Se vocÃƒÂª jÃƒÂ¡ executou este schema antes, rode tambÃƒÂ©m este patch (nÃƒÂ£o quebra se jÃƒÂ¡ existir).
 alter table public.cardapios add column if not exists cor_secundaria text;
 alter table public.cardapios add column if not exists fonte_key text;
 alter table public.cardapios add column if not exists fonte_peso_texto integer;
@@ -219,7 +223,18 @@ update public.cardapios set fonte_peso_texto = 400 where fonte_peso_texto is nul
 update public.cardapios set fonte_peso_titulo = 800 where fonte_peso_titulo is null;
 update public.cardapios set owner_edit_enabled = false where owner_edit_enabled is null;
 
--- Acesso do proprietário por cardápio (PIN separado do admin)
+-- Modo Marmita: empresas de marmita/refeiÃƒÂ§ÃƒÂµes
+alter table public.cardapios add column if not exists modo_marmita_enabled boolean;
+alter table public.cardapios add column if not exists marmita_agendamento_enabled boolean;
+alter table public.cardapios add column if not exists marmita_horarios_retirada text;
+alter table public.cardapios add column if not exists marmita_dias_semana text;
+alter table public.cardapios add column if not exists marmita_instrucoes text;
+
+update public.cardapios set modo_marmita_enabled = false where modo_marmita_enabled is null;
+update public.cardapios set marmita_agendamento_enabled = false where marmita_agendamento_enabled is null;
+update public.cardapios set marmita_dias_semana = '1,2,3,4,5' where marmita_dias_semana is null;
+
+-- Acesso do proprietÃƒÂ¡rio por cardÃƒÂ¡pio (PIN separado do admin)
 create table if not exists public.cardapio_owner_access (
   cardapio_id uuid primary key references public.cardapios(id) on delete cascade,
   enabled boolean not null default false,
@@ -349,6 +364,19 @@ begin
       when lower(coalesce(trim(p_patch->>'modo_garcom_enabled'), '')) in ('false', 'f', '0', 'no', 'off') then false
       else modo_garcom_enabled
     end,
+    modo_marmita_enabled = case
+      when lower(coalesce(trim(p_patch->>'modo_marmita_enabled'), '')) in ('true', 't', '1', 'yes', 'on') then true
+      when lower(coalesce(trim(p_patch->>'modo_marmita_enabled'), '')) in ('false', 'f', '0', 'no', 'off') then false
+      else modo_marmita_enabled
+    end,
+    marmita_agendamento_enabled = case
+      when lower(coalesce(trim(p_patch->>'marmita_agendamento_enabled'), '')) in ('true', 't', '1', 'yes', 'on') then true
+      when lower(coalesce(trim(p_patch->>'marmita_agendamento_enabled'), '')) in ('false', 'f', '0', 'no', 'off') then false
+      else marmita_agendamento_enabled
+    end,
+    marmita_horarios_retirada = coalesce(nullif(trim(p_patch->>'marmita_horarios_retirada'), ''), marmita_horarios_retirada),
+    marmita_dias_semana = coalesce(nullif(trim(p_patch->>'marmita_dias_semana'), ''), marmita_dias_semana),
+    marmita_instrucoes = coalesce(nullif(trim(p_patch->>'marmita_instrucoes'), ''), marmita_instrucoes),
     horario_funcionamento = coalesce(nullif(trim(p_patch->>'horario_funcionamento'), ''), horario_funcionamento),
     abre_em = case
       when nullif(trim(p_patch->>'abre_em'), '') is not null then (trim(p_patch->>'abre_em'))::time
@@ -361,7 +389,8 @@ begin
     endereco = coalesce(nullif(trim(p_patch->>'endereco'), ''), endereco),
     instagram_url = coalesce(nullif(trim(p_patch->>'instagram_url'), ''), instagram_url),
     foto_url = coalesce(nullif(trim(p_patch->>'foto_url'), ''), foto_url),
-    banner_url = coalesce(nullif(trim(p_patch->>'banner_url'), ''), banner_url)
+    banner_url = coalesce(nullif(trim(p_patch->>'banner_url'), ''), banner_url),
+    templates = coalesce(p_patch->'templates', templates)
   where id = c_id;
 
   return true;
@@ -436,8 +465,8 @@ begin
   end;
 
   if produto_id is null then
-    insert into public.produtos (cardapio_id, nome, categoria, descricao, preco, imagem_url)
-    values (c_id, v_nome, v_categoria, v_descricao, v_preco, v_imagem_url);
+    insert into public.produtos (cardapio_id, nome, categoria, descricao, preco, imagem_url, precos, opcoes, estoque_diario)
+    values (c_id, v_nome, v_categoria, v_descricao, v_preco, v_imagem_url, p_patch->'precos', p_patch->'opcoes', (p_patch->>'estoque_diario')::integer);
     return true;
   end if;
 
@@ -447,7 +476,10 @@ begin
     categoria = v_categoria,
     descricao = v_descricao,
     preco = v_preco,
-    imagem_url = v_imagem_url
+    imagem_url = v_imagem_url,
+    precos = p_patch->'precos',
+    opcoes = p_patch->'opcoes',
+    estoque_diario = (p_patch->>'estoque_diario')::integer
   where id = produto_id
     and cardapio_id = c_id;
 
@@ -660,3 +692,17 @@ using (
   bucket_id = 'cardapios'
   and public.is_admin(auth.uid())
 );
+
+ / * 
+     P A T C H   P A R A   N O V A S   F U N C I O N A L I D A D E S   ( M A R M I T A   E   T A M A N H O S ) : 
+     
+     - -   1 .   A d i c i o n a r   c o l u n a   d e   p r e Ã§ o s   J S O N B   n o s   p r o d u t o s   ( p a r a   t a m a n h o s   P ,   M ,   G ) 
+     A L T E R   T A B L E   p u b l i c . p r o d u t o s   A D D   C O L U M N   I F   N O T   E X I S T S   p r e c o s   j s o n b ; 
+ 
+     - -   2 .   A d i c i o n a r   c o l u n a   d e   t e m p l a t e s   J S O N B   n o s   c a r d Ã¡ p i o s 
+     A L T E R   T A B L E   p u b l i c . c a r d a p i o s   A D D   C O L U M N   I F   N O T   E X I S T S   t e m p l a t e s   j s o n b ; 
+ 
+     - -   3 .   R o d a r   a s   f u n Ã§ Ãµ e s   a t u a l i z a d a s   ( o w n e r _ u p s e r t _ p r o d u t o ,   e t c )   q u e   e s t Ã£ o   n e s t e   a r q u i v o . 
+ * / 
+ 
+ 

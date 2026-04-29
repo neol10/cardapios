@@ -54,7 +54,11 @@
 
           <label>
             Slogan
-            <input type="text" name="slogan" />
+            <div style="display:flex; gap:8px;">
+              <input type="text" name="slogan" style="flex:1;" />
+              <button type="button" class="btn js-open-templates" title="Modelos de texto">📝</button>
+            </div>
+            <input type="hidden" name="templates_json" />
           </label>
 
           <label>
@@ -141,6 +145,24 @@
               </label>
             </div>
 
+            <details class="details details-sub">
+              <summary>Preços por Tamanho (Opcional)</summary>
+              <div class="two-cols">
+                <label>
+                  Preço P
+                  <input type="text" name="preco_p" placeholder="0,00" />
+                </label>
+                <label>
+                  Preço M
+                  <input type="text" name="preco_m" placeholder="0,00" />
+                </label>
+              </div>
+              <label>
+                Preço G
+                <input type="text" name="preco_g" placeholder="0,00" />
+              </label>
+            </details>
+
             <label>
               Descrição
               <textarea name="descricao" rows="3"></textarea>
@@ -155,6 +177,18 @@
               Imagem do produto (URL opcional)
               <input type="url" name="imagem_url" placeholder="https://..." />
             </label>
+
+            <label>
+              Estoque Diário (Limite por dia)
+              <input type="number" name="estoque_diario" placeholder="Ex: 50" />
+            </label>
+
+            <div class="field">
+              <label>Acompanhamentos / Personalização</label>
+              <div id="product-options-container" class="stack-gap" style="margin-top: 8px;"></div>
+              <button type="button" class="btn btn-ghost" id="add-option-group-btn" style="margin-top: 8px;">+ Adicionar Grupo</button>
+              <input type="hidden" name="opcoes_json" />
+            </div>
 
             <div class="topbar-actions">
               <button type="submit" class="btn btn-primary btn-lg">Salvar produto</button>
