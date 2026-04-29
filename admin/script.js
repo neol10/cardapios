@@ -1417,6 +1417,7 @@ async function setupDashboardPage() {
     updateModoGarcomAvailability(cardapioForm);
   });
 
+  // Listener para eventos de clique no dashboard (Cozinha, Impressão, Venda Manual)
   document.body.addEventListener("click", async (e) => {
     if (e.target.classList.contains("js-open-cozinha")) {
       showCozinha(true);
