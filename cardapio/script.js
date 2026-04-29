@@ -1603,7 +1603,7 @@ async function loadCardapio() {
   const { data: produtos, error: produtosError } = await withTimeout(
     supabase.from("produtos").select("*").eq("cardapio_id", data.id).order("nome"),
     12_000,
-    supabase.from("produtos").select("*").eq("cardapio_id", data.id),
+    "Carregamento dos produtos"
   );
 
   if (produtosError) {
@@ -1626,7 +1626,7 @@ async function loadCardapio() {
     console.warn("Falha ao carregar resumo de vendas:", e);
   }
 
-  renderCategorias();
+  renderCategories();
   initSearch();
   initLightbox();
   renderProdutos();
