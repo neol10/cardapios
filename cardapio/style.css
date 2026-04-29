@@ -584,14 +584,76 @@ body.modo-catalogo .produto-body {
 }
 
 /* Modo Marmita */
+body.modo-marmita .categories-container {
+  justify-content: center;
+  padding: 20px 0;
+  border-bottom: 2px solid var(--theme);
+  margin-bottom: 30px;
+}
+
+body.modo-marmita .category-pill {
+  font-size: 1.2rem;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  border: none;
+  background: transparent;
+  color: var(--muted);
+}
+
+body.modo-marmita .category-pill.active {
+  color: var(--theme);
+  background: transparent;
+  box-shadow: none;
+  font-weight: 900;
+  border-bottom: 3px solid var(--theme);
+  border-radius: 0;
+}
+
+body.modo-marmita .produto-card {
+  border: none;
+  background: transparent;
+  box-shadow: none;
+  text-align: center;
+  border-bottom: 1px solid var(--border);
+  border-radius: 0;
+  padding-bottom: 20px;
+}
+
+body.modo-marmita .produto-media {
+  display: none; /* Em menus estilo o da imagem, a foto as vezes polui */
+}
+
+body.modo-marmita .produto-body {
+  display: block;
+  padding: 10px;
+}
+
+body.modo-marmita .produto-body h3 {
+  font-size: 1.4rem;
+  text-transform: uppercase;
+  margin-bottom: 10px;
+  color: var(--theme);
+}
+
+body.modo-marmita .produto-body .muted {
+  font-size: 1rem;
+  line-height: 1.6;
+  color: var(--text);
+  margin-bottom: 15px;
+}
+
 body.modo-marmita #marmita-agendamento-wrap {
   margin-bottom: 16px;
+  background: color-mix(in srgb, var(--theme) 5%, var(--surface));
+  padding: 15px;
+  border-radius: 12px;
+  border: 1px solid var(--theme);
 }
 
 body.modo-marmita #marmita-agendamento-wrap select {
   width: 100%;
   padding: 12px;
-  border: 2px solid var(--primary);
+  border: 1px solid var(--border);
   border-radius: 8px;
   font-size: 16px;
   background: var(--surface);
