@@ -1155,6 +1155,12 @@ function fillCardapioForm(item) {
   if (form.marmita_deadline) form.marmita_deadline.value = item.marmita_deadline ? String(item.marmita_deadline).slice(0, 5) : "";
   if (form.whatsapp_botao) form.whatsapp_botao.value = item.whatsapp_botao || "flutuante";
   if (form.mensagem_whatsapp_template) {
+    const current = String(item.mensagem_whatsapp_template || "").trim();
+    const hasReplacementChar = current.includes("\uFFFD") || current.includes("");
+    const looksLikeDefault =
+      current.includes("Novo pedido") &&
+      current.includes("{LOJA}") &&
+      current.includes("{ITENS}") &&
       current.includes("{TOTAL}") &&
       (current.includes("RESUMO") || current.includes("Resumo")) &&
       (current.includes("ITENS") || current.includes("Itens")) &&
