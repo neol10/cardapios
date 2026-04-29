@@ -1036,6 +1036,15 @@ function applyCardapioModeUI() {
   }
 }
 
+function updateAddressVisibility() {
+  const tipo = getTipoPedido();
+  if (enderecoWrap) {
+    enderecoWrap.classList.toggle("is-hidden", tipo === "retirada");
+    const endInput = enderecoWrap.querySelector("textarea");
+    if (endInput) endInput.required = tipo !== "retirada";
+  }
+}
+
 function applyMarmitaModeCheckout() {
   const aceitaEntrega = Boolean(activeCardapio?.aceita_entrega ?? true);
   const aceitaRetirada = Boolean(activeCardapio?.aceita_retirada ?? true);
