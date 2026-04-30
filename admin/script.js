@@ -156,26 +156,36 @@ const state = {
   isEditingCardapio: false
 };
 
-const DEFAULT_WHATSAPP_TEMPLATE = `*Novo pedido - {LOJA}*
--------------------------
-RESUMO
-Tipo: {TIPO_PEDIDO}
-Pagamento: {PAGAMENTO}
+const DEFAULT_WHATSAPP_TEMPLATE = `🍽️ *{LOJA}*
+🥗🥩😋 Que Deus nos abençoe! Tenha um dia abençoado! 🙏🏻
 
-CLIENTE
+━━━━━━━━━━━━━━━━━━━
+🛒 *NOVO PEDIDO*
+━━━━━━━━━━━━━━━━━━━
+
+👤 *CLIENTE*
 Nome: {NOME}
 Telefone: {TELEFONE}
 
-ENDERECO
+📦 *TIPO DE PEDIDO*
+{TIPO_PEDIDO}
+
+📍 *ENDEREÇO / RETIRADA*
 {ENDERECO}
 
-ITENS
+━━━━━━━━━━━━━━━━━━━
+🍱 *ITENS DO PEDIDO*
+━━━━━━━━━━━━━━━━━━━
 {ITENS}
 
-VALORES
+━━━━━━━━━━━━━━━━━━━
+💰 *VALORES*
 Subtotal: {SUBTOTAL}
-Taxa de entrega: {TAXA_ENTREGA}
-TOTAL: {TOTAL}`;
+🏍️ Taxa de entrega: {TAXA_ENTREGA}
+✅ *TOTAL: {TOTAL}*
+
+💳 Pagamento: {PAGAMENTO}
+━━━━━━━━━━━━━━━━━━━`;
 
 function escapeHtml(value) {
   const str = String(value ?? "");

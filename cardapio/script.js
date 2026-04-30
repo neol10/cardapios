@@ -691,9 +691,16 @@ function renderProdutos() {
         const imageUrl = produtoImageUrl ||
           "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=800&q=80";
         const disponivel = produto.disponivel !== false;
+        // Em modo marmita: clicar na imagem abre o modal de detalhes (não o lightbox)
+        const mediaClass = marmita
+          ? `produto-media js-open-produto-modal`
+          : `produto-media js-open-lightbox`;
+        const mediaExtra = marmita
+          ? `data-id="${produto.id}"`
+          : `data-url="${imageUrl}"`;
         return `
       <article class="produto-card ${!disponivel ? 'is-sold-out' : ''}" data-id="${produto.id}">
-        <div class="produto-media js-open-lightbox" data-url="${imageUrl}" role="button" tabindex="0" aria-label="Ver imagem de ${nome}">
+        <div class="${mediaClass}" ${mediaExtra} role="button" tabindex="0" aria-label="${marmita ? 'Ver detalhes de ' : 'Ver imagem de '}${nome}">
           <img src="${imageUrl}" alt="${nome}" loading="lazy" decoding="async" style="${!disponivel ? 'filter: grayscale(1); opacity: 0.6;' : ''}" />
           ${!disponivel ? '<span class="sold-out-badge">Esgotado</span>' : ''}
         </div>
