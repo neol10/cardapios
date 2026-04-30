@@ -605,6 +605,37 @@ function pulseCart() {
   window.setTimeout(() => cartBox.classList.remove("cart-pulse"), 320);
 }
 
+function toast(text, type = "success") {
+  const container = document.getElementById("toast-container") || createToastContainer();
+  const el = document.createElement("div");
+  el.className = `toast toast-${type}`;
+  el.textContent = text;
+  container.appendChild(el);
+  setTimeout(() => el.classList.add("show"), 10);
+  setTimeout(() => {
+    el.classList.remove("show");
+    setTimeout(() => el.remove(), 300);
+  }, 4000);
+}
+
+function createToastContainer() {
+  const c = document.createElement("div");
+  c.id = "toast-container";
+  c.style = "position:fixed; bottom:20px; right:20px; z-index:9999; display:flex; flex-direction:column; gap:8px;";
+  document.body.appendChild(c);
+  
+  const style = document.createElement("style");
+  style.textContent = `
+    .toast { padding: 12px 20px; border-radius: 8px; color: #fff; font-size: 14px; transform: translateX(120%); transition: transform 0.3s ease; box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
+    .toast.show { transform: translateX(0); }
+    .toast-success { background: #1f8f5f; }
+    .toast-error { background: #cc3a2d; }
+    .toast-info { background: #3182ce; }
+  `;
+  document.head.appendChild(style);
+  return c;
+}
+
 function updateOpenClosedUI() {
   if (!activeCardapio) return;
   const abertoAgora = isOpenNow(activeCardapio);
@@ -623,31 +654,6 @@ function updateOpenClosedUI() {
   if (whatsappFab) {
     whatsappFab.classList.toggle("is-hidden", !(waBaseLink && botao === "flutuante" && abertoAgora));
   }
-}
-
-function renderCategorias() {
-  const container = document.querySelector("#categories");
-  if (!container) return;
-
-  const cats = ["Todos", ...new Set(activeProdutos.map(p => p.categoria).filter(Boolean))];
-  
-  container.innerHTML = cats.map(cat => `
-    <button type="button" class="category-btn ${activeCategory === cat ? 'active' : ''}" data-category="${cat}">
-      ${cat}
-    </button>
-  `).join("");
-
-  container.querySelectorAll(".category-btn").forEach(btn => {
-    btn.onclick = () => {
-      activeCategory = btn.dataset.category;
-      filteredProdutos = activeCategory === "Todos" 
-        ? activeProdutos 
-        : activeProdutos.filter(p => p.categoria === activeCategory);
-      
-      renderCategorias();
-      renderProdutos();
-    };
-  });
 }
 
 function renderProdutos() {
@@ -791,30 +797,36 @@ function initLightbox() {
   });
 }
 
-function animateAddToCart(btn) {
-  const rect = btn.getBoundingClientRect();
-  const cartIcon = document.querySelector(".cart-box h2");
+function animateAddToCart(button) {
+  const cartIcon = document.querySelector(".btn-cart-float") || document.querySelector("#cart-btn") || document.querySelector(".cart-box h2");
+  if (!cartIcon || !button) return;
+
+  const btnRect = button.getBoundingClientRect();
   const cartRect = cartIcon.getBoundingClientRect();
 
-  const flying = document.createElement("div");
-  flying.className = "flying-item";
-  flying.innerHTML = "🛒";
-  flying.style.left = `${rect.left + rect.width / 2 - 20}px`;
-  flying.style.top = `${rect.top + rect.height / 2 - 20}px`;
+  const flyer = document.createElement("div");
+  flyer.className = "flying-icon";
+  flyer.innerHTML = "🛍️";
+  flyer.style = `
+    position: fixed;
+    z-index: 9999;
+    font-size: 24px;
+    pointer-events: none;
+    left: ${btnRect.left + btnRect.width / 2}px;
+    top: ${btnRect.top + btnRect.height / 2}px;
+  `;
+  document.body.appendChild(flyer);
 
-  document.body.appendChild(flying);
-
-  requestAnimationFrame(() => {
-    flying.style.left = `${cartRect.left + cartRect.width / 2 - 20}px`;
-    flying.style.top = `${cartRect.top + cartRect.height / 2 - 20}px`;
-    flying.style.transform = "scale(0.5)";
-    flying.style.opacity = "0";
-  });
-
-  setTimeout(() => {
-    flying.remove();
+  flyer.animate([
+    { transform: "scale(1)", opacity: 1 },
+    { transform: `translate(${cartRect.left - btnRect.left}px, ${cartRect.top - btnRect.top}px) scale(0.2)`, opacity: 0 }
+  ], {
+    duration: 600,
+    easing: "cubic-bezier(0.42, 0, 0.58, 1)"
+  }).onfinish = () => {
+    flyer.remove();
     pulseCart();
-  }, 600);
+  };
 }
 
 function ensureProdutoModal() {
@@ -1169,29 +1181,6 @@ function renderCart() {
       cartMinimo.classList.add("is-hidden");
     }
   }
-
-function animateAddToCart(button) {
-  const cartIcon = document.querySelector(".btn-cart-float") || document.querySelector("#cart-btn");
-  if (!cartIcon) return;
-
-  const btnRect = button.getBoundingClientRect();
-  const cartRect = cartIcon.getBoundingClientRect();
-
-  const flyer = document.createElement("div");
-  flyer.className = "flying-icon";
-  flyer.innerHTML = "🛍️";
-  flyer.style.left = `${btnRect.left + btnRect.width / 2}px`;
-  flyer.style.top = `${btnRect.top + btnRect.height / 2}px`;
-  document.body.appendChild(flyer);
-
-  flyer.animate([
-    { transform: "scale(1)", opacity: 1 },
-    { transform: `translate(${cartRect.left - btnRect.left}px, ${cartRect.top - btnRect.top}px) scale(0.2)`, opacity: 0 }
-  ], {
-    duration: 600,
-    easing: "cubic-bezier(0.42, 0, 0.58, 1)"
-  }).onfinish = () => flyer.remove();
-}
 
   setTotalLineValue(cartTotal, "Total", formatPriceBRL(calculateTotal()));
 
