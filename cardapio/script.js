@@ -1465,16 +1465,34 @@ function buildWhatsappMessage({ nome, telefone, endereco }) {
   const agendamentoEl = document.getElementById("marmita_horario");
   const horarioRetirada = agendamentoEl?.value || "";
 
+  // Mapeamento de emojis por nome do grupo de opção
+  const optionEmojis = {
+    arroz: "🍚", feijao: "🫘", feijão: "🫘", mistura: "🥩",
+    carne: "🥩", frango: "🍗", peixe: "🐟", acompanhamento: "🥦",
+    salada: "🥗", bebida: "🥤", bebidas: "🥤", sobremesa: "🍮",
+    vegana: "🥦", vegetariana: "🥦", vegetariano: "🥦"
+  };
+
+  function getOptionEmoji(grupo) {
+    const key = String(grupo).toLowerCase()
+      .normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+    for (const [k, emoji] of Object.entries(optionEmojis)) {
+      if (key.includes(k)) return emoji;
+    }
+    return "•";
+  }
+
   const itensTexto = cart
     .map((item) => {
       const totalItem = item.preco * item.quantidade;
       const unit = formatPriceBRL(item.preco);
       const totalLine = formatPriceBRL(totalItem);
       const sizeLabel = item.size ? ` (${item.size})` : "";
-      let txt = `- ${item.quantidade}x ${item.nome}${sizeLabel} (${unit}) = ${totalLine}`;
+      let txt = `🍱 ${item.quantidade}x *${item.nome}${sizeLabel}* (${unit}) = ${totalLine}`;
       if (item.options?.length) {
         item.options.forEach(o => {
-          txt += `\n  - ${o.grupo}: ${o.itens.join(", ")}`;
+          const emoji = getOptionEmoji(o.grupo);
+          txt += `\n  ${emoji} ${o.grupo}: ${o.itens.join(", ")}`;
         });
       }
       return txt;
@@ -1482,7 +1500,7 @@ function buildWhatsappMessage({ nome, telefone, endereco }) {
     .join("\n");
 
   const template = safeText(activeCardapio?.mensagem_whatsapp_template);
-  const templateCorrompido = template.includes("\uFFFD") || template.includes("�");
+  const templateCorrompido = template.includes("\uFFFD") || template.includes("\u{FFFD}");
   if (template && !templateCorrompido) {
     const resolvedEndereco = tipoPedido === "retirada" ? "Retirada no balcão" : endereco;
     const vars = {
@@ -1495,7 +1513,8 @@ function buildWhatsappMessage({ nome, telefone, endereco }) {
       TELEFONE: telefone,
       ENDERECO: resolvedEndereco || "Não informado",
       TIPO_PEDIDO: tipoPedidoLabel,
-      PAGAMENTO: pagamento || "Não informado"
+      PAGAMENTO: pagamento || "Não informado",
+      HORARIO: horarioRetirada || "Não informado"
     };
 
     const replaceVars = (input) =>

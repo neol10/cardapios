@@ -173,6 +173,9 @@ Telefone: {TELEFONE}
 📍 *ENDEREÇO / RETIRADA*
 {ENDERECO}
 
+⏰ *HORÁRIO AGENDADO*
+{HORARIO}
+
 ━━━━━━━━━━━━━━━━━━━
 🍱 *ITENS DO PEDIDO*
 ━━━━━━━━━━━━━━━━━━━
