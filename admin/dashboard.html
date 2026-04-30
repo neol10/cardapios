@@ -126,49 +126,7 @@
               Habilitar modo garçom (funciona em pedido e catálogo)
             </label>
 
-            <details class="details details-sub">
-              <summary>🍱 Modo Marmita</summary>
 
-              <label>
-                <input type="checkbox" name="modo_marmita_enabled" />
-                Ativar modo marmita (sem entrega, apenas retirada)
-              </label>
-
-              <label>
-                <input type="checkbox" name="marmita_agendamento_enabled" />
-                Habilitar agendamento de horário para retirada
-              </label>
-
-              <label>
-                Horários de retirada (separados por vírgula)
-                <input
-                  type="text"
-                  name="marmita_horarios_retirada"
-                  placeholder="11:00, 11:30, 12:00, 12:30, 13:00"
-                />
-                <div class="muted">Ex.: 11:00, 11:30, 12:00</div>
-              </label>
-
-              <label>
-                Dias da semana (1=seg, 7=dom, separados por vírgula)
-                <input
-                  type="text"
-                  name="marmita_dias_semana"
-                  placeholder="1,2,3,4,5"
-                  value="1,2,3,4,5"
-                />
-                <div class="muted">Padrão: 1,2,3,4,5 (segunda a sexta)</div>
-              </label>
-
-              <label>
-                Instruções para retirada
-                <textarea
-                  name="marmita_instrucoes"
-                  placeholder="Ex.: Retire na portaria B, mediante apresentação do comprovante."
-                  rows="2"
-                ></textarea>
-              </label>
-            </details>
 
             <label>
               PIN do proprietário
@@ -544,30 +502,32 @@ Tags: {LOJA} {ITENS} {SUBTOTAL} {TAXA_ENTREGA} {TOTAL} {NOME} {TELEFONE} {ENDERE
               </small>
             </label>
             <details class="details details-sub">
-              <summary>Configurações de Marmita</summary>
+              <summary>🍱 Configurações de Marmita</summary>
               <label>
                 <input type="checkbox" name="modo_marmita_enabled" />
-                Ativar Modo Marmita (muda o visual para menu do dia)
+                Ativar Modo Marmita (sem entrega, apenas retirada e menu do dia)
               </label>
               <label>
                 <input type="checkbox" name="marmita_agendamento_enabled" />
-                Habilitar agendamento de retirada/entrega
+                Habilitar agendamento de horário para retirada
               </label>
               <label>
                 Horário limite para pedidos (Hoje)
                 <input type="time" name="marmita_deadline" />
               </label>
               <label>
-                Dias da semana ativos (1-7, separados por vírgula)
-                <input type="text" name="marmita_dias_semana" placeholder="1,2,3,4,5" />
-              </label>
-              <label>
                 Horários de retirada (separados por vírgula)
-                <input type="text" name="marmita_horarios_retirada" placeholder="11:30, 12:00, 12:30" />
+                <input type="text" name="marmita_horarios_retirada" placeholder="11:00, 11:30, 12:00, 12:30, 13:00" />
+                <div class="muted">Ex.: 11:00, 11:30, 12:00</div>
               </label>
               <label>
-                Instruções adicionais de marmita
-                <textarea name="marmita_instrucoes" rows="2" placeholder="Ex: Pedidos após as 11h somente para o dia seguinte."></textarea>
+                Dias da semana (1=seg, 7=dom, separados por vírgula)
+                <input type="text" name="marmita_dias_semana" placeholder="1,2,3,4,5" value="1,2,3,4,5" />
+                <div class="muted">Padrão: 1,2,3,4,5 (segunda a sexta)</div>
+              </label>
+              <label>
+                Instruções para retirada
+                <textarea name="marmita_instrucoes" rows="2" placeholder="Ex.: Retire na portaria B, mediante apresentação do comprovante. Pedidos após as 11h somente para o dia seguinte."></textarea>
               </label>
             </details>
           </details>
