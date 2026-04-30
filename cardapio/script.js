@@ -845,7 +845,7 @@ function ensureProdutoModal() {
         <p id="produto-modal-categoria" class="muted is-hidden"></p>
         <p id="produto-modal-descricao" class="muted is-hidden"></p>
         <p id="produto-modal-preco" class="price"></p>
-        
+
         <div id="produto-modal-sizes" class="produto-sizes is-hidden">
           <p class="sizes-label">Escolha o tamanho:</p>
           <div class="sizes-grid"></div>
@@ -855,7 +855,22 @@ function ensureProdutoModal() {
           <!-- Grupos de opções via JS -->
         </div>
 
-        <div class="modal-footer">
+        <!-- Wizard: questionário passo a passo -->
+        <div id="produto-modal-wizard" class="produto-wizard is-hidden">
+          <div class="wizard-header">
+            <div class="wizard-progress-bar"><div class="wizard-progress-fill" id="wizard-progress-fill"></div></div>
+            <span class="wizard-step-label" id="wizard-step-label"></span>
+          </div>
+          <p class="wizard-question-title" id="wizard-question-title"></p>
+          <p class="wizard-question-badge" id="wizard-question-badge"></p>
+          <div class="wizard-items" id="wizard-items"></div>
+          <div class="wizard-nav">
+            <button type="button" id="wizard-prev" class="btn btn-ghost wizard-btn-prev">← Voltar</button>
+            <button type="button" id="wizard-next" class="btn btn-primary wizard-btn-next">Próximo →</button>
+          </div>
+        </div>
+
+        <div class="modal-footer" id="produto-modal-footer">
           <button type="button" id="produto-modal-add" class="btn btn-primary btn-block">Adicionar ao pedido</button>
         </div>
       </div>
@@ -887,6 +902,17 @@ function ensureProdutoModal() {
   const sizesEl = root.querySelector("#produto-modal-sizes");
   const optionsEl = root.querySelector("#produto-modal-options");
   const addBtn = root.querySelector("#produto-modal-add");
+  const footerEl = root.querySelector("#produto-modal-footer");
+
+  // Wizard elements
+  const wizardEl = root.querySelector("#produto-modal-wizard");
+  const wizardProgressFill = root.querySelector("#wizard-progress-fill");
+  const wizardStepLabel = root.querySelector("#wizard-step-label");
+  const wizardQuestionTitle = root.querySelector("#wizard-question-title");
+  const wizardQuestionBadge = root.querySelector("#wizard-question-badge");
+  const wizardItemsEl = root.querySelector("#wizard-items");
+  const wizardPrevBtn = root.querySelector("#wizard-prev");
+  const wizardNextBtn = root.querySelector("#wizard-next");
 
   produtoModal = {
     root,
@@ -898,8 +924,21 @@ function ensureProdutoModal() {
     sizesEl,
     optionsEl,
     addBtn,
+    footerEl,
     selectedProdutoId: null,
-    selectedSize: null
+    selectedSize: null,
+    // Wizard state
+    wizardEl,
+    wizardProgressFill,
+    wizardStepLabel,
+    wizardQuestionTitle,
+    wizardQuestionBadge,
+    wizardItemsEl,
+    wizardPrevBtn,
+    wizardNextBtn,
+    wizardGroups: [],
+    wizardStep: 0,
+    wizardAnswers: []
   };
 
   if (addBtn) {
@@ -907,17 +946,18 @@ function ensureProdutoModal() {
       if (produtoModal.selectedProdutoId) {
         const selectedOptions = captureSelectedOptions();
         const validation = validateOptions(selectedOptions);
-        
         if (!validation.ok) {
           toast(validation.message, "error");
           return;
         }
-
         addToCart(produtoModal.selectedProdutoId, addBtn, produtoModal.selectedSize, selectedOptions);
         closeProdutoModal();
       }
     });
   }
+
+  if (wizardNextBtn) wizardNextBtn.addEventListener("click", wizardNext);
+  if (wizardPrevBtn) wizardPrevBtn.addEventListener("click", wizardPrev);
 
   return produtoModal;
 }
@@ -926,6 +966,170 @@ function closeProdutoModal() {
   if (!produtoModal) return;
   produtoModal.root.classList.add("is-hidden");
   document.body.classList.remove("modal-open");
+}
+
+// --- Helpers para opções (modal clássico) ---
+function captureSelectedOptions() {
+  if (!produtoModal?.optionsEl) return [];
+  const groups = produtoModal.optionsEl.querySelectorAll(".option-group");
+  const result = [];
+  groups.forEach((group, gIdx) => {
+    const checked = Array.from(group.querySelectorAll(`input[name="group_${gIdx}"]:checked`)).map(i => i.value);
+    if (checked.length) {
+      const titleEl = group.querySelector(".option-group-title");
+      result.push({ grupo: titleEl?.textContent || `Grupo ${gIdx + 1}`, itens: checked });
+    }
+  });
+  return result;
+}
+
+function validateOptions(selectedOptions) {
+  if (!produtoModal?.optionsEl) return { ok: true };
+  const groups = produtoModal.optionsEl.querySelectorAll(".option-group");
+  for (let gIdx = 0; gIdx < groups.length; gIdx++) {
+    const group = groups[gIdx];
+    const min = parseInt(group.dataset.min || "0", 10);
+    const checked = group.querySelectorAll(`input[name="group_${gIdx}"]:checked`).length;
+    const titleEl = group.querySelector(".option-group-title");
+    const titulo = titleEl?.textContent || `Grupo ${gIdx + 1}`;
+    if (checked < min) return { ok: false, message: `Escolha pelo menos ${min} opção em "${titulo}"` };
+  }
+  return { ok: true };
+}
+
+// --- Wizard (questionário passo a passo) ---
+function initWizard(opcoes) {
+  const modal = produtoModal;
+  if (!modal) return;
+  modal.wizardGroups = opcoes || [];
+  modal.wizardStep = 0;
+  modal.wizardAnswers = opcoes.map(() => []);
+  // Esconde footer padrão, mostra wizard
+  if (modal.footerEl) modal.footerEl.classList.add("is-hidden");
+  if (modal.optionsEl) modal.optionsEl.classList.add("is-hidden");
+  if (modal.wizardEl) modal.wizardEl.classList.remove("is-hidden");
+  renderWizardStep();
+}
+
+function renderWizardStep() {
+  const modal = produtoModal;
+  if (!modal) return;
+  const groups = modal.wizardGroups;
+  const step = modal.wizardStep;
+  const group = groups[step];
+  if (!group) return;
+  const total = groups.length;
+  const isLast = step === total - 1;
+
+  // Progresso
+  const pct = Math.round(((step + 1) / total) * 100);
+  if (modal.wizardProgressFill) modal.wizardProgressFill.style.width = `${pct}%`;
+  if (modal.wizardStepLabel) modal.wizardStepLabel.textContent = `Passo ${step + 1} de ${total}`;
+
+  // Pergunta
+  if (modal.wizardQuestionTitle) modal.wizardQuestionTitle.textContent = group.titulo;
+  const isRequired = (group.min || 0) > 0;
+  const maxLabel = (group.max || 1) === 1 ? "1 opção" : `até ${group.max} opções`;
+  const badge = isRequired ? `✅ Obrigatório • Escolha ${maxLabel}` : `⭕ Opcional • Escolha ${maxLabel}`;
+  if (modal.wizardQuestionBadge) modal.wizardQuestionBadge.textContent = badge;
+  if (modal.wizardQuestionBadge) modal.wizardQuestionBadge.className = `wizard-question-badge ${isRequired ? 'is-required' : 'is-optional'}`;
+
+  // Itens
+  const isRadio = (group.max || 1) === 1 && (group.min || 0) <= 1;
+  const prevAnswers = modal.wizardAnswers[step] || [];
+  if (modal.wizardItemsEl) {
+    modal.wizardItemsEl.innerHTML = (group.itens || []).map((item) => {
+      const isSelected = prevAnswers.includes(item);
+      const inputType = isRadio ? "radio" : "checkbox";
+      return `
+        <label class="wizard-item${isSelected ? ' is-selected' : ''}">
+          <input type="${inputType}" name="wizard_group_${step}" value="${escapeHtml(item)}"${isSelected ? ' checked' : ''}>
+          <span class="wizard-item-name">${escapeHtml(item)}</span>
+          <span class="wizard-item-check">✓</span>
+        </label>
+      `;
+    }).join("");
+
+    modal.wizardItemsEl.querySelectorAll("input").forEach(input => {
+      input.addEventListener("change", () => {
+        if (isRadio) {
+          modal.wizardItemsEl.querySelectorAll(".wizard-item").forEach(el => el.classList.remove("is-selected"));
+        }
+        modal.wizardItemsEl.querySelectorAll("input:checked").forEach(inp => {
+          inp.closest(".wizard-item")?.classList.add("is-selected");
+        });
+        modal.wizardItemsEl.querySelectorAll("input:not(:checked)").forEach(inp => {
+          inp.closest(".wizard-item")?.classList.remove("is-selected");
+        });
+      });
+    });
+  }
+
+  // Botões de navegação
+  if (modal.wizardPrevBtn) modal.wizardPrevBtn.classList.toggle("is-hidden", step === 0);
+  if (modal.wizardNextBtn) {
+    modal.wizardNextBtn.textContent = isLast ? "✓ Adicionar ao pedido" : "Próximo →";
+    modal.wizardNextBtn.classList.toggle("btn-success", isLast);
+    modal.wizardNextBtn.classList.toggle("btn-primary", !isLast);
+  }
+}
+
+function wizardNext() {
+  const modal = produtoModal;
+  if (!modal) return;
+  const step = modal.wizardStep;
+  const group = modal.wizardGroups[step];
+  if (!group) return;
+
+  const checked = Array.from(modal.wizardItemsEl?.querySelectorAll(`input[name="wizard_group_${step}"]:checked`) || []).map(i => i.value);
+  const min = group.min || 0;
+  const max = group.max || 99;
+
+  if (checked.length < min) {
+    toast(`Escolha pelo menos ${min} opção em "${group.titulo}"`, "error");
+    return;
+  }
+  if (checked.length > max) {
+    toast(`Escolha no máximo ${max} opções em "${group.titulo}"`, "error");
+    return;
+  }
+
+  modal.wizardAnswers[step] = checked;
+
+  const isLast = step === modal.wizardGroups.length - 1;
+  if (isLast) {
+    const options = modal.wizardGroups
+      .map((g, i) => ({ grupo: g.titulo, itens: modal.wizardAnswers[i] || [] }))
+      .filter(o => o.itens.length > 0);
+    addToCart(modal.selectedProdutoId, modal.wizardNextBtn, modal.selectedSize, options);
+    closeProdutoModal();
+  } else {
+    modal.wizardStep++;
+    renderWizardStep();
+    animateWizardSlide("next");
+  }
+}
+
+function wizardPrev() {
+  const modal = produtoModal;
+  if (!modal || modal.wizardStep === 0) return;
+  // Salva respostas parciais do passo atual
+  const step = modal.wizardStep;
+  const checked = Array.from(modal.wizardItemsEl?.querySelectorAll(`input[name="wizard_group_${step}"]:checked`) || []).map(i => i.value);
+  modal.wizardAnswers[step] = checked;
+  modal.wizardStep--;
+  renderWizardStep();
+  animateWizardSlide("prev");
+}
+
+function animateWizardSlide(direction) {
+  const modal = produtoModal;
+  if (!modal?.wizardItemsEl) return;
+  const from = direction === "next" ? 40 : -40;
+  modal.wizardItemsEl.animate(
+    [{ transform: `translateX(${from}px)`, opacity: 0 }, { transform: "translateX(0)", opacity: 1 }],
+    { duration: 220, easing: "ease-out" }
+  );
 }
 
 function openProdutoModal(produtoId) {
@@ -1001,28 +1205,17 @@ function openProdutoModal(produtoId) {
     modal.addBtn.classList.toggle("is-hidden", isCatalogMode(activeCardapio));
   }
 
-  // Renderizar Opções
-  if (modal.optionsEl) {
-    const opcoes = selected.opcoes || [];
-    modal.optionsEl.classList.toggle("is-hidden", !opcoes.length);
-    if (opcoes.length) {
-      modal.optionsEl.innerHTML = opcoes.map((group, gIdx) => `
-        <div class="option-group" data-gidx="${gIdx}" data-min="${group.min}" data-max="${group.max}">
-          <div class="option-group-header">
-            <span class="option-group-title">${escapeHtml(group.titulo)}</span>
-            <span class="option-group-badge">${group.min > 0 ? `Obrigatório (mín. ${group.min})` : `Opcional (máx. ${group.max})`}</span>
-          </div>
-          <div class="option-items">
-            ${(group.itens || []).map((item, iIdx) => `
-              <label class="option-item">
-                <input type="${group.max === 1 && group.min === 1 ? 'radio' : 'checkbox'}" name="group_${gIdx}" value="${escapeHtml(item)}">
-                <span class="option-name">${escapeHtml(item)}</span>
-              </label>
-            `).join("")}
-          </div>
-        </div>
-      `).join("");
-    }
+  // Renderizar Opções ou iniciar Wizard
+  const opcoes = selected.opcoes || [];
+  if (opcoes.length > 0) {
+    // Modo Questionário: um grupo por vez
+    if (modal.optionsEl) modal.optionsEl.classList.add("is-hidden");
+    initWizard(opcoes);
+  } else {
+    // Sem opções: esconde wizard, mostra footer normal
+    if (modal.wizardEl) modal.wizardEl.classList.add("is-hidden");
+    if (modal.optionsEl) modal.optionsEl.classList.add("is-hidden");
+    if (modal.footerEl) modal.footerEl.classList.remove("is-hidden");
   }
 
   modal.root.classList.remove("is-hidden");
@@ -1706,7 +1899,14 @@ function attachEvents() {
     }
 
     if (target.classList.contains("add-to-cart")) {
-      addToCart(target.dataset.id, target);
+      const produto = activeProdutos.find(p => String(p.id) === String(target.dataset.id));
+      const hasOptions = produto && (produto.opcoes?.length > 0 || Object.keys(produto.precos || {}).length > 0);
+      if (hasOptions) {
+        // Abre o questionário / seletor de tamanho
+        openProdutoModal(target.dataset.id);
+      } else {
+        addToCart(target.dataset.id, target);
+      }
     }
 
     if (target.classList.contains("remove-item")) {

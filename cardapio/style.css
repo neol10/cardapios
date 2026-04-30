@@ -1442,3 +1442,167 @@ button:disabled {
   font-size: 1.5rem;
   transition: none;
 }
+
+/* ============================================
+   WIZARD – Questionário passo a passo
+   ============================================ */
+.produto-wizard {
+  margin-top: 8px;
+  display: grid;
+  gap: 14px;
+}
+
+.produto-wizard.is-hidden {
+  display: none;
+}
+
+/* Barra de progresso */
+.wizard-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.wizard-progress-bar {
+  flex: 1;
+  height: 6px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--border) 80%, transparent);
+  overflow: hidden;
+}
+
+.wizard-progress-fill {
+  height: 100%;
+  border-radius: 999px;
+  background: linear-gradient(90deg, var(--theme), var(--theme2));
+  transition: width 0.3s ease;
+}
+
+.wizard-step-label {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--muted);
+  white-space: nowrap;
+}
+
+/* Título e badge da pergunta */
+.wizard-question-title {
+  margin: 0;
+  font-size: 1.15rem;
+  font-weight: 800;
+  line-height: 1.2;
+  color: var(--text);
+}
+
+.wizard-question-badge {
+  margin: 0;
+  display: inline-block;
+  font-size: 0.78rem;
+  font-weight: 700;
+  padding: 4px 10px;
+  border-radius: 6px;
+}
+
+.wizard-question-badge.is-required {
+  background: color-mix(in srgb, var(--theme) 12%, transparent);
+  color: color-mix(in srgb, var(--theme) 80%, black);
+  border: 1px solid color-mix(in srgb, var(--theme) 22%, transparent);
+}
+
+.wizard-question-badge.is-optional {
+  background: color-mix(in srgb, var(--muted) 10%, transparent);
+  color: var(--muted);
+  border: 1px solid color-mix(in srgb, var(--border) 70%, transparent);
+}
+
+/* Lista de itens */
+.wizard-items {
+  display: grid;
+  gap: 8px;
+}
+
+.wizard-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 16px;
+  border-radius: 14px;
+  border: 2px solid var(--border);
+  background: color-mix(in srgb, var(--surface) 95%, transparent);
+  cursor: pointer;
+  transition: border-color 0.18s ease, background 0.18s ease, transform 0.12s ease;
+  font-size: 1rem;
+  font-weight: 600;
+  position: relative;
+  user-select: none;
+}
+
+.wizard-item:hover {
+  border-color: color-mix(in srgb, var(--theme) 40%, var(--border));
+  transform: translateY(-1px);
+}
+
+.wizard-item.is-selected {
+  border-color: var(--theme);
+  background: color-mix(in srgb, var(--theme) 6%, var(--surface));
+  box-shadow: 0 4px 14px color-mix(in srgb, var(--theme) 14%, transparent);
+}
+
+.wizard-item input {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+  pointer-events: none;
+}
+
+.wizard-item-name {
+  flex: 1;
+}
+
+.wizard-item-check {
+  font-size: 1.1rem;
+  font-weight: 900;
+  color: var(--theme);
+  opacity: 0;
+  transform: scale(0.5);
+  transition: opacity 0.15s ease, transform 0.15s ease;
+}
+
+.wizard-item.is-selected .wizard-item-check {
+  opacity: 1;
+  transform: scale(1);
+}
+
+/* Navegação */
+.wizard-nav {
+  display: flex;
+  gap: 10px;
+  margin-top: 4px;
+  align-items: center;
+}
+
+.wizard-btn-prev {
+  width: auto;
+  flex-shrink: 0;
+}
+
+.wizard-btn-next {
+  flex: 1;
+  font-weight: 800;
+  letter-spacing: 0.01em;
+}
+
+/* Botão de sucesso (último passo) */
+.btn-success {
+  background: linear-gradient(135deg, #16a34a, #15803d) !important;
+  color: #fff !important;
+  box-shadow: 0 8px 24px rgba(22, 163, 74, 0.28);
+  animation: successPulse 0.4s ease;
+}
+
+@keyframes successPulse {
+  0% { transform: scale(0.97); }
+  60% { transform: scale(1.02); }
+  100% { transform: scale(1); }
+}
