@@ -1816,48 +1816,7 @@ async function loadCardapio() {
   renderCart();
 }
 
-function captureSelectedOptions() {
-  if (!produtoModal || !produtoModal.optionsEl) return [];
-  
-  const groups = produtoModal.optionsEl.querySelectorAll(".option-group");
-  const selections = [];
 
-  groups.forEach(group => {
-    const gIdx = group.dataset.gidx;
-    const title = group.querySelector(".option-group-title").textContent;
-    const checked = group.querySelectorAll('input:checked');
-    const itens = Array.from(checked).map(i => i.value);
-    
-    if (itens.length > 0) {
-      selections.push({ grupo: title, itens });
-    }
-  });
-
-  return selections;
-}
-
-function validateOptions(selections) {
-  if (!produtoModal || !produtoModal.optionsEl) return { ok: true };
-  
-  const groups = produtoModal.optionsEl.querySelectorAll(".option-group");
-  for (const group of groups) {
-    const title = group.querySelector(".option-group-title").textContent;
-    const min = parseInt(group.dataset.min);
-    const max = parseInt(group.dataset.max);
-    
-    const selection = selections.find(s => s.grupo === title);
-    const count = selection ? selection.itens.length : 0;
-    
-    if (count < min) {
-      return { ok: false, message: `O grupo "${title}" exige no mínimo ${min} opções.` };
-    }
-    if (count > max) {
-      return { ok: false, message: `O grupo "${title}" permite no máximo ${max} opções.` };
-    }
-  }
-  
-  return { ok: true };
-}
 
 function calculateVendidos(produtoId) {
   const selected = activeProdutos.find(p => p.id === produtoId);
