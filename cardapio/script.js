@@ -687,7 +687,8 @@ function renderProdutos() {
         const nome = escapeHtml(produto.nome);
         const categoria = escapeHtml(produto.categoria || "");
         const descricao = escapeHtml(produto.descricao || "");
-        const imageUrl = safeImageUrl(produto.imagem_url) ||
+        const produtoImageUrl = safeImageUrl(produto.imagem_url);
+        const imageUrl = produtoImageUrl ||
           "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=800&q=80";
         const disponivel = produto.disponivel !== false;
         return `

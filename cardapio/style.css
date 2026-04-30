@@ -620,7 +620,10 @@ body.modo-marmita .produto-card {
 }
 
 body.modo-marmita .produto-media {
-  display: none; /* Em menus estilo o da imagem, a foto as vezes polui */
+  height: clamp(140px, 22vw, 200px);
+  border-radius: 12px;
+  overflow: hidden;
+  margin: 0 10px;
 }
 
 body.modo-marmita .produto-body {
