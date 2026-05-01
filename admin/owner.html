@@ -148,83 +148,86 @@
             <p class="muted">Nenhum produto carregado ainda.</p>
           </div>
 
-          <form id="owner-produto-form" class="stack-gap">
+          <form id="owner-produto-form" class="stack-gap compact">
             <input type="hidden" name="id" />
 
-            <label>
-              Nome do produto
-              <input type="text" name="nome" required />
-            </label>
-
-            <div class="two-cols">
+            <div class="section-card">
               <label>
-                Categoria
-                <input type="text" name="categoria" />
+                Nome do produto
+                <input type="text" name="nome" required />
               </label>
 
-              <label>
-                Preço
-                <input type="text" name="preco" placeholder="0,00" required />
-              </label>
-            </div>
-
-            <details class="details details-sub">
-              <summary>Preços por Tamanho (Opcional)</summary>
               <div class="two-cols">
                 <label>
-                  Preço P
-                  <input type="text" name="preco_p" placeholder="0,00" />
+                  Categoria
+                  <input type="text" name="categoria" />
                 </label>
+
                 <label>
-                  Preço M
-                  <input type="text" name="preco_m" placeholder="0,00" />
+                  Preço
+                  <input type="text" name="preco" placeholder="0,00" required />
                 </label>
               </div>
+
+              <details class="details details-sub">
+                <summary>Preços por Tamanho (Opcional)</summary>
+                <div class="two-cols">
+                  <label>
+                    Preço P
+                    <input type="text" name="preco_p" placeholder="0,00" />
+                  </label>
+                  <label>
+                    Preço M
+                    <input type="text" name="preco_m" placeholder="0,00" />
+                  </label>
+                </div>
+                <label>
+                  Preço G
+                  <input type="text" name="preco_g" placeholder="0,00" />
+                </label>
+              </details>
+
               <label>
-                Preço G
-                <input type="text" name="preco_g" placeholder="0,00" />
+                Descrição
+                <textarea name="descricao" rows="2"></textarea>
               </label>
-            </details>
 
-            <label>
-              Descrição
-              <textarea name="descricao" rows="3"></textarea>
-            </label>
+              <div class="two-cols">
+                <label>
+                  Imagem (Arquivo)
+                  <input type="file" name="imagem_file" accept="image/*" />
+                </label>
 
-            <label>
-              Imagem do produto (arquivo)
-              <input type="file" name="imagem_file" accept="image/*" />
-            </label>
-
-            <label>
-              Imagem do produto (URL opcional)
-              <input type="url" name="imagem_url" placeholder="https://..." />
-            </label>
-
-            <label>
-              Estoque Diário (Limite por dia)
-              <input type="number" name="estoque_diario" placeholder="Ex: 50" />
-            </label>
-
-            <div class="field">
-              <label>Acompanhamentos / Personalização</label>
-              <div id="product-options-container" class="stack-gap" style="margin-top: 8px;"></div>
-              
-              <div class="presets-container">
-                <button type="button" class="btn btn-marmita-template" id="add-marmita-template-btn">🍽️ Montar Marmita Completa</button>
-                <button type="button" class="btn btn-preset" data-preset-group="Arroz">+ Arroz</button>
-                <button type="button" class="btn btn-preset" data-preset-group="Feijão">+ Feijão</button>
-                <button type="button" class="btn btn-preset" data-preset-group="Mistura">+ Mistura</button>
-                <button type="button" class="btn btn-preset" data-preset-group="Acompanhamentos">+ Acomp.</button>
-                <button type="button" class="btn btn-ghost" id="add-option-group-btn">+ Em Branco</button>
+                <label>
+                  Imagem (URL)
+                  <input type="url" name="imagem_url" placeholder="https://..." />
+                </label>
               </div>
-              
-              <input type="hidden" name="opcoes_json" />
-            </div>
 
-            <div class="topbar-actions">
-              <button type="submit" class="btn btn-primary btn-lg">Salvar produto</button>
-              <button type="button" class="btn" id="owner-produto-cancel">Cancelar edição</button>
+              <label>
+                Estoque Diário (Limite por dia)
+                <input type="number" name="estoque_diario" placeholder="Ex: 50" />
+              </label>
+
+              <div class="field">
+                <label>Acompanhamentos / Personalização</label>
+                <div id="product-options-container" class="stack-gap" style="margin-top: 8px;"></div>
+                
+                <div class="presets-container">
+                  <button type="button" class="btn btn-marmita-template" id="add-marmita-template-btn">🍽️ Template Marmita</button>
+                  <button type="button" class="btn btn-preset" data-preset-group="Arroz">+ Arroz</button>
+                  <button type="button" class="btn btn-preset" data-preset-group="Feijão">+ Feijão</button>
+                  <button type="button" class="btn btn-preset" data-preset-group="Mistura">+ Mistura</button>
+                  <button type="button" class="btn btn-ghost" id="add-option-group-btn">+ Novo Grupo</button>
+                </div>
+                
+                <input type="hidden" name="opcoes_json" />
+              </div>
+
+              <div class="topbar-actions" style="margin-top:10px;">
+                <button type="submit" class="btn btn-primary btn-lg" style="flex:1;">Salvar Produto</button>
+                <button type="button" class="btn" id="owner-produto-cancel">Cancelar</button>
+              </div>
             </div>
           </form>
         </details>

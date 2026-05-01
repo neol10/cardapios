@@ -55,12 +55,10 @@
           <div class="stat-card">
             <span class="stat-label">Vendas Totais</span>
             <strong class="stat-value" id="stat-total-vendas">R$ 0,00</strong>
-            <span class="stat-diff" id="stat-diff-vendas">...</span>
           </div>
           <div class="stat-card">
             <span class="stat-label">Total de Pedidos</span>
             <strong class="stat-value" id="stat-total-pedidos">0</strong>
-            <span class="stat-diff" id="stat-diff-pedidos">...</span>
           </div>
           <div class="stat-card">
             <span class="stat-label">Ticket Médio</span>
@@ -84,563 +82,261 @@
       </section>
 
       <section class="panel" id="cardapios-panel">
-        <h2>Cardápios</h2>
+        <div class="panel-header">
+          <h2>Gerenciar Loja</h2>
+        </div>
+
+        <div class="form-tabs" id="cardapio-tabs">
+          <button type="button" class="tab-btn is-active" data-tab="essencial">📌 Essencial</button>
+          <button type="button" class="tab-btn" data-tab="visual">🎨 Estilo</button>
+          <button type="button" class="tab-btn" data-tab="operacao">⏰ Horários</button>
+          <button type="button" class="tab-btn" data-tab="midia">🖼️ Fotos</button>
+          <button type="button" class="tab-btn" data-tab="entrega">🛵 Pedidos</button>
+        </div>
 
         <form id="cardapio-form" class="stack-gap compact">
           <input type="hidden" name="id" />
 
-          <label>
-            Nome
-            <input type="text" name="nome" placeholder="Pizzaria do João" required />
-          </label>
-
-          <label>
-            Slogan / Descrição Curta
-            <div style="display:flex; gap:8px;">
-              <input type="text" name="slogan" placeholder="O melhor da região..." style="flex:1;" />
-              <button type="button" class="btn js-open-templates" title="Modelos de texto">📝</button>
-            </div>
-            <input type="hidden" name="templates_json" />
-          </label>
-
-          <label>
-            Slug
-            <input type="text" name="slug" placeholder="pizzaria-do-joao" required />
-          </label>
-
-          <label>
-            WhatsApp (somente números)
-            <input type="text" name="whatsapp" placeholder="5511999999999" required />
-          </label>
-
-          <details class="details details-sub">
-            <summary>Acesso do proprietário</summary>
-
-            <label>
-              <input type="checkbox" name="owner_edit_enabled" />
-              Permitir que o proprietário edite este cardápio
-            </label>
-
-            <label>
-              <input type="checkbox" name="modo_garcom_enabled" />
-              Habilitar modo garçom (funciona em pedido e catálogo)
-            </label>
-
-
-
-            <label>
-              PIN do proprietário
-              <input
-                type="password"
-                name="owner_pin"
-                placeholder="Defina um PIN (ex.: 1664800)"
-                inputmode="numeric"
-                autocomplete="off"
-              />
-              <div class="muted">O PIN não é exibido. Para trocar, digite um novo e salve.</div>
-            </label>
-
-            <button type="button" class="btn js-copy-owner-link">Copiar link do editor</button>
-            <button type="button" class="btn js-copy-garcom-link">Copiar link do garçom</button>
-          </details>
-
-          <label>
-            Cor do tema
-            <div class="color-row">
-              <input type="color" name="cor_tema" value="#ff6a00" required />
-              <span class="color-swatch" aria-hidden="true"></span>
-              <input class="color-hex color-hex-input" value="#FF6A00" aria-label="Código da cor (HEX)" inputmode="text" autocapitalize="none" autocomplete="off" maxlength="7" spellcheck="false" />
-            </div>
-          </label>
-
-          <details class="details">
-            <summary>Personalização da loja</summary>
-
-            <details class="details details-sub" open>
-              <summary>Fundo</summary>
-
-              <label>
-                Fundo da loja
-                <select name="fundo_estilo">
-                  <option value="padrao" selected>Padrão</option>
-                  <option value="solido">Cor sólida</option>
-                  <option value="degrade_linear">Degradê linear</option>
-                  <option value="degrade_radial">Degradê radial</option>
-                </select>
-              </label>
-
-              <div class="two-cols">
-                <label class="js-fundo-solido">
-                  Cor do fundo (para "Cor sólida")
-                  <div class="color-row">
-                    <input type="color" name="cor_fundo" value="#fffaf3" />
-                    <span class="color-swatch" aria-hidden="true"></span>
-                    <input class="color-hex color-hex-input" value="#FFFAF3" aria-label="Código da cor (HEX)" inputmode="text" autocapitalize="none" autocomplete="off" maxlength="7" spellcheck="false" />
-                  </div>
-                </label>
-
-                <label class="js-fundo-angulo">
-                  Ângulo do degradê (0 a 360)
-                  <input type="number" name="fundo_angulo" min="0" max="360" step="1" value="135" />
-                </label>
-              </div>
-
-              <div class="two-cols">
-                <label class="js-fundo-degrade">
-                  Degradê - cor 1
-                  <div class="color-row">
-                    <input type="color" name="fundo_cor_1" value="#ff6a00" />
-                    <span class="color-swatch" aria-hidden="true"></span>
-                    <input class="color-hex color-hex-input" value="#FF6A00" aria-label="Código da cor (HEX)" inputmode="text" autocapitalize="none" autocomplete="off" maxlength="7" spellcheck="false" />
-                  </div>
-                </label>
-
-                <label class="js-fundo-degrade">
-                  Degradê - cor 2
-                  <div class="color-row">
-                    <input type="color" name="fundo_cor_2" value="#ffe6ce" />
-                    <span class="color-swatch" aria-hidden="true"></span>
-                    <input class="color-hex color-hex-input" value="#FFE6CE" aria-label="Código da cor (HEX)" inputmode="text" autocapitalize="none" autocomplete="off" maxlength="7" spellcheck="false" />
-                  </div>
-                </label>
-              </div>
-            </details>
-
-            <details class="details details-sub">
-              <summary>Cores e bordas</summary>
-
-              <label>
-                Paleta de cores (cole HEX)
-                <div class="palette-row">
-                  <input
-                    type="text"
-                    id="palette-input"
-                    placeholder="Ex.: #FF6A00 #C8945B #FFFAF3 #2A211D"
-                    autocomplete="off"
-                    autocapitalize="none"
-                    spellcheck="false"
-                  />
-                  <button type="button" class="btn js-apply-palette">Aplicar</button>
+          <!-- ABA: ESSENCIAL -->
+          <div class="form-section is-active" data-section="essencial">
+            <div class="section-card">
+              <div class="section-title">Informações Básicas</div>
+              <p class="section-desc">Identificação principal da sua loja.</p>
+              <label>Nome da Loja <input type="text" name="nome" placeholder="Pizzaria do João" required /></label>
+              <label>Slug (Link) <input type="text" name="slug" placeholder="pizzaria-do-joao" required /></label>
+              <label>WhatsApp <input type="text" name="whatsapp" placeholder="5511999999999" required /></label>
+              <label>Slogan
+                <div style="display:flex; gap:8px;">
+                  <input type="text" name="slogan" placeholder="O melhor da região..." style="flex:1;" />
+                  <button type="button" class="btn js-open-templates">📝</button>
                 </div>
-                <div class="muted palette-hint">Use 4+ cores: tema, secundária, fundo e texto.</div>
               </label>
+            </div>
+          </div>
 
-              <label>
-                Cor secundária (opcional)
+          <!-- ABA: VISUAL -->
+          <div class="form-section" data-section="visual">
+            <div class="section-card">
+              <div class="section-title">Visual e Cores</div>
+              <label>Cor do Tema
                 <div class="color-row">
-                  <input type="color" name="cor_secundaria" value="#c8945b" />
-                  <span class="color-swatch" aria-hidden="true"></span>
-                  <input class="color-hex color-hex-input" value="#C8945B" aria-label="Código da cor (HEX)" inputmode="text" autocapitalize="none" autocomplete="off" maxlength="7" spellcheck="false" />
+                  <input type="color" name="cor_tema" value="#ff6a00" />
+                  <span class="color-swatch"></span>
+                  <input class="color-hex color-hex-input" value="#FF6A00" maxlength="7" />
                 </div>
               </label>
 
-              <div class="two-cols">
-                <label>
-                  Cor dos cards (opcional)
-                  <div class="color-row">
-                    <input type="color" name="cor_surface" value="#ffffff" />
-                    <span class="color-swatch" aria-hidden="true"></span>
-                    <input class="color-hex color-hex-input" value="#FFFFFF" aria-label="Código da cor (HEX)" inputmode="text" autocapitalize="none" autocomplete="off" maxlength="7" spellcheck="false" />
+              <details class="details details-sub">
+                <summary>Personalização do Fundo</summary>
+                <label>Estilo do Fundo
+                  <select name="fundo_estilo">
+                    <option value="padrao" selected>Padrão</option>
+                    <option value="solido">Cor sólida</option>
+                    <option value="degrade_linear">Degradê linear</option>
+                    <option value="degrade_radial">Degradê radial</option>
+                  </select>
+                </label>
+                <div class="two-cols js-fundo-solido">
+                  <label>Cor Fundo <input type="color" name="cor_fundo" value="#fffaf3" /></label>
+                  <label class="js-fundo-angulo">Ângulo <input type="number" name="fundo_angulo" value="135" /></label>
+                </div>
+              </details>
+
+              <details class="details details-sub">
+                <summary>Cores Avançadas (Texto e Cards)</summary>
+                <label>Paleta Rápida (Cole HEX)
+                  <div class="palette-row" style="display:flex; gap:8px;">
+                    <input type="text" id="palette-input" placeholder="#FF6A00 #C8945B #FFFAF3 #2A211D" style="flex:1;" />
+                    <button type="button" class="btn js-apply-palette">Aplicar</button>
                   </div>
                 </label>
 
-                <label>
-                  Cor da borda (opcional)
-                  <div class="color-row">
-                    <input type="color" name="cor_borda" value="#f0dfd1" />
-                    <span class="color-swatch" aria-hidden="true"></span>
-                    <input class="color-hex color-hex-input" value="#F0DFD1" aria-label="Código da cor (HEX)" inputmode="text" autocapitalize="none" autocomplete="off" maxlength="7" spellcheck="false" />
-                  </div>
-                </label>
-              </div>
+                <div class="two-cols">
+                  <label>Cor Secundária <input type="color" name="cor_secundaria" value="#c8945b" /></label>
+                  <label>Cor dos Cards <input type="color" name="cor_surface" value="#ffffff" /></label>
+                </div>
+                
+                <div class="two-cols">
+                  <label>Cor do Texto <input type="color" name="cor_texto" value="#2a211d" /></label>
+                  <label>Cor Secundária <input type="color" name="cor_muted" value="#756960" /></label>
+                </div>
 
-              <div class="two-cols">
-                <label>
-                  Cor do texto (opcional)
-                  <div class="color-row">
-                    <input type="color" name="cor_texto" value="#2a211d" />
-                    <span class="color-swatch" aria-hidden="true"></span>
-                    <input class="color-hex color-hex-input" value="#2A211D" aria-label="Código da cor (HEX)" inputmode="text" autocapitalize="none" autocomplete="off" maxlength="7" spellcheck="false" />
-                  </div>
-                </label>
+                <label>Cor da Borda <input type="color" name="cor_borda" value="#f0dfd1" /></label>
+              </details>
 
-                <label>
-                  Cor do texto secundário (opcional)
-                  <div class="color-row">
-                    <input type="color" name="cor_muted" value="#756960" />
-                    <span class="color-swatch" aria-hidden="true"></span>
-                    <input class="color-hex color-hex-input" value="#756960" aria-label="Código da cor (HEX)" inputmode="text" autocapitalize="none" autocomplete="off" maxlength="7" spellcheck="false" />
-                  </div>
+              <details class="details details-sub">
+                <summary>Tipografia</summary>
+                <label>Fonte Principal
+                  <select name="fonte_key">
+                    <option value="sora" selected>Sora (Padrão)</option>
+                    <option value="inter">Inter (Moderna)</option>
+                    <option value="poppins">Poppins (Arredondada)</option>
+                    <option value="montserrat">Montserrat (Forte)</option>
+                    <option value="nunito">Nunito (Suave)</option>
+                    <option value="rubik">Rubik</option>
+                    <option value="system">Sistema</option>
+                  </select>
                 </label>
-              </div>
+                <div class="two-cols">
+                  <label>Peso Texto Principal
+                    <select name="fonte_peso_texto">
+                      <option value="400" selected>Normal</option>
+                      <option value="500">Médio</option>
+                      <option value="600">Semi-negrito</option>
+                    </select>
+                  </label>
+                  <label>Peso Títulos
+                    <select name="fonte_peso_titulo">
+                      <option value="600">600</option>
+                      <option value="700">700</option>
+                      <option value="800" selected>800</option>
+                    </select>
+                  </label>
+                </div>
+              </details>
 
-              <div id="theme-preview" class="theme-preview" aria-label="Prévia do tema">
+              <div id="theme-preview" class="theme-preview">
                 <div class="theme-preview-surface">
                   <div class="theme-preview-card">
                     <div class="theme-preview-title">Prévia</div>
-                    <div class="theme-preview-text">Texto principal</div>
-                    <div class="theme-preview-muted">Texto secundário</div>
+                    <div class="theme-preview-text">Texto Principal</div>
                     <div class="theme-preview-btn">Botão</div>
                   </div>
                 </div>
-                <div class="theme-preview-hint">Mostra como o card/textos/botão ficam com essas cores.</div>
               </div>
-            </details>
+            </div>
+          </div>
 
-            <details class="details details-sub">
-              <summary>Tipografia</summary>
+          <!-- ABA: OPERACAO -->
+          <div class="form-section" data-section="operacao">
+            <div class="section-card">
+              <div class="section-title">Funcionamento e Acesso</div>
+              <div class="two-cols">
+                <label>Abre às <input type="time" name="abre_em" /></label>
+                <label>Fecha às <input type="time" name="fecha_em" /></label>
+              </div>
+              <label>Horário (Texto) <input type="text" name="horario_funcionamento" /></label>
+              <label>Endereço <input type="text" name="endereco" /></label>
+              
+              <details class="details details-sub">
+                <summary>Acesso e Garçom</summary>
+                <label><input type="checkbox" name="owner_edit_enabled" /> Permitir edição pelo proprietário</label>
+                <label><input type="checkbox" name="modo_garcom_enabled" /> Modo Garçom</label>
+                <label>PIN do proprietário <input type="password" name="owner_pin" /></label>
+              </details>
+            </div>
+          </div>
 
-              <label>
-                Fonte do cardápio
-                <select name="fonte_key">
-                  <option value="sora" selected>Padrão (Sora)</option>
-                  <option value="inter">Inter (moderna)</option>
-                  <option value="poppins">Poppins (arredondada)</option>
-                  <option value="montserrat">Montserrat (títulos fortes)</option>
-                  <option value="nunito">Nunito (suave)</option>
-                  <option value="rubik">Rubik (geométrica)</option>
-                  <option value="outfit">Outfit (clean)</option>
-                  <option value="dm_sans">DM Sans (neutra)</option>
-                  <option value="work_sans">Work Sans (corporativa)</option>
-                  <option value="lora">Lora (serif elegante)</option>
-                  <option value="merriweather">Merriweather (serif clássica)</option>
-                  <option value="system">Sistema</option>
+          <!-- ABA: MIDIA -->
+          <div class="form-section" data-section="midia">
+            <div class="section-card">
+              <div class="section-title">Fotos e Banner</div>
+              <label>Foto de Perfil <input type="file" name="foto" accept="image/*" /></label>
+              <label>Banner <input type="file" name="banner" accept="image/*" /></label>
+              <label>Galeria (Imagens) <input type="file" name="galeria" multiple /></label>
+              <div id="galeria-preview" class="gallery-preview is-hidden"></div>
+            </div>
+          </div>
+
+          <!-- ABA: ENTREGA -->
+          <div class="form-section" data-section="entrega">
+            <div class="section-card">
+              <div class="section-title">Regras de Pedido</div>
+              <div class="two-cols">
+                <label>Taxa Entrega <input type="text" name="taxa_entrega" /></label>
+                <label>Pedido Mínimo <input type="text" name="pedido_minimo" /></label>
+              </div>
+              <label>Pagamentos <input type="text" name="formas_pagamento" /></label>
+              <label>Modo de Cardápio
+                <select name="modo">
+                  <option value="pedido">Carrinho de Compras</option>
+                  <option value="marmita">Marmita (Agendamento)</option>
+                  <option value="catalogo">Apenas Catálogo</option>
                 </select>
               </label>
 
-              <div class="two-cols">
-                <label>
-                  Peso do texto
-                  <select name="fonte_peso_texto">
-                    <option value="300">Fina (300)</option>
-                    <option value="400" selected>Normal (400)</option>
-                    <option value="500">Média (500)</option>
-                    <option value="600">Semi-negrita (600)</option>
-                    <option value="700">Negrita (700)</option>
-                  </select>
-                </label>
+              <details class="details details-sub">
+                <summary>Avançado (Marmita/WhatsApp)</summary>
+                <label><input type="checkbox" name="modo_marmita_enabled" /> Ativar Marmita</label>
+                <label><input type="checkbox" name="marmita_agendamento_enabled" /> Agendamento</label>
+                <label>WhatsApp Template <textarea name="mensagem_whatsapp_template" rows="4"></textarea></label>
+              </details>
+            </div>
+          </div>
 
-                <label>
-                  Peso do título
-                  <select name="fonte_peso_titulo">
-                    <option value="600">600</option>
-                    <option value="700">700</option>
-                    <option value="800" selected>800</option>
-                    <option value="900">900</option>
-                  </select>
-                </label>
-              </div>
-            </details>
-
-            <details class="details details-sub">
-              <summary>Informações da loja</summary>
-
-              <label>
-                Slogan (opcional)
-                <input type="text" name="slogan" placeholder="Ex.: Forno a lenha desde 2008" />
-              </label>
-
-              <label>
-                Horário de funcionamento (opcional)
-                <input type="text" name="horario_funcionamento" placeholder="Ex.: Seg-Dom 18h às 23h" />
-              </label>
-
-              <div class="two-cols">
-                <label>
-                  Abre (opcional)
-                  <input type="time" name="abre_em" />
-                </label>
-
-                <label>
-                  Fecha (opcional)
-                  <input type="time" name="fecha_em" />
-                </label>
-              </div>
-
-              <label>
-                Endereço (opcional)
-                <input type="text" name="endereco" placeholder="Ex.: Rua X, 123 - Centro" />
-              </label>
-
-              <label>
-                Instagram (opcional)
-                <input type="url" name="instagram_url" placeholder="https://instagram.com/seuperfil" />
-              </label>
-            </details>
-
-            <details class="details details-sub">
-              <summary>Mídia (logo e banner)</summary>
-
-              <label>
-                Foto do cardápio (perfil)
-                <input type="file" name="foto" accept="image/*" />
-              </label>
-
-              <label>
-                URL da foto (opcional)
-                <input type="url" name="foto_url" placeholder="https://..." />
-              </label>
-
-              <label>
-                Banner do topo (opcional)
-                <input type="file" name="banner" accept="image/*" />
-              </label>
-
-              <label>
-                URL do banner (opcional)
-                <input type="url" name="banner_url" placeholder="https://..." />
-              </label>
-
-              <label>
-                Imagens do estabelecimento (galeria)
-                <input type="file" name="galeria" accept="image/*" multiple />
-                <input type="hidden" name="galeria_urls" value="[]" />
-                <div id="galeria-preview" class="gallery-preview is-hidden" aria-live="polite"></div>
-              </label>
-            </details>
-
-            <details class="details details-sub">
-              <summary>Entrega e pagamento</summary>
-
-              <div class="two-cols">
-                <label>
-                  Taxa de entrega (R$)
-                  <input type="text" name="taxa_entrega" placeholder="0,00" />
-                </label>
-
-                <label>
-                  Pedido mínimo (R$)
-                  <input type="text" name="pedido_minimo" placeholder="0,00" />
-                </label>
-              </div>
-
-              <label>
-                Formas de pagamento (opcional)
-                <input type="text" name="formas_pagamento" placeholder="Ex.: Pix, Cartão, Dinheiro" />
-              </label>
-
-              <div class="two-cols">
-                <label>
-                  Aceita entrega
-                  <select name="aceita_entrega">
-                    <option value="true" selected>Sim</option>
-                    <option value="false">Não</option>
-                  </select>
-                </label>
-
-                <label>
-                  Aceita retirada
-                  <select name="aceita_retirada">
-                    <option value="true" selected>Sim</option>
-                    <option value="false">Não</option>
-                  </select>
-                </label>
-              </div>
-            </details>
-
-            <label>
-              Layout dos produtos
-              <select name="layout_produtos">
-                <option value="grid" selected>Grade</option>
-                <option value="lista">Lista</option>
-              </select>
-            </label>
-
-            <label>
-              Densidade
-              <select name="densidade">
-                <option value="confortavel" selected>Confortável</option>
-                <option value="compacta">Compacta</option>
-              </select>
-            </label>
-
-            <label>
-              Modo do cardápio
-              <select name="modo">
-                <option value="pedido" selected>Pedido (carrinho e checkout)</option>
-                <option value="catalogo">Catálogo (somente visualizar)</option>
-                <option value="marmita">Marmita (agendamento e retirada)</option>
-              </select>
-            </label>
-
-            <label>
-              Botão do WhatsApp
-              <select name="whatsapp_botao">
-                <option value="flutuante" selected>Flutuante</option>
-                <option value="topo">No topo</option>
-                <option value="nenhum">Nenhum</option>
-              </select>
-            </label>
-
-            <label>
-              Template da mensagem do WhatsApp (opcional)
-              <textarea name="mensagem_whatsapp_template" rows="7" placeholder="Exemplo (pode editar):
-*Novo pedido - {LOJA}*
--------------------------
-RESUMO
-Tipo: {TIPO_PEDIDO}
-Pagamento: {PAGAMENTO}
-
-CLIENTE
-Nome: {NOME}
-Telefone: {TELEFONE}
-
-ENDERECO
-{ENDERECO}
-
-ITENS
-{ITENS}
-
-VALORES
-Subtotal: {SUBTOTAL}
-Taxa de entrega: {TAXA_ENTREGA}
-TOTAL: {TOTAL}
-
-Tags: {LOJA} {ITENS} {SUBTOTAL} {TAXA_ENTREGA} {TOTAL} {NOME} {TELEFONE} {ENDERECO} {TIPO_PEDIDO} {PAGAMENTO}"></textarea>
-              <small class="hint">
-                Dica: você pode usar tags como <strong>{LOJA}</strong>, <strong>{ITENS}</strong>, <strong>{TOTAL}</strong> (também aceita <strong>{{LOJA}}</strong>). Se deixar em branco, o sistema usa um modelo padrão.
-              </small>
-            </label>
-            <details class="details details-sub">
-              <summary>🍱 Configurações de Marmita</summary>
-              <label>
-                <input type="checkbox" name="modo_marmita_enabled" />
-                Ativar Modo Marmita (sem entrega, apenas retirada e menu do dia)
-              </label>
-              <label>
-                <input type="checkbox" name="marmita_agendamento_enabled" />
-                Habilitar agendamento de horário para retirada
-              </label>
-              <label>
-                Horário limite para pedidos (Hoje)
-                <input type="time" name="marmita_deadline" />
-              </label>
-              <label>
-                Horários de retirada (separados por vírgula)
-                <input type="text" name="marmita_horarios_retirada" placeholder="11:00, 11:30, 12:00, 12:30, 13:00" />
-                <div class="muted">Ex.: 11:00, 11:30, 12:00</div>
-              </label>
-              <label>
-                Dias da semana (1=seg, 7=dom, separados por vírgula)
-                <input type="text" name="marmita_dias_semana" placeholder="1,2,3,4,5" value="1,2,3,4,5" />
-                <div class="muted">Padrão: 1,2,3,4,5 (segunda a sexta)</div>
-              </label>
-              <label>
-                Instruções para retirada
-                <textarea name="marmita_instrucoes" rows="2" placeholder="Ex.: Retire na portaria B, mediante apresentação do comprovante. Pedidos após as 11h somente para o dia seguinte."></textarea>
-              </label>
-            </details>
-          </details>
-
-          <button class="btn btn-primary" type="submit">Salvar cardápio</button>
-          <button class="btn" type="button" id="cancel-cardapio-edit">Cancelar edição</button>
+          <div class="topbar-actions" style="margin-top:20px;">
+            <button class="btn btn-primary btn-lg" type="submit" style="flex:1;">Salvar Tudo</button>
+            <button class="btn" type="button" id="cancel-cardapio-edit">Cancelar</button>
+          </div>
         </form>
       </section>
 
       <section class="panel" id="cardapios-criados-panel">
-        <h2>Cardápios criados</h2>
+        <h2>Lojas Criadas</h2>
         <div id="cardapios-list" class="list"></div>
       </section>
 
       <section class="panel is-hidden" id="produtos-panel">
-        <h2>Produtos</h2>
-        <p id="produto-contexto" class="muted">Selecione um cardápio para gerenciar produtos.</p>
+        <div class="panel-header">
+          <h2>Gerenciar Produtos</h2>
+          <button class="btn" id="cancel-produto-edit">Voltar</button>
+        </div>
+        <p id="produto-contexto" class="muted">Gerenciando itens para a loja selecionada.</p>
 
         <form id="produto-form" class="stack-gap compact" enctype="multipart/form-data">
           <input type="hidden" name="id" />
-
-          <label>
-            Nome
-            <input type="text" name="nome" required />
-          </label>
-
-          <label>
-            Categoria (opcional)
-            <input type="text" name="categoria" placeholder="Ex.: Bolos, Doces, Bebidas" />
-          </label>
-
-          <label>
-            Descrição (opcional)
-            <textarea name="descricao" rows="2" placeholder="Ex.: Bolo caseiro, fatia generosa..."></textarea>
-          </label>
-
-          <label>
-            Preço (R$) - Padrão
-            <input type="text" name="preco" placeholder="49,90" required />
-          </label>
-
-          <details class="details details-sub">
-            <summary>Preços por Tamanho (Opcional)</summary>
+          <div class="section-card">
+            <label>Nome do Produto <input type="text" name="nome" required /></label>
             <div class="two-cols">
-            <label>
-              Preço M (R$)
-              <input type="text" name="preco_m" placeholder="0,00" />
-            </label>
-            <label>
-              Preço G (R$)
-              <input type="text" name="preco_g" placeholder="0,00" />
-            </label>
-            <div class="muted">Se preenchidos, o cliente poderá escolher o tamanho no cardápio.</div>
-          </details>
-
-          <label>
-            Estoque Diário (Limite de vendas por dia)
-            <input type="number" name="estoque_diario" placeholder="Ex: 50 (Vazio para ilimitado)" />
-          </label>
-
-          <div class="field">
-            <label>Acompanhamentos / Personalização</label>
-            <div id="product-options-container" class="stack-gap" style="margin-top: 8px;">
-              <!-- Grupos de opções via JS -->
+              <label>Categoria <input type="text" name="categoria" /></label>
+              <label>Preço <input type="text" name="preco" required /></label>
             </div>
+            <label>Descrição <textarea name="descricao" rows="2"></textarea></label>
             
-            <div class="presets-container">
-              <button type="button" class="btn btn-marmita-template" id="add-marmita-template-btn">🍽️ Montar Marmita Completa</button>
-              <button type="button" class="btn btn-preset" data-preset-group="Arroz">+ Arroz</button>
-              <button type="button" class="btn btn-preset" data-preset-group="Feijão">+ Feijão</button>
-              <button type="button" class="btn btn-preset" data-preset-group="Mistura">+ Mistura</button>
-              <button type="button" class="btn btn-preset" data-preset-group="Acompanhamentos">+ Acomp.</button>
-              <button type="button" class="btn btn-ghost" id="add-option-group-btn">+ Em Branco</button>
+            <details class="details details-sub">
+              <summary>Tamanhos e Estoque</summary>
+              <div class="two-cols">
+                <label>Preço M <input type="text" name="preco_m" /></label>
+                <label>Preço G <input type="text" name="preco_g" /></label>
+              </div>
+              <label>Estoque Diário <input type="number" name="estoque_diario" /></label>
+            </details>
+
+            <div class="field">
+              <label>Acompanhamentos / Personalização</label>
+              <div id="product-options-container" class="stack-gap" style="margin-top: 8px;"></div>
+              <div class="presets-container">
+                <button type="button" class="btn btn-marmita-template" id="add-marmita-template-btn">🍽️ Template Marmita</button>
+                <button type="button" class="btn btn-preset" data-preset-group="Arroz">+ Arroz</button>
+                <button type="button" class="btn btn-preset" data-preset-group="Feijão">+ Feijão</button>
+                <button type="button" class="btn btn-preset" data-preset-group="Mistura">+ Mistura</button>
+                <button type="button" class="btn btn-ghost" id="add-option-group-btn">+ Novo Grupo</button>
+              </div>
+              <input type="hidden" name="opcoes_json" />
             </div>
-            
-            <input type="hidden" name="opcoes_json" />
+
+            <label>Imagem do produto <input type="file" name="imagem" accept="image/*" /></label>
+            <button class="btn btn-primary btn-lg" type="submit">Salvar Produto</button>
           </div>
-
-          <label>
-            Imagem do produto
-            <input type="file" name="imagem" accept="image/*" />
-          </label>
-
-          <label>
-            URL da imagem (opcional)
-            <input type="url" name="imagem_url" placeholder="https://..." />
-          </label>
-
-          <button class="btn btn-primary" type="submit">Salvar produto</button>
-          <button class="btn" type="button" id="cancel-produto-edit">Cancelar edição</button>
         </form>
 
-        <div id="produtos-list" class="list"></div>
+        <div id="produtos-list" class="list" style="margin-top:20px;"></div>
       </section>
 
       <section class="panel panel-full is-hidden" id="pedidos-panel">
         <div class="panel-header">
           <h2>Pedidos</h2>
-          <button type="button" class="btn js-open-cozinha" style="background: var(--theme); color: white;">🍱 Resumo da Cozinha</button>
+          <button type="button" class="btn js-open-cozinha" style="background: var(--primary); color: var(--primary-contrast);">🍱 Cozinha</button>
         </div>
-        <p class="muted">Mostra pedidos do cardápio selecionado. Se nada estiver selecionado, lista todos.</p>
         <div id="pedidos-list" class="list"></div>
       </section>
 
       <section class="panel panel-full is-hidden" id="cozinha-panel">
         <div class="panel-header">
-          <h2>🍱 Resumo de Produção (Cozinha)</h2>
-          <button type="button" class="btn js-close-cozinha">Voltar para Pedidos</button>
+          <h2>🍱 Resumo de Produção</h2>
+          <button type="button" class="btn js-close-cozinha">Sair</button>
         </div>
-        <p class="muted">Total de itens a produzir considerando os pedidos de hoje.</p>
-        <div id="cozinha-summary" class="stack-gap" style="margin-top: 20px;">
-          <!-- Resumo gerado via JS -->
-        </div>
+        <div id="cozinha-summary" class="stack-gap" style="margin-top: 20px;"></div>
       </section>
     </main>
 

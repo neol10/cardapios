@@ -2944,9 +2944,38 @@ function setupProductOptionsHandlers() {
   });
 }
 
+function setupFormTabs() {
+  const tabsContainer = document.getElementById('cardapio-tabs');
+  if (!tabsContainer) return;
+
+  tabsContainer.addEventListener('click', (e) => {
+    const tabBtn = e.target.closest('.tab-btn');
+    if (!tabBtn) return;
+
+    const tabName = tabBtn.dataset.tab;
+    
+    // Atualiza botões
+    tabsContainer.querySelectorAll('.tab-btn').forEach(btn => {
+      btn.classList.toggle('is-active', btn === tabBtn);
+    });
+
+    // Atualiza seções
+    const form = document.getElementById('cardapio-form');
+    if (form) {
+      form.querySelectorAll('.form-section').forEach(section => {
+        section.classList.toggle('is-active', section.dataset.section === tabName);
+      });
+      // Atualiza previas visuais se for aba visual
+      if (tabName === 'visual') {
+        updateThemePreview(form);
+      }
+    }
+  });
+}
+
 setupProductOptionsHandlers();
+setupFormTabs();
 
 if (document.querySelector("#owner-page")) {
   initOwnerPage();
 }
-

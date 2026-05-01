@@ -107,42 +107,33 @@ textarea {
 }
 
 input,
-textarea {
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  padding: 12px;
-  background: rgba(18, 16, 14, 0.92);
-  color: var(--text);
-}
-
+textarea,
 select {
   border: 1px solid var(--border);
-  border-radius: 12px;
-  padding: 12px;
-  background: rgba(18, 16, 14, 0.92);
+  border-radius: 14px;
+  padding: 13px 16px;
+  background: rgba(18, 16, 14, 0.95);
   color: var(--text);
+  font-size: 0.95rem;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 input:hover,
 textarea:hover,
 select:hover {
-  border-color: color-mix(in srgb, var(--primary) 20%, var(--border));
-}
-
-input::placeholder,
-textarea::placeholder {
-  color: color-mix(in srgb, var(--muted) 85%, transparent);
+  border-color: color-mix(in srgb, var(--primary) 35%, var(--border));
+  background: rgba(24, 21, 18, 0.98);
 }
 
 input:focus,
-textarea:focus {
-  outline: 2px solid color-mix(in srgb, var(--primary) 45%, black);
-  border-color: var(--primary);
-}
-
+textarea:focus,
 select:focus {
-  outline: 2px solid color-mix(in srgb, var(--primary) 45%, black);
+  outline: none;
   border-color: var(--primary);
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--primary) 15%, transparent),
+              inset 0 2px 4px rgba(0, 0, 0, 0.1);
+  transform: translateY(-1px);
 }
 
 input:disabled,
@@ -272,11 +263,21 @@ select:disabled {
 }
 
 .panel {
-  background: linear-gradient(160deg, rgba(29, 25, 22, 0.96), rgba(19, 16, 14, 0.98));
+  background: linear-gradient(165deg, rgba(32, 28, 25, 0.98), rgba(20, 18, 16, 1));
   border: 1px solid var(--border);
-  border-radius: 18px;
-  padding: 18px;
+  border-radius: 24px;
+  padding: 24px;
   box-shadow: var(--shadow);
+  position: relative;
+  overflow: hidden;
+}
+
+.panel::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(200, 148, 91, 0.15), transparent);
 }
 
 .panel-full {
@@ -421,18 +422,24 @@ input:checked + .slider:before {
 }
 
 .details {
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 14px;
-  padding: 12px;
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  padding: 16px;
+  background: rgba(255, 255, 255, 0.01);
+  transition: all 0.3s ease;
+}
+
+.details:hover {
   background: rgba(255, 255, 255, 0.02);
+  border-color: color-mix(in srgb, var(--primary) 20%, var(--border));
 }
 
 .details-sub {
-  margin-top: 10px;
-  padding: 10px;
-  border-radius: 14px;
-  border: 1px solid rgba(255, 255, 255, 0.06);
-  background: rgba(0, 0, 0, 0.12);
+  margin-top: 12px;
+  padding: 16px;
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  background: rgba(0, 0, 0, 0.2);
 }
 
 .details-sub summary {
@@ -913,4 +920,84 @@ input.color-hex.is-invalid {
     text-align: center;
     margin-top: 4px;
   }
+}
+/* Form Tabs System */
+.form-tabs {
+  display: flex;
+  gap: 8px;
+  padding: 6px;
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 16px;
+  margin-bottom: 24px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  border: 1px solid var(--border);
+}
+
+.form-tabs::-webkit-scrollbar { display: none; }
+
+.tab-btn {
+  padding: 10px 18px;
+  border-radius: 12px;
+  border: none;
+  background: transparent;
+  color: var(--muted);
+  font-weight: 700;
+  font-size: 0.88rem;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.tab-btn:hover {
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--text);
+}
+
+.tab-btn.is-active {
+  background: var(--primary);
+  color: var(--primary-contrast);
+  box-shadow: 0 8px 20px rgba(200, 148, 91, 0.25);
+}
+
+.form-section {
+  display: none;
+  animation: slideUp 0.3s ease-out;
+}
+
+.form-section.is-active {
+  display: grid;
+}
+
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.section-card {
+  display: grid;
+  gap: 20px;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 20px;
+}
+
+.section-title {
+  font-size: 1.1rem;
+  font-weight: 800;
+  color: var(--primary);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 4px;
+}
+
+.section-desc {
+  font-size: 0.85rem;
+  color: var(--muted);
+  margin-bottom: 16px;
 }
