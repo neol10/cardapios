@@ -706,9 +706,11 @@ function renderProdutos() {
           ${!disponivel ? '<span class="sold-out-badge">Esgotado</span>' : ''}
         </div>
         <div class="produto-body">
-          <h3 class="js-open-produto-modal" data-id="${produto.id}" style="cursor:pointer">${nome}</h3>
-          ${categoria ? `<p class="muted"><strong>${categoria}</strong></p>` : ""}
-          ${descricao ? `<p class="muted">${descricao}</p>` : ""}
+          <div class="produto-info">
+            <h3 class="js-open-produto-modal" data-id="${produto.id}" style="cursor:pointer">${nome}</h3>
+            ${categoria ? `<p class="muted"><strong>${categoria}</strong></p>` : ""}
+            ${descricao ? `<p class="muted">${descricao}</p>` : ""}
+          </div>
           <p class="price">${formatPriceBRL(produto.preco)}</p>
           ${
             catalogo
@@ -1270,10 +1272,10 @@ function applyMarmitaModeCheckout() {
 
   updateAddressVisibility();
   
-  // Adicionar campo de agendamento se habilitado
-  if (isMarmitaAgendamentoMode(activeCardapio)) {
-    addMarmitaAgendamentoField();
-  }
+  // Campo de agendamento desabilitado a pedido do usuário
+  // if (isMarmitaAgendamentoMode(activeCardapio)) {
+  //   addMarmitaAgendamentoField();
+  // }
 }
 
 function addMarmitaAgendamentoField() {

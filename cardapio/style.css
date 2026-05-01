@@ -535,15 +535,22 @@ p {
   display: grid;
   grid-template-columns: 1fr auto;
   grid-template-areas:
-    "title price"
+    "info price"
     "btn btn";
   gap: 10px 10px;
   align-items: start;
   min-width: 0;
 }
 
-.produto-body h3 {
-  grid-area: title;
+.produto-info {
+  grid-area: info;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0; /* allows text truncation */
+}
+
+.produto-info h3 {
   margin: 0;
   font-size: 1.02rem;
   line-height: 1.15;
@@ -552,6 +559,12 @@ p {
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
+}
+
+.produto-info p.muted {
+  margin: 0;
+  font-size: 0.9rem;
+  line-height: 1.3;
 }
 
 .price {
