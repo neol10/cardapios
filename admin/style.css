@@ -270,6 +270,7 @@ select:disabled {
   box-shadow: var(--shadow);
   position: relative;
   overflow: hidden;
+  min-width: 0; /* Ensures grid item doesn't blowout */
 }
 
 .panel::before {
@@ -934,6 +935,8 @@ input.color-hex.is-invalid {
   border: 1px solid var(--border);
   -webkit-overflow-scrolling: touch;
   scroll-snap-type: x mandatory;
+  width: 100%;
+  max-width: 100%;
 }
 
 .form-tabs::-webkit-scrollbar { display: none; }
