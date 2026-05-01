@@ -768,3 +768,149 @@ input.color-hex.is-invalid {
 .toast.toast-error {
   border-color: color-mix(in srgb, var(--danger) 45%, var(--border));
 }
+/* Option Group Cards (Admin) */
+.option-groups-empty {
+  text-align: center;
+  padding: 24px;
+  border: 1px dashed var(--border);
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.option-group-card {
+  background: rgba(29, 25, 22, 0.98);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 16px;
+  margin-bottom: 16px;
+  display: grid;
+  gap: 12px;
+  transition: border-color 0.2s ease;
+}
+
+.option-group-card:hover {
+  border-color: color-mix(in srgb, var(--primary) 30%, var(--border));
+}
+
+.option-group-card-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.option-group-icon {
+  font-size: 1.2rem;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(200, 148, 91, 0.1);
+  border-radius: 8px;
+}
+
+.option-group-title-input {
+  flex: 1;
+  font-weight: 700;
+  font-size: 1rem;
+}
+
+.btn-remove-group {
+  padding: 6px 10px;
+  color: var(--danger);
+  border-color: transparent;
+  background: rgba(224, 112, 90, 0.1);
+}
+
+.btn-remove-group:hover {
+  background: var(--danger);
+  color: white;
+}
+
+.option-group-card-config {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 16px;
+  padding: 10px;
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 12px;
+}
+
+.option-minmax-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.85rem;
+}
+
+.option-minmax-label input {
+  width: 60px;
+  padding: 6px 8px;
+  text-align: center;
+}
+
+.option-required-badge {
+  font-size: 0.75rem;
+  font-weight: 800;
+  padding: 4px 8px;
+  border-radius: 6px;
+  margin-left: auto;
+}
+
+.option-required-badge.is-required {
+  background: rgba(79, 179, 139, 0.15);
+  color: var(--success);
+}
+
+.option-required-badge.is-optional {
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--muted);
+}
+
+.option-itens-label {
+  display: grid;
+  gap: 6px;
+  font-size: 0.85rem;
+}
+
+.presets-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.btn-preset {
+  font-size: 0.75rem;
+  padding: 6px 10px;
+  border-radius: 8px;
+  background: rgba(200, 148, 91, 0.08);
+  border: 1px solid rgba(200, 148, 91, 0.2);
+  color: var(--primary);
+}
+
+.btn-preset:hover {
+  background: var(--primary);
+  color: #1a1410;
+}
+
+.btn-marmita-template {
+  background: linear-gradient(135deg, #4fb38b, #2e7d32);
+  color: white;
+  border: none;
+  font-size: 0.85rem;
+}
+
+@media (max-width: 480px) {
+  .option-group-card-config {
+    flex-direction: row;
+    justify-content: space-between;
+  }
+  
+  .option-required-badge {
+    width: 100%;
+    text-align: center;
+    margin-top: 4px;
+  }
+}

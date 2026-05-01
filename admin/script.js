@@ -2789,35 +2789,75 @@ function renderProductOptionGroups(form) {
   if (!container) return;
 
   const options = parseProductOptions(form.opcoes_json.value);
-  
-  container.innerHTML = options.map((group, gIdx) => `
-    <div class="list-item" style="padding: 12px; border: 1px solid var(--border); border-radius: 12px; background: color-mix(in srgb, var(--surface) 95%, transparent); margin-bottom: 12px;">
-      <div class="two-cols">
-        <label>
-          Título do Grupo
-          <input type="text" value="${escapeHtml(group.titulo)}" oninput="updateOptionGroup(${gIdx}, 'titulo', this.value)" placeholder="Ex: Escolha o Arroz" />
-        </label>
-        <div class="two-cols">
-          <label>Mín <input type="number" value="${group.min || 0}" oninput="updateOptionGroup(${gIdx}, 'min', this.value)" /></label>
-          <label>Máx <input type="number" value="${group.max || 1}" oninput="updateOptionGroup(${gIdx}, 'max', this.value)" /></label>
-        </div>
+
+  const OPTION_ICONS = {
+    arroz: "🍚", feijao: "🫘", feijao: "🫘", mistura: "🥩",
+    carne: "🥩", frango: "🍗", peixe: "🐟", acompanhamento: "🥦",
+    salada: "🥗", bebida: "🥤", bebidas: "🥤", sobremesa: "🍮",
+    vegetarian: "🥦", pvt: "🥦"
+  };
+
+  function getGroupIcon(titulo) {
+    const key = String(titulo || "").toLowerCase()
+      .normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+    for (const [k, icon] of Object.entries(OPTION_ICONS)) {
+      if (key.includes(k)) return icon;
+    }
+    return "📋";
+  }
+
+  if (!options.length) {
+    container.innerHTML = `
+      <div class="option-groups-empty">
+        <p>Nenhum grupo de escolha adicionado ainda.</p>
+        <p class="muted" style="font-size:0.85rem;">Use os botões abaixo para adicionar grupos de opções para seus clientes escolherem.</p>
+      </div>`;
+    return;
+  }
+
+  container.innerHTML = options.map((group, gIdx) => {
+    const icon = getGroupIcon(group.titulo);
+    const isRequired = (group.min || 0) > 0;
+    return `
+    <div class="option-group-card">
+      <div class="option-group-card-header">
+        <span class="option-group-icon">${icon}</span>
+        <input type="text"
+          class="option-group-title-input"
+          value="${escapeHtml(group.titulo)}"
+          oninput="updateOptionGroup(${gIdx}, 'titulo', this.value)"
+          placeholder="Ex: Arroz, Feijão, Mistura..." />
+        <button type="button" class="btn btn-remove-group" onclick="removeOptionGroup(${gIdx})" title="Remover grupo">✕</button>
       </div>
-      <label style="margin-top: 8px;">
-        Opções (separadas por vírgula)
-        <input type="text" value="${(group.itens || []).join(", ")}" oninput="updateOptionGroup(${gIdx}, 'itens', this.value)" placeholder="Branco, Integral, Grega" />
+      <div class="option-group-card-config">
+        <label class="option-minmax-label">
+          <span>Mín</span>
+          <input type="number" min="0" value="${group.min || 0}" oninput="updateOptionGroup(${gIdx}, 'min', this.value)" />
+        </label>
+        <label class="option-minmax-label">
+          <span>Máx</span>
+          <input type="number" min="1" value="${group.max || 1}" oninput="updateOptionGroup(${gIdx}, 'max', this.value)" />
+        </label>
+        <span class="option-required-badge ${isRequired ? 'is-required' : 'is-optional'}">${isRequired ? "✅ Obrigatório" : "⭕ Opcional"}</span>
+      </div>
+      <label class="option-itens-label">
+        <span>Opções <small class="muted">(separadas por vírgula)</small></span>
+        <input type="text"
+          value="${escapeHtml((group.itens || []).join(", "))}"
+          oninput="updateOptionGroup(${gIdx}, 'itens', this.value)"
+          placeholder="Ex: Branco, Integral, Grega" />
       </label>
-      <button type="button" class="btn" style="color: red; margin-top: 8px; border-color: red;" onclick="removeOptionGroup(${gIdx})">Remover Grupo</button>
-    </div>
-  `).join("");
+    </div>`;
+  }).join("");
 }
 
 window.updateOptionGroup = (gIdx, field, value) => {
   const form = document.querySelector("#produto-form") || document.querySelector("#owner-produto-form");
   if (!form) return;
   const options = parseProductOptions(form.opcoes_json.value);
-  if (field === 'itens') {
+  if (field === "itens") {
     options[gIdx][field] = value.split(",").map(i => i.trim()).filter(i => i);
-  } else if (field === 'min' || field === 'max') {
+  } else if (field === "min" || field === "max") {
     options[gIdx][field] = parseInt(value) || 0;
   } else {
     options[gIdx][field] = value;
@@ -2834,8 +2874,40 @@ window.removeOptionGroup = (gIdx) => {
   renderProductOptionGroups(form);
 };
 
+// Grupos pré-definidos para marmita
+const MARMITA_PRESETS = [
+  { titulo: "Arroz",           min: 1, max: 1, itens: ["Branco", "Integral"] },
+  { titulo: "Feijão",          min: 1, max: 1, itens: ["Marrom", "Preto"] },
+  { titulo: "Mistura",         min: 1, max: 2, itens: ["Almôndegas ao Molho", "Isca de Frango", "PVT c/ Queijo"] },
+  { titulo: "Acompanhamentos", min: 0, max: 3, itens: ["Arroz", "Farofa", "Macarrão", "Purê de Batata", "Saladinha"] },
+];
+
+function addPresetGroup(presetKey) {
+  const form = document.querySelector("#produto-form") || document.querySelector("#owner-produto-form");
+  if (!form) return;
+  const preset = MARMITA_PRESETS.find(p => p.titulo.toLowerCase() === presetKey.toLowerCase());
+  if (!preset) return;
+  const options = parseProductOptions(form.opcoes_json.value);
+  options.push({ ...preset });
+  form.opcoes_json.value = JSON.stringify(options);
+  renderProductOptionGroups(form);
+}
+
+window.addPresetGroup = addPresetGroup;
+
+function addMarmitaTemplate() {
+  const form = document.querySelector("#produto-form") || document.querySelector("#owner-produto-form");
+  if (!form) return;
+  const options = MARMITA_PRESETS.map(p => ({ ...p }));
+  form.opcoes_json.value = JSON.stringify(options);
+  renderProductOptionGroups(form);
+}
+
+window.addMarmitaTemplate = addMarmitaTemplate;
+
 function setupProductOptionsHandlers() {
   document.body.addEventListener("click", (e) => {
+    // Adicionar grupo em branco
     if (e.target.id === "add-option-group-btn") {
       const form = e.target.closest("form");
       if (!form) return;
@@ -2843,6 +2915,31 @@ function setupProductOptionsHandlers() {
       options.push({ titulo: "Novo Grupo", min: 0, max: 1, itens: [] });
       form.opcoes_json.value = JSON.stringify(options);
       renderProductOptionGroups(form);
+    }
+
+    // Template completo de marmita
+    if (e.target.id === "add-marmita-template-btn") {
+      const form = e.target.closest("form");
+      if (!form) return;
+      const options = MARMITA_PRESETS.map(p => ({ ...p }));
+      form.opcoes_json.value = JSON.stringify(options);
+      renderProductOptionGroups(form);
+    }
+
+    // Preset individual
+    if (e.target.dataset.presetGroup) {
+      const form = e.target.closest("form");
+      if (!form) return;
+      const key = e.target.dataset.presetGroup;
+      const preset = MARMITA_PRESETS.find(p => p.titulo === key);
+      if (!preset) return;
+      const options = parseProductOptions(form.opcoes_json.value);
+      // Evita duplicar
+      if (!options.find(o => o.titulo === preset.titulo)) {
+        options.push({ ...preset });
+        form.opcoes_json.value = JSON.stringify(options);
+        renderProductOptionGroups(form);
+      }
     }
   });
 }
@@ -2852,3 +2949,4 @@ setupProductOptionsHandlers();
 if (document.querySelector("#owner-page")) {
   initOwnerPage();
 }
+

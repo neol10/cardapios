@@ -16,7 +16,7 @@
       href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&family=Playfair+Display:wght@600;700;800&display=swap"
       rel="stylesheet"
     />
-    <link rel="stylesheet" href="/admin/style.css?v=9" />
+    <link rel="stylesheet" href="/admin/style.css?v=37" />
     <script>
       window.__SUPABASE_CONFIG__ = {
         url: "https://uapwitkmxuoepnjlffqy.supabase.co",
@@ -209,7 +209,16 @@
             <div class="field">
               <label>Acompanhamentos / Personalização</label>
               <div id="product-options-container" class="stack-gap" style="margin-top: 8px;"></div>
-              <button type="button" class="btn btn-ghost" id="add-option-group-btn" style="margin-top: 8px;">+ Adicionar Grupo</button>
+              
+              <div class="presets-container">
+                <button type="button" class="btn btn-marmita-template" id="add-marmita-template-btn">🍽️ Montar Marmita Completa</button>
+                <button type="button" class="btn btn-preset" data-preset-group="Arroz">+ Arroz</button>
+                <button type="button" class="btn btn-preset" data-preset-group="Feijão">+ Feijão</button>
+                <button type="button" class="btn btn-preset" data-preset-group="Mistura">+ Mistura</button>
+                <button type="button" class="btn btn-preset" data-preset-group="Acompanhamentos">+ Acomp.</button>
+                <button type="button" class="btn btn-ghost" id="add-option-group-btn">+ Em Branco</button>
+              </div>
+              
               <input type="hidden" name="opcoes_json" />
             </div>
 
@@ -225,6 +234,6 @@
       </section>
     </main>
 
-    <script type="module" src="/admin/script.js?v=30"></script>
+    <script type="module" src="/admin/script.js?v=37"></script>
   </body>
 </html>
