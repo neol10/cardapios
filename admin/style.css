@@ -931,7 +931,8 @@ input.color-hex.is-invalid {
   border-radius: 16px;
   margin-bottom: 24px;
   overflow-x: auto;
-  scrollbar-width: none;
+  scrollbar-width: thin;
+  scrollbar-color: color-mix(in srgb, var(--primary) 50%, transparent) transparent;
   border: 1px solid var(--border);
   -webkit-overflow-scrolling: touch;
   scroll-snap-type: x mandatory;
@@ -939,7 +940,22 @@ input.color-hex.is-invalid {
   max-width: 100%;
 }
 
-.form-tabs::-webkit-scrollbar { display: none; }
+.form-tabs::-webkit-scrollbar {
+  height: 4px;
+}
+
+.form-tabs::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.form-tabs::-webkit-scrollbar-thumb {
+  background: color-mix(in srgb, var(--primary) 50%, transparent);
+  border-radius: 4px;
+}
+
+.form-tabs::-webkit-scrollbar-thumb:hover {
+  background: var(--primary);
+}
 
 .tab-btn {
   flex-shrink: 0;
