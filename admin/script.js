@@ -1184,10 +1184,23 @@ function fillCardapioForm(item) {
   }
 
   if (form.owner_edit_enabled) {
-    form.owner_edit_enabled.checked = Boolean(item.owner_edit_enabled);
+    const isEnabled = Boolean(item.owner_edit_enabled);
+    form.owner_edit_enabled.checked = isEnabled;
+    const ownerLinkArea = document.getElementById("owner-link-area");
+    const ownerLinkInput = document.getElementById("owner-link-input");
+    if (ownerLinkArea && ownerLinkInput) {
+      if (isEnabled) {
+        ownerLinkArea.classList.remove("is-hidden");
+        const origin = window.location.origin;
+        ownerLinkInput.value = `${origin}/owner.html?id=${item.id}`;
+      } else {
+        ownerLinkArea.classList.add("is-hidden");
+      }
+    }
   }
   if (form.owner_pin) {
     form.owner_pin.value = "";
+    form.owner_pin.placeholder = item.owner_edit_enabled ? "PIN salvo (digite para alterar)" : "Defina um PIN";
   }
 
   if (form.templates_json) {
@@ -2973,8 +2986,35 @@ function setupFormTabs() {
   });
 }
 
+function setupOwnerLinkHandlers() {
+  document.body.addEventListener('change', (e) => {
+    if (e.target.name === 'owner_edit_enabled') {
+      const ownerLinkArea = document.getElementById("owner-link-area");
+      const ownerLinkInput = document.getElementById("owner-link-input");
+      if (ownerLinkArea && ownerLinkInput) {
+        if (e.target.checked) {
+          ownerLinkArea.classList.remove("is-hidden");
+          const form = e.target.closest("form");
+          const idField = form?.querySelector('input[name="id"]');
+          const id = idField?.value || "NOVO";
+          const origin = window.location.origin;
+          ownerLinkInput.value = `${origin}/owner.html?id=${id}`;
+        } else {
+          ownerLinkArea.classList.add("is-hidden");
+        }
+      }
+      
+      const pinInput = document.querySelector('input[name="owner_pin"]');
+      if (pinInput) {
+        pinInput.placeholder = e.target.checked ? "PIN salvo (digite para alterar)" : "Defina um PIN";
+      }
+    }
+  });
+}
+
 setupProductOptionsHandlers();
 setupFormTabs();
+setupOwnerLinkHandlers();
 
 if (document.querySelector("#owner-page")) {
   initOwnerPage();

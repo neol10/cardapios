@@ -105,6 +105,7 @@
               <label>Nome da Loja <input type="text" name="nome" placeholder="Pizzaria do João" required /></label>
               <label>Slug (Link) <input type="text" name="slug" placeholder="pizzaria-do-joao" required /></label>
               <label>WhatsApp <input type="text" name="whatsapp" placeholder="5511999999999" required /></label>
+              <label>Instagram URL <input type="url" name="instagram_url" placeholder="https://instagram.com/sua_loja" /></label>
               <label>Slogan
                 <div style="display:flex; gap:8px;">
                   <input type="text" name="slogan" placeholder="O melhor da região..." style="flex:1;" />
@@ -248,11 +249,31 @@
               <label>Horário (Texto) <input type="text" name="horario_funcionamento" /></label>
               <label>Endereço <input type="text" name="endereco" /></label>
               
-              <details class="details details-sub">
+              <details class="details details-sub" open>
                 <summary>Acesso e Garçom</summary>
-                <label><input type="checkbox" name="owner_edit_enabled" /> Permitir edição pelo proprietário</label>
-                <label><input type="checkbox" name="modo_garcom_enabled" /> Modo Garçom</label>
-                <label>PIN do proprietário <input type="password" name="owner_pin" /></label>
+                
+                <div class="checkbox-group stack-gap">
+                  <label class="checkbox-label" style="display: flex; flex-direction: row; align-items: center; gap: 8px;">
+                    <input type="checkbox" name="owner_edit_enabled" /> 
+                    <span>Permitir edição pelo proprietário</span>
+                  </label>
+                  
+                  <div id="owner-link-area" class="is-hidden" style="margin-left: 24px; margin-bottom: 12px;">
+                    <p class="muted" style="margin-bottom: 8px; font-size: 0.9rem;">Link para o proprietário gerenciar os produtos e pedidos:</p>
+                    <div style="display: flex; gap: 8px;">
+                      <input type="text" id="owner-link-input" readonly style="flex: 1;" />
+                      <button type="button" class="btn btn-primary" onclick="copyToClipboard(document.getElementById('owner-link-input').value)">Copiar</button>
+                      <button type="button" class="btn" onclick="window.open(document.getElementById('owner-link-input').value, '_blank')">Abrir</button>
+                    </div>
+                  </div>
+
+                  <label class="checkbox-label" style="display: flex; flex-direction: row; align-items: center; gap: 8px;">
+                    <input type="checkbox" name="modo_garcom_enabled" /> 
+                    <span>Modo Garçom</span>
+                  </label>
+                </div>
+
+                <label style="margin-top: 16px;">PIN do proprietário (Senha) <input type="password" name="owner_pin" placeholder="Defina um PIN" /></label>
               </details>
             </div>
           </div>
