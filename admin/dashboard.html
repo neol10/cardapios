@@ -146,22 +146,52 @@
                 <summary>Cores Avançadas (Texto e Cards)</summary>
                 <label>Paleta Rápida (Cole HEX)
                   <div class="palette-row" style="display:flex; gap:8px;">
-                    <input type="text" id="palette-input" placeholder="#FF6A00 #C8945B #FFFAF3 #2A211D" style="flex:1;" />
+                    <input type="text" id="palette-input" placeholder="#FF6A00 #C8945B #FFFAF3 #2A211D" style="flex:1;" autocomplete="off" spellcheck="false" />
                     <button type="button" class="btn js-apply-palette">Aplicar</button>
                   </div>
                 </label>
 
                 <div class="two-cols">
-                  <label>Cor Secundária <input type="color" name="cor_secundaria" value="#c8945b" /></label>
-                  <label>Cor dos Cards <input type="color" name="cor_surface" value="#ffffff" /></label>
+                  <label>Cor Secundária
+                    <div class="color-row">
+                      <input type="color" name="cor_secundaria" value="#c8945b" />
+                      <span class="color-swatch"></span>
+                      <input class="color-hex color-hex-input" value="#C8945B" maxlength="7" />
+                    </div>
+                  </label>
+                  <label>Cor dos Cards
+                    <div class="color-row">
+                      <input type="color" name="cor_surface" value="#ffffff" />
+                      <span class="color-swatch"></span>
+                      <input class="color-hex color-hex-input" value="#FFFFFF" maxlength="7" />
+                    </div>
+                  </label>
                 </div>
                 
                 <div class="two-cols">
-                  <label>Cor do Texto <input type="color" name="cor_texto" value="#2a211d" /></label>
-                  <label>Cor Secundária <input type="color" name="cor_muted" value="#756960" /></label>
+                  <label>Cor do Texto
+                    <div class="color-row">
+                      <input type="color" name="cor_texto" value="#2a211d" />
+                      <span class="color-swatch"></span>
+                      <input class="color-hex color-hex-input" value="#2A211D" maxlength="7" />
+                    </div>
+                  </label>
+                  <label>Texto Secundário
+                    <div class="color-row">
+                      <input type="color" name="cor_muted" value="#756960" />
+                      <span class="color-swatch"></span>
+                      <input class="color-hex color-hex-input" value="#756960" maxlength="7" />
+                    </div>
+                  </label>
                 </div>
 
-                <label>Cor da Borda <input type="color" name="cor_borda" value="#f0dfd1" /></label>
+                <label>Cor da Borda
+                  <div class="color-row">
+                    <input type="color" name="cor_borda" value="#f0dfd1" />
+                    <span class="color-swatch"></span>
+                    <input class="color-hex color-hex-input" value="#F0DFD1" maxlength="7" />
+                  </div>
+                </label>
               </details>
 
               <details class="details details-sub">
