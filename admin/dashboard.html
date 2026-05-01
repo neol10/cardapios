@@ -261,6 +261,12 @@
           <div class="form-section" data-section="midia">
             <div class="section-card">
               <div class="section-title">Fotos e Banner</div>
+              
+              <!-- Campos ocultos para armazenar URLs existentes -->
+              <input type="hidden" name="foto_url" />
+              <input type="hidden" name="banner_url" />
+              <input type="hidden" name="galeria_urls" />
+              
               <label>Foto de Perfil <input type="file" name="foto" accept="image/*" /></label>
               <label>Banner <input type="file" name="banner" accept="image/*" /></label>
               <label>Galeria (Imagens) <input type="file" name="galeria" multiple /></label>
