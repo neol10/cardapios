@@ -1112,11 +1112,11 @@ function fillCardapioForm(item) {
   if (!form || !item) return;
   const idField = getHiddenIdField(form);
   if (idField) idField.value = item.id;
-  form.nome.value = item.nome;
-  form.slug.value = item.slug;
-  form.whatsapp.value = maskTelefone(item.whatsapp || "");
-  form.cor_tema.value = item.cor_tema || "#ff6a00";
-  form.foto_url.value = item.foto_url || "";
+  if (form.nome) form.nome.value = item.nome || "";
+  if (form.slug) form.slug.value = item.slug || "";
+  if (form.whatsapp) form.whatsapp.value = maskTelefone(item.whatsapp || "");
+  if (form.cor_tema) form.cor_tema.value = item.cor_tema || "#ff6a00";
+  if (form.foto_url) form.foto_url.value = item.foto_url || "";
   if (form.banner_url) form.banner_url.value = item.banner_url || "";
 
   if (form.galeria_urls) {
