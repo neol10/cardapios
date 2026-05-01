@@ -673,6 +673,7 @@ function renderProdutos() {
 
   const deadlinePassed = isMarmitaDeadlinePassed(activeCardapio);
   const catalogo = isCatalogMode(activeCardapio);
+  const marmita = isMarmitaMode(activeCardapio);
 
   if (deadlinePassed && !catalogo) {
     const alert = document.createElement("div");
