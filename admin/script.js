@@ -2470,7 +2470,9 @@ function getOwnerPinCache(slug) {
 function getOwnerSlugFromUrl() {
   try {
     const url = new URL(window.location.href);
-    return url.searchParams.get("slug") || url.searchParams.get("id") || "";
+    const s = url.searchParams.get("slug") || url.searchParams.get("id") || "";
+    return String(s).trim().toLowerCase();
+
   } catch {
     return "";
   }
@@ -2739,10 +2741,11 @@ async function initOwnerPage() {
     }
 
     if (data !== true) {
-      setOwnerPinCache(slug, "");
+      console.error("Erro de validação no RPC owner_upsert_produto", { slug, pinSent: pin ? "****" : "vazio" });
       setOwnerMessage("PIN inválido ou acesso desabilitado.", "error");
       return;
     }
+
 
     setOwnerPinCache(slug, pin);
     ownerValidatedPin = pin;
@@ -3023,8 +3026,14 @@ function renderProductOptionGroups(form) {
           <span>Máx</span>
           <input type="number" min="1" value="${group.max || 1}" oninput="updateOptionGroup(${gIdx}, 'max', this.value)" />
         </label>
-        <span class="option-required-badge ${isRequired ? 'is-required' : 'is-optional'}">${isRequired ? "✅ Obrigatório" : "⭕ Opcional"}</span>
+        <span class="option-required-badge ${isRequired ? 'is-required' : 'is-optional'}" 
+              onclick="window.toggleOptionRequired(${gIdx})"
+              style="cursor:pointer; user-select:none;"
+              title="Clique para alternar">
+          ${isRequired ? "✅ Obrigatório" : "⭕ Opcional"}
+        </span>
       </div>
+
       <label class="option-itens-label">
         <span>Opções <small class="muted">(separadas por vírgula)</small></span>
         <input type="text"
@@ -3036,7 +3045,19 @@ function renderProductOptionGroups(form) {
   }).join("");
 }
 
+window.toggleOptionRequired = (gIdx) => {
+  const form = document.querySelector("#produto-form") || document.querySelector("#owner-produto-form");
+  if (!form) return;
+  const options = parseProductOptions(form.opcoes_json.value);
+  const isRequired = (options[gIdx].min || 0) > 0;
+  options[gIdx].min = isRequired ? 0 : 1;
+  options[gIdx].max = Math.max(options[gIdx].min, options[gIdx].max || 1);
+  form.opcoes_json.value = JSON.stringify(options);
+  renderProductOptionGroups(form);
+};
+
 window.updateOptionGroup = (gIdx, field, value) => {
+
   const form = document.querySelector("#produto-form") || document.querySelector("#owner-produto-form");
   if (!form) return;
   const options = parseProductOptions(form.opcoes_json.value);

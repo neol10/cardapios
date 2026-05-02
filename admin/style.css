@@ -1060,3 +1060,22 @@ input.color-hex.is-invalid {
   color: var(--muted);
   margin-bottom: 16px;
 }
+
+.option-group-icon-input {
+  width: 38px !important;
+  height: 38px !important;
+  text-align: center;
+  border: 1px solid var(--border) !important;
+  background: var(--surface) !important;
+  color: var(--text) !important;
+  border-radius: 8px !important;
+  font-size: 1.3rem !important;
+  cursor: pointer;
+  padding: 0 !important;
+  flex-shrink: 0;
+}
+
+.option-group-icon-input:focus {
+  border-color: var(--primary) !important;
+  outline: none;
+}
