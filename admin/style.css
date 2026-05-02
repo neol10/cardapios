@@ -38,13 +38,14 @@ body {
 }
 
 .auth-card {
-  width: min(480px, 100%);
+  width: min(720px, 100%);
   background: linear-gradient(145deg, rgba(29, 25, 22, 0.98), rgba(21, 18, 16, 0.96));
   border: 1px solid var(--border);
   border-radius: 24px;
-  padding: 28px;
+  padding: clamp(16px, 4vw, 28px);
   box-shadow: var(--shadow);
 }
+
 
 h1,
 h2,
@@ -109,6 +110,8 @@ textarea {
 input,
 textarea,
 select {
+  width: 100%;
+
   border: 1px solid var(--border);
   border-radius: 14px;
   padding: 13px 16px;
@@ -714,11 +717,12 @@ input.color-hex.is-invalid {
   background: rgba(0, 0, 0, 0.2);
 }
 
-@media (min-width: 640px) {
+@media (min-width: 768px) {
   .two-cols {
     grid-template-columns: 1fr 1fr;
   }
 }
+
 
 .list {
   display: grid;
@@ -863,14 +867,15 @@ input.color-hex.is-invalid {
 }
 
 .option-group-card-config {
-  display: flex;
-  flex-wrap: wrap;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
   align-items: center;
-  gap: 16px;
-  padding: 10px;
+  gap: 12px;
+  padding: 12px;
   background: rgba(0, 0, 0, 0.2);
   border-radius: 12px;
 }
+
 
 .option-minmax-label {
   display: flex;
@@ -888,10 +893,10 @@ input.color-hex.is-invalid {
 .option-required-badge {
   font-size: 0.75rem;
   font-weight: 800;
-  padding: 4px 8px;
-  border-radius: 6px;
-  margin-left: auto;
+  padding: 6px 10px;
+  border-radius: 8px;
 }
+
 
 .option-required-badge.is-required {
   background: rgba(79, 179, 139, 0.15);
@@ -910,11 +915,12 @@ input.color-hex.is-invalid {
 }
 
 .presets-container {
-  display: flex;
-  flex-wrap: wrap;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
   gap: 8px;
   margin-top: 12px;
 }
+
 
 .btn-preset {
   font-size: 0.75rem;
@@ -931,11 +937,14 @@ input.color-hex.is-invalid {
 }
 
 .btn-marmita-template {
+  grid-column: 1 / -1;
   background: linear-gradient(135deg, #4fb38b, #2e7d32);
   color: white;
   border: none;
   font-size: 0.85rem;
+  margin-bottom: 4px;
 }
+
 
 @media (max-width: 480px) {
   .option-group-card-config {
