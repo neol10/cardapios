@@ -330,18 +330,23 @@ p {
   padding: 14px 16px 14px 44px;
   border-radius: 16px;
   border: 1px solid var(--border);
-  background: color-mix(in srgb, var(--surface) 95%, transparent);
-  backdrop-filter: blur(10px);
-  box-shadow: var(--shadow);
+  background: color-mix(in srgb, var(--surface) 85%, transparent);
+  backdrop-filter: blur(12px) saturate(160%);
+  -webkit-backdrop-filter: blur(12px) saturate(160%);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
   font-size: 1rem;
-  transition: all 0.2s;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .search-input:focus {
   outline: none;
   border-color: var(--theme);
-  box-shadow: 0 0 0 4px color-mix(in srgb, var(--theme) 15%, transparent);
+  background: var(--surface);
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--theme) 15%, transparent),
+              0 12px 40px rgba(0, 0, 0, 0.12);
+  transform: translateY(-1px);
 }
+
 
 .search-icon {
   position: absolute;
@@ -383,8 +388,10 @@ p {
   background: var(--theme);
   color: #fff;
   border-color: var(--theme);
-  box-shadow: 0 4px 12px color-mix(in srgb, var(--theme) 25%, transparent);
+  box-shadow: 0 8px 20px color-mix(in srgb, var(--theme) 30%, transparent);
+  transform: scale(1.05) translateY(-2px);
 }
+
 
 /* Skeleton Loaders */
 .skeleton {
@@ -498,13 +505,13 @@ p {
 }
 
 .produto-card:hover {
-  transform: translateY(-2px);
-  border-color: color-mix(in srgb, var(--theme2) 24%, var(--border));
+  transform: translateY(-6px);
+  border-color: var(--theme);
   box-shadow:
-    var(--shadow),
-    0 0 0 1px color-mix(in srgb, var(--theme2) 20%, transparent),
-    0 16px 44px color-mix(in srgb, var(--theme2) 14%, transparent);
+    0 22px 50px color-mix(in srgb, var(--theme) 12%, rgba(0,0,0,0.25)),
+    0 0 0 1px color-mix(in srgb, var(--theme) 20%, transparent);
 }
+
 
 .produto-card:active {
   transform: translateY(-1px);
@@ -623,21 +630,29 @@ body.modo-marmita .category-pill.active {
 }
 
 body.modo-marmita .produto-card {
-  border: none;
-  background: transparent;
-  box-shadow: none;
+  border: 1px solid var(--border);
+  background: color-mix(in srgb, var(--surface) 92%, var(--bg));
+  box-shadow: var(--shadow);
   text-align: center;
-  border-bottom: 1px solid var(--border);
-  border-radius: 0;
+  border-radius: 20px;
   padding-bottom: 20px;
+  overflow: hidden;
+  transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-body.modo-marmita .produto-media {
-  height: clamp(140px, 22vw, 200px);
-  border-radius: 12px;
-  overflow: hidden;
-  margin: 0 10px;
+body.modo-marmita .produto-card:hover {
+  transform: translateY(-4px);
+  border-color: var(--theme);
 }
+
+
+body.modo-marmita .produto-media {
+  height: clamp(160px, 24vw, 220px);
+  border-radius: 0;
+  overflow: hidden;
+  margin-bottom: 12px;
+}
+
 
 body.modo-marmita .produto-body {
   display: block;
@@ -645,11 +660,13 @@ body.modo-marmita .produto-body {
 }
 
 body.modo-marmita .produto-body h3 {
-  font-size: 1.4rem;
-  text-transform: uppercase;
-  margin-bottom: 10px;
+  font-size: 1.25rem;
+  letter-spacing: 0.5px;
+  margin-bottom: 8px;
   color: var(--theme);
+  font-weight: 800;
 }
+
 
 body.modo-marmita .produto-body .muted {
   font-size: 1rem;

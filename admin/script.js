@@ -190,6 +190,76 @@ Subtotal: {SUBTOTAL}
 💳 Pagamento: {PAGAMENTO}
 ━━━━━━━━━━━━━━━━━━━`;
 
+const THEME_PRESETS = {
+  "dark-gold": {
+    cor_tema: "#c8945b",
+    cor_secundaria: "#6f4e37",
+    fundo_estilo: "solido",
+    cor_fundo: "#14110f",
+    cor_surface: "#1d1916",
+    cor_texto: "#f3ede7",
+    cor_muted: "#b7aca3",
+    cor_borda: "#2f2722",
+    fonte_key: "playfair"
+  },
+  "midnight-blue": {
+    cor_tema: "#38bdf8",
+    cor_secundaria: "#1e293b",
+    fundo_estilo: "degrade_radial",
+    cor_fundo: "#0f172a",
+    fundo_cor_1: "#1e40af",
+    fundo_cor_2: "#0f172a",
+    cor_surface: "#1e293b",
+    cor_texto: "#f8fafc",
+    cor_muted: "#94a3b8",
+    cor_borda: "#334155"
+  },
+  "emerald-forest": {
+    cor_tema: "#34d399",
+    cor_secundaria: "#064e3b",
+    fundo_estilo: "degrade_linear",
+    cor_fundo: "#064e3b",
+    fundo_cor_1: "#065f46",
+    fundo_cor_2: "#064e3b",
+    cor_surface: "#065f46",
+    cor_texto: "#ecfdf5",
+    cor_muted: "#a7f3d0",
+    cor_borda: "#064e3b"
+  },
+  "soft-rose": {
+    cor_tema: "#ec4899",
+    cor_secundaria: "#fbcfe8",
+    fundo_estilo: "padrao",
+    cor_fundo: "#fff5f5",
+    cor_surface: "#ffffff",
+    cor_texto: "#831843",
+    cor_muted: "#be185d",
+    cor_borda: "#fce7f3"
+  },
+  "modern-white": {
+    cor_tema: "#0f172a",
+    cor_secundaria: "#64748b",
+    fundo_estilo: "solido",
+    cor_fundo: "#f8fafc",
+    cor_surface: "#ffffff",
+    cor_texto: "#0f172a",
+    cor_muted: "#64748b",
+    cor_borda: "#e2e8f0"
+  },
+  "sunset-vibes": {
+    cor_tema: "#ff6a00",
+    cor_secundaria: "#c8945b",
+    fundo_estilo: "degrade_linear",
+    cor_fundo: "#fffaf3",
+    fundo_cor_1: "#ff6a00",
+    fundo_cor_2: "#ffe6ce",
+    cor_surface: "#ffffff",
+    cor_texto: "#2a211d",
+    cor_muted: "#756960",
+    cor_borda: "#f0dfd1"
+  }
+};
+
 function escapeHtml(value) {
   const str = String(value ?? "");
   return str
@@ -338,22 +408,31 @@ function applyPaletteToCardapioForm(cardapioForm, paletteText) {
     throw new Error("Nenhuma cor HEX válida encontrada na paleta");
   }
 
+  // Ordena por brilho
   annotated.sort((a, b) => a.lum - b.lum);
 
   const text = annotated[0].hex;
   const bg = annotated[annotated.length - 1].hex;
 
-  const withoutEnds = annotated
-    .map((x) => x.hex)
-    .filter((hex) => hex !== text && hex !== bg);
+  // Filtra as pontas para pegar cores de destaque
+  const highlights = annotated
+    .filter((x) => x.hex !== text && x.hex !== bg);
 
-  const theme = withoutEnds[0] || annotated[Math.floor(annotated.length / 2)].hex;
-  const secondary = withoutEnds[1] || theme;
-  const surface = withoutEnds[2] || mixHex(bg, text, 0.06) || bg;
-  const border = mixHex(surface, text, 0.14) || mixHex(bg, text, 0.14) || surface;
-  const muted = mixHex(text, bg, 0.52) || text;
-  const bg1 = theme;
-  const bg2 = secondary !== theme ? secondary : mixHex(theme, bg, 0.3) || bg;
+  const theme = highlights.length > 0 ? highlights[0].hex : annotated[Math.floor(annotated.length / 2)].hex;
+  const secondary = highlights.length > 1 ? highlights[1].hex : theme;
+  
+  // Tenta criar uma superfície (card) harmoniosa
+  // Se o fundo for escuro, o card deve ser um pouco mais claro. Se for claro, um pouco mais escuro ou branco.
+  const bgLum = annotated[annotated.length - 1].lum;
+  let surface;
+  if (bgLum < 0.2) {
+    surface = mixHex(bg, "#FFFFFF", 0.08); // Um pouco mais claro que o fundo escuro
+  } else {
+    surface = "#FFFFFF";
+  }
+
+  const border = mixHex(surface, text, 0.1) || mixHex(bg, text, 0.1);
+  const muted = mixHex(text, surface, 0.4) || text;
 
   const setIfExists = (name, value) => {
     const el = cardapioForm.querySelector(`[name="${CSS.escape(name)}"]`);
@@ -368,13 +447,29 @@ function applyPaletteToCardapioForm(cardapioForm, paletteText) {
   setIfExists("cor_borda", border);
   setIfExists("cor_texto", text);
   setIfExists("cor_muted", muted);
-  setIfExists("fundo_cor_1", bg1);
-  setIfExists("fundo_cor_2", bg2);
+  setIfExists("fundo_cor_1", theme);
+  setIfExists("fundo_cor_2", secondary);
 
   refreshAllColorPreviews(cardapioForm);
   updateThemePreview(cardapioForm);
   updateFundoVisibility(cardapioForm);
 }
+
+function applyThemePreset(form, themeKey) {
+  const preset = THEME_PRESETS[themeKey];
+  if (!preset) return;
+
+  Object.entries(preset).forEach(([name, value]) => {
+    const el = form.querySelector(`[name="${CSS.escape(name)}"]`);
+    if (el) el.value = value;
+  });
+
+  refreshAllColorPreviews(form);
+  updateFundoVisibility(form);
+  updateThemePreview(form);
+  toast(`Tema ${themeKey} aplicado!`);
+}
+
 
 function setupHexInputs(root) {
   if (!root) return;
@@ -1498,8 +1593,6 @@ async function setupDashboardPage() {
     });
   }
 
-  const paletteInput = document.querySelector("#palette-input");
-  const applyPaletteBtn = document.querySelector(".js-apply-palette");
   if (cardapioForm && paletteInput instanceof HTMLInputElement && applyPaletteBtn) {
     applyPaletteBtn.addEventListener("click", () => {
       try {
@@ -1510,6 +1603,15 @@ async function setupDashboardPage() {
       }
     });
   }
+
+  // Preset Buttons
+  document.querySelectorAll(".preset-btn").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const theme = btn.dataset.theme;
+      if (theme) applyThemePreset(cardapioForm, theme);
+    });
+  });
+
 
   const analyticsPeriod = document.getElementById("analytics-period");
   analyticsPeriod?.addEventListener("change", loadAnalytics);

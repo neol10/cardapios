@@ -629,6 +629,33 @@ input.color-hex.is-invalid {
   background: rgba(0, 0, 0, 0.2);
 }
 
+/* Theme Presets */
+.theme-presets {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  gap: 10px;
+  margin-top: 12px;
+}
+
+.preset-btn {
+  padding: 10px 8px;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  border-width: 2px;
+}
+
+.preset-btn:hover {
+  transform: scale(1.04) translateY(-2px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
+}
+
+.preset-btn:active {
+  transform: scale(0.98);
+}
+
+
 .theme-preview {
   margin-top: 12px;
   border: 1px solid rgba(255, 255, 255, 0.08);
