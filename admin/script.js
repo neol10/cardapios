@@ -2501,10 +2501,14 @@ async function initOwnerPage() {
   if (!(authForm instanceof HTMLFormElement) || !(editForm instanceof HTMLFormElement)) return;
 
   const setOwnerMessage = (text, type = "") => setMessage(message, text, type);
+  let ownerValidatedPin = getOwnerPinCache(slug);
+
   const getOwnerPinValue = () => {
     const input = authForm.querySelector('input[name="pin"]');
-    return input instanceof HTMLInputElement ? input.value : "";
+    const val = input instanceof HTMLInputElement ? input.value : "";
+    return onlyDigits(val || ownerValidatedPin || getOwnerPinCache(slug));
   };
+
 
 
   const showEdit = (show) => {
@@ -2602,7 +2606,9 @@ async function initOwnerPage() {
 
     setOwnerVerified(slug);
     setOwnerPinCache(slug, pin);
+    ownerValidatedPin = pin;
     showEdit(true);
+
     setOwnerMessage("");
     await loadAndFill();
     setupPriceInputs(editForm);
@@ -2645,7 +2651,9 @@ async function initOwnerPage() {
     }
 
     setOwnerPinCache(slug, pin);
+    ownerValidatedPin = pin;
     setOwnerMessage("Salvo com sucesso.", "success");
+
     await loadAndFill();
   });
 
@@ -2668,7 +2676,8 @@ async function initOwnerPage() {
       return;
     }
 
-    const pin = onlyDigits(getOwnerPinValue() || getOwnerPinCache(slug));
+    const pin = getOwnerPinValue();
+
     if (!pin) {
       setOwnerMessage("Digite o PIN para continuar.", "error");
       return;
@@ -2733,6 +2742,8 @@ async function initOwnerPage() {
     }
 
     setOwnerPinCache(slug, pin);
+    ownerValidatedPin = pin;
+
     resetOwnerProdutoForm(ownerProdutoForm);
     await loadOwnerProdutos();
     setOwnerMessage("Produto salvo com sucesso.", "success");
@@ -2765,7 +2776,8 @@ async function initOwnerPage() {
       const confirmed = confirm(`Excluir ${produto.nome}?`);
       if (!confirmed) return;
 
-      const pin = onlyDigits(getOwnerPinValue() || getOwnerPinCache(slug));
+      const pin = getOwnerPinValue();
+
       if (!pin) {
         setOwnerMessage("Digite o PIN para continuar.", "error");
         return;
