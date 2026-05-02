@@ -1287,8 +1287,9 @@ function fillCardapioForm(item) {
       if (isEnabled) {
         ownerLinkArea.classList.remove("is-hidden");
         const origin = window.location.origin;
-        ownerLinkInput.value = `${origin}/owner.html?id=${item.id}`;
-      } else {
+        ownerLinkInput.value = `${origin}/admin/owner.html?slug=${item.slug}`;
+      }
+ else {
         ownerLinkArea.classList.add("is-hidden");
       }
     }
@@ -2437,12 +2438,12 @@ function getOwnerPinCache(slug) {
 function getOwnerSlugFromUrl() {
   try {
     const url = new URL(window.location.href);
-    const slug = String(url.searchParams.get("slug") || "").trim();
-    return slug;
+    return url.searchParams.get("slug") || url.searchParams.get("id") || "";
   } catch {
     return "";
   }
 }
+
 
 async function initOwnerPage() {
   const ownerPage = document.querySelector("#owner-page");
@@ -2481,11 +2482,18 @@ async function initOwnerPage() {
   };
 
   const loadAndFill = async () => {
-    const { data, error } = await supabase
+    const query = supabase
       .from("cardapios")
-      .select("id,nome,slug,whatsapp,slogan,modo,modo_garcom_enabled,horario_funcionamento,abre_em,fecha_em,endereco,instagram_url,foto_url,banner_url")
-      .eq("slug", slug)
-      .single();
+      .select("id,nome,slug,whatsapp,slogan,modo,modo_garcom_enabled,horario_funcionamento,abre_em,fecha_em,endereco,instagram_url,foto_url,banner_url");
+    
+    if (slug.length > 20) { // Provavelmente um UUID (ID)
+      query.eq("id", slug);
+    } else {
+      query.eq("slug", slug);
+    }
+
+    const { data, error } = await query.single();
+
 
     if (error || !data) {
       setOwnerMessage("Não foi possível carregar o cardápio.", "error");
@@ -3099,10 +3107,11 @@ function setupOwnerLinkHandlers() {
         if (e.target.checked) {
           ownerLinkArea.classList.remove("is-hidden");
           const form = e.target.closest("form");
-          const idField = form?.querySelector('input[name="id"]');
-          const id = idField?.value || "NOVO";
+          const slugField = form?.querySelector('input[name="slug"]');
+          const slug = slugField?.value || "";
           const origin = window.location.origin;
-          ownerLinkInput.value = `${origin}/owner.html?id=${id}`;
+          ownerLinkInput.value = `${origin}/admin/owner.html?slug=${slug}`;
+
         } else {
           ownerLinkArea.classList.add("is-hidden");
         }
@@ -3123,3 +3132,20 @@ setupOwnerLinkHandlers();
 if (document.querySelector("#owner-page")) {
   initOwnerPage();
 }
+
+window.copyToClipboard = function(text) {
+  if (!text) return;
+  navigator.clipboard.writeText(text).then(() => {
+    toast("Link copiado!");
+  }).catch(() => {
+    // Fallback para navegadores sem suporte a clipboard API (raro hoje em dia)
+    const el = document.createElement('textarea');
+    el.value = text;
+    document.body.appendChild(el);
+    el.select();
+    document.execCommand('copy');
+    document.body.removeChild(el);
+    toast("Link copiado!");
+  });
+};
+
