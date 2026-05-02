@@ -2719,6 +2719,12 @@ async function initOwnerPage() {
     const estoque_diario = payload.estoque_diario ? parseInt(payload.estoque_diario) : null;
     const opcoes = parseProductOptions(payload.opcoes_json);
 
+    const cleanPrice = (val) => {
+      const s = String(val || "0").replace(/\./g, "").replace(",", ".");
+      const n = parseFloat(s);
+      return Number.isFinite(n) ? n : 0;
+    };
+
     const { data, error } = await supabase.rpc("owner_upsert_produto", {
       p_slug: slug,
       p_pin: pin,
@@ -2727,13 +2733,14 @@ async function initOwnerPage() {
         nome: payload.nome,
         categoria: payload.categoria || null,
         descricao: payload.descricao || null,
-        preco: payload.preco,
+        preco: cleanPrice(payload.preco),
         imagem_url: imagemFinal || null,
         precos: Object.keys(precos).length ? precos : null,
         estoque_diario,
         opcoes: opcoes.length ? opcoes : null
       }
     });
+
 
     if (error) {
       setOwnerMessage("Não foi possível salvar o produto. Verifique o schema no Supabase.", "error");
