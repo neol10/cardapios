@@ -1798,8 +1798,11 @@ async function setupDashboardPage() {
       foto_url: foto_url || null,
       banner_url: banner_url || null,
       galeria_urls: galeriaUrlsBase.length ? galeriaUrlsBase : null,
-      templates: templates.length ? templates : null
+      templates: templates.length ? templates : null,
+      owner_edit_enabled,
+      owner_pin: owner_pin ? onlyDigits(owner_pin) : null
     };
+
 
     let savedId = id;
 
@@ -2971,14 +2974,16 @@ function renderProductOptionGroups(form) {
     vegetarian: "🥦", pvt: "🥦"
   };
 
-  function getGroupIcon(titulo) {
-    const key = String(titulo || "").toLowerCase()
+  function getGroupIcon(group) {
+    if (group.icon) return group.icon;
+    const key = String(group.titulo || "").toLowerCase()
       .normalize("NFD").replace(/[\u0300-\u036f]/g, "");
     for (const [k, icon] of Object.entries(OPTION_ICONS)) {
       if (key.includes(k)) return icon;
     }
     return "📋";
   }
+
 
   if (!options.length) {
     container.innerHTML = `
@@ -2995,7 +3000,12 @@ function renderProductOptionGroups(form) {
     return `
     <div class="option-group-card">
       <div class="option-group-card-header">
-        <span class="option-group-icon">${icon}</span>
+        <input type="text"
+          class="option-group-icon-input"
+          value="${getGroupIcon(group)}"
+          oninput="updateOptionGroup(${gIdx}, 'icon', this.value)"
+          title="Mudar ícone"
+          style="width: 32px; height: 32px; text-align: center; border: none; background: var(--bg); border-radius: 4px; font-size: 1.2rem; cursor: pointer;" />
         <input type="text"
           class="option-group-title-input"
           value="${escapeHtml(group.titulo)}"
@@ -3003,6 +3013,7 @@ function renderProductOptionGroups(form) {
           placeholder="Ex: Arroz, Feijão, Mistura..." />
         <button type="button" class="btn btn-remove-group" onclick="removeOptionGroup(${gIdx})" title="Remover grupo">✕</button>
       </div>
+
       <div class="option-group-card-config">
         <label class="option-minmax-label">
           <span>Mín</span>
