@@ -2501,6 +2501,11 @@ async function initOwnerPage() {
   if (!(authForm instanceof HTMLFormElement) || !(editForm instanceof HTMLFormElement)) return;
 
   const setOwnerMessage = (text, type = "") => setMessage(message, text, type);
+  const getOwnerPinValue = () => {
+    const input = authForm.querySelector('input[name="pin"]');
+    return input instanceof HTMLInputElement ? input.value : "";
+  };
+
 
   const showEdit = (show) => {
     editForm.classList.toggle("is-hidden", !show);
