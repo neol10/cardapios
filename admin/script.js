@@ -1593,6 +1593,8 @@ async function setupDashboardPage() {
     });
   }
 
+  const paletteInput = document.querySelector("#palette-input");
+  const applyPaletteBtn = document.querySelector(".js-apply-palette");
   if (cardapioForm && paletteInput instanceof HTMLInputElement && applyPaletteBtn) {
     applyPaletteBtn.addEventListener("click", () => {
       try {
