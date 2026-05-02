@@ -1538,28 +1538,29 @@ function buildWhatsappMessage({ nome, telefone, endereco }) {
   const enderecoLinha = tipoPedido === "retirada" ? "Retirada no balcão" : endereco;
 
   const defaultTemplate = [
-    `*Novo pedido - ${activeCardapio.nome}*`,
-    "-------------------------",
-    "RESUMO",
-    `Tipo: ${tipoPedidoLabel}`,
-    `Pagamento: ${pagamento || "Nao informado"}`,
+    `*NOVO PEDIDO - ${activeCardapio.nome}* 🛒`,
+    "----------------------------------",
+    "📝 *RESUMO*",
+    `📍 *Tipo:* ${tipoPedidoLabel}`,
+    `💳 *Pagamento:* ${pagamento || "Não informado"}`,
     "",
-    "CLIENTE",
-    `Nome: ${nome}`,
-    `Telefone: ${telefone}`,
+    "👤 *CLIENTE*",
+    `*Nome:* ${nome}`,
+    `*Telefone:* ${telefone}`,
     "",
-    "ENDERECO",
-    `${enderecoLinha || "Nao informado"}`,
+    "🏠 *ENDEREÇO*",
+    `${enderecoLinha || "Não informado"}`,
     "",
-    ...(marmita && horarioRetirada ? ["RETIRADA", `Horário: ${horarioRetirada}`, ""] : []),
-    "ITENS",
+    ...(marmita && horarioRetirada ? ["⏰ *RETIRADA*", `Horário: ${horarioRetirada}`, ""] : []),
+    "📦 *ITENS*",
     itensTexto,
     "",
-    "VALORES",
+    "💰 *VALORES*",
     `Subtotal: ${formatPriceBRL(subtotal)}`,
     ...(marmita ? [] : [`Taxa de entrega: ${formatPriceBRL(taxaEntrega)}`]),
-    `TOTAL: ${formatPriceBRL(total)}`
+    `*TOTAL: ${formatPriceBRL(total)}* ✅`
   ];
+
 
   return defaultTemplate.join("\n");
 

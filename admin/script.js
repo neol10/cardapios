@@ -640,13 +640,39 @@ function setupThemeControls(form) {
 
 function maskTelefone(value) {
   const digits = onlyDigits(value).slice(0, 11);
-
   if (!digits.length) return "";
-
   if (digits.length <= 2) return `(${digits}`;
   if (digits.length <= 7) return `(${digits.slice(0, 2)}) ${digits.slice(2)}`;
   return `(${digits.slice(0, 2)}) ${digits.slice(2, 7)}-${digits.slice(7)}`;
 }
+
+function maskMoney(value) {
+  const digits = onlyDigits(value);
+  const number = Number.parseInt(digits || "0", 10) / 100;
+  return number.toLocaleString("pt-BR", {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2
+  });
+}
+
+function setupPriceInputs(root) {
+  if (!root) return;
+  const selectors = [
+    'input[name="preco"]',
+    'input[name="preco_p"]',
+    'input[name="preco_m"]',
+    'input[name="preco_g"]',
+    '.js-money-mask'
+  ];
+  root.querySelectorAll(selectors.join(", ")).forEach((input) => {
+    if (!(input instanceof HTMLInputElement)) return;
+    input.addEventListener("input", () => {
+      const masked = maskMoney(input.value);
+      input.value = masked;
+    });
+  });
+}
+
 
 function setMessage(element, text, type = "") {
   if (!element) return;
@@ -1540,6 +1566,9 @@ async function setupDashboardPage() {
 
   setupColorPreviewListeners(cardapioForm);
   setupThemeControls(cardapioForm);
+  setupPriceInputs(cardapioForm);
+  setupPriceInputs(document.querySelector("#produto-form"));
+
   updateModoGarcomAvailability(cardapioForm);
 
   cardapioForm?.modo?.addEventListener("change", () => {
@@ -2571,7 +2600,10 @@ async function initOwnerPage() {
     showEdit(true);
     setOwnerMessage("");
     await loadAndFill();
+    setupPriceInputs(editForm);
+    setupPriceInputs(ownerProdutoForm);
   });
+
 
   editForm.addEventListener("submit", async (event) => {
     event.preventDefault();
