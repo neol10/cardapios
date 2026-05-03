@@ -23,22 +23,6 @@
   --theme: #ff6a00;
   --theme2: #c8945b;
   --font: "Sora", sans-serif;
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --bg: #0f172a;
-    --surface: #1e293b;
-    --text: #f8fafc;
-    --muted: #94a3b8;
-    --border: #334155;
-  }
-}
-
-:root {
-  --theme: #ff6a00;
-  --theme2: #c8945b;
-  --font: "Sora", sans-serif;
   --font-weight: 400;
   --heading-weight: 800;
   --bg: #fffaf3;
@@ -49,6 +33,28 @@
   --shadow: 0 14px 40px rgba(95, 51, 30, 0.14);
   --ok: #1f8f5f;
 }
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #0f172a;
+    --surface: #1e293b;
+    --text: #f8fafc;
+    --muted: #94a3b8;
+    --border: #334155;
+    --shadow: 0 14px 40px rgba(0, 0, 0, 0.4);
+  }
+}
+
+::selection {
+  background: var(--theme);
+  color: #fff;
+}
+
+html {
+  scroll-behavior: smooth;
+  -webkit-tap-highlight-color: transparent;
+}
+
 
 * {
   box-sizing: border-box;
@@ -395,11 +401,17 @@ p {
 
 /* Skeleton Loaders */
 .skeleton {
-  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background: linear-gradient(
+    90deg,
+    color-mix(in srgb, var(--surface) 90%, var(--border)) 25%,
+    color-mix(in srgb, var(--surface) 80%, var(--border)) 50%,
+    color-mix(in srgb, var(--surface) 90%, var(--border)) 75%
+  );
   background-size: 200% 100%;
-  animation: skeleton-loading 1.5s infinite;
+  animation: skeleton-loading 1.8s infinite cubic-bezier(0.4, 0, 0.2, 1);
   border-radius: 8px;
 }
+
 
 @keyframes skeleton-loading {
   0% { background-position: 200% 0; }
