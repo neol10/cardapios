@@ -187,6 +187,97 @@
           transition: none;
         }
       }
+
+      /* Estilos de Precificação */
+      .pricing-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 20px;
+        margin-top: 24px;
+      }
+
+      .pricing-card {
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid var(--border);
+        border-radius: 24px;
+        padding: 32px 24px;
+        display: flex;
+        flex-direction: column;
+        position: relative;
+        transition: transform 0.3s ease, border-color 0.3s ease;
+      }
+
+      .pricing-card:hover {
+        transform: translateY(-5px);
+        border-color: var(--theme2);
+      }
+
+      .pricing-card.featured {
+        background: linear-gradient(135deg, rgba(255, 106, 0, 0.1) 0%, rgba(200, 148, 91, 0.05) 100%);
+        border: 2px solid var(--theme);
+        transform: scale(1.02);
+      }
+
+      .plan-badge {
+        position: absolute;
+        top: -12px;
+        right: 24px;
+        background: var(--theme);
+        color: white;
+        padding: 4px 12px;
+        border-radius: 99px;
+        font-size: 0.75rem;
+        font-weight: 800;
+        text-transform: uppercase;
+      }
+
+      .plan-name {
+        font-size: 1.25rem;
+        font-weight: 800;
+        margin-bottom: 8px;
+        color: var(--theme2);
+      }
+
+      .plan-price {
+        font-size: 2.5rem;
+        font-weight: 900;
+        margin-bottom: 16px;
+      }
+
+      .plan-price span {
+        font-size: 1rem;
+        font-weight: 400;
+        color: var(--muted);
+      }
+
+      .plan-desc {
+        font-size: 0.9rem;
+        color: var(--muted);
+        margin-bottom: 24px;
+        line-height: 1.5;
+      }
+
+      .plan-features {
+        list-style: none;
+        padding: 0;
+        margin: 0 0 32px;
+        flex-grow: 1;
+        display: grid;
+        gap: 12px;
+      }
+
+      .plan-features li {
+        font-size: 0.95rem;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      .pricing-card .btn {
+        width: 100%;
+        text-decoration: none;
+        font-weight: 800;
+      }
     </style>
 
     <script>
@@ -213,13 +304,64 @@
 
     <main class="vitrine">
       <div class="vitrine-head">
-        <h2>Cardápios</h2>
+        <h2>Cardápios Ativos</h2>
         <p id="vitrine-count">Carregando...</p>
       </div>
 
       <p id="vitrine-message" class="vitrine-message" aria-live="polite"></p>
-
       <section id="cardapios" class="vitrine-grid" aria-label="Lista de cardápios"></section>
+
+      <hr style="border: 0; border-top: 1px solid var(--border); margin: 60px 0 40px;">
+
+      <div class="vitrine-head" style="margin-bottom: 24px;">
+        <h2>Planos e Assinaturas</h2>
+        <p>Escolha a melhor solução para o seu negócio</p>
+      </div>
+
+      <div class="pricing-grid">
+        <!-- Catalogo -->
+        <div class="pricing-card">
+          <div class="plan-name">Catálogo Digital</div>
+          <div class="plan-price">R$ 59<span>/mês</span></div>
+          <p class="plan-desc">Perfeito para quem quer apenas expor os produtos com elegância.</p>
+          <ul class="plan-features">
+            <li>✨ Design Premium</li>
+            <li>📱 Funciona Offline (PWA)</li>
+            <li>🔍 Busca Inteligente</li>
+            <li>❌ Sem Pedidos WA</li>
+          </ul>
+          <a href="https://wa.me/5519998130586?text=Olá! Quero assinar o *Plano Catálogo* (R$ 59/mês) para o meu negócio." target="_blank" class="btn btn-ghost">Contratar Plano</a>
+        </div>
+
+        <!-- Pedidos (Featured) -->
+        <div class="pricing-card featured">
+          <div class="plan-badge">Mais Popular</div>
+          <div class="plan-name">Delivery Pro</div>
+          <div class="plan-price">R$ 99<span>/mês</span></div>
+          <p class="plan-desc">Sistema completo de pedidos via WhatsApp para delivery e balcão.</p>
+          <ul class="plan-features">
+            <li>✅ Pedidos no WhatsApp</li>
+            <li>🤵 Modo Garçom / Mesa</li>
+            <li>📊 Relatório de Vendas</li>
+            <li>🚀 Alta Conversão</li>
+          </ul>
+          <a href="https://wa.me/5519998130586?text=Olá! Quero assinar o *Plano Delivery Pro* (R$ 99/mês) para o meu negócio." target="_blank" class="btn btn-primary">Contratar Pro</a>
+        </div>
+
+        <!-- Marmita -->
+        <div class="pricing-card">
+          <div class="plan-name">Marmita Express</div>
+          <div class="plan-price">R$ 160<span>/mês</span></div>
+          <p class="plan-desc">Especialista em Marmitarias com agendamento e prazos.</p>
+          <ul class="plan-features">
+            <li>📅 Agendamento de Pedidos</li>
+            <li>⏰ Horários de Retirada</li>
+            <li>📦 Controle de Estoque</li>
+            <li>🛑 Horário Limite (Hoje)</li>
+          </ul>
+          <a href="https://wa.me/5519998130586?text=Olá! Quero assinar o *Plano Marmita* (R$ 160/mês) para o meu negócio." target="_blank" class="btn btn-ghost">Contratar Marmita</a>
+        </div>
+      </div>
     </main>
 
     <script type="module" src="/index.js?v=5"></script>
