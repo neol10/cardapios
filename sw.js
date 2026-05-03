@@ -34,14 +34,18 @@ function isCacheableRequest(request) {
   if (!request || request.method !== "GET") return false;
 
   const url = new URL(request.url);
-  // Só cacheia same-origin
-  if (url.origin !== self.location.origin) return false;
+  const isSameOrigin = url.origin === self.location.origin;
+  const isSupabase = url.hostname.includes("supabase.co");
+  const isExternalImage = url.pathname.match(/\.(jpg|jpeg|png|gif|svg|webp)$/i);
 
-  // Evita cache de URLs "sensíveis" por padrão
+  if (!isSameOrigin && !isSupabase && !isExternalImage) return false;
+
+  // Evita cache de URLs "sensíveis"
   if (url.pathname.startsWith("/api")) return false;
 
   return true;
 }
+
 
 function isStaticAsset(url) {
   return (
@@ -88,14 +92,18 @@ self.addEventListener("fetch", (event) => {
 
   const url = new URL(request.url);
 
-  // Navegação (HTML): network-first
-  if (request.mode === "navigate") {
+  // Navegação (HTML) ou dados do Supabase: network-first
+  const isNav = request.mode === "navigate";
+  const isData = url.hostname.includes("supabase.co") && !url.pathname.includes("/storage/");
+
+  if (isNav || isData) {
     event.respondWith(networkFirst(request));
     return;
   }
 
-  // Assets: stale-while-revalidate
-  if (isStaticAsset(url)) {
+  // Assets estáticos e imagens: stale-while-revalidate
+  if (isStaticAsset(url) || url.pathname.includes("/storage/") || !url.hostname.includes(self.location.hostname)) {
     event.respondWith(staleWhileRevalidate(request));
   }
 });
+
