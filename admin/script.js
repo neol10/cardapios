@@ -2574,6 +2574,7 @@ async function initOwnerPage() {
     if (editForm.templates_json) editForm.templates_json.value = JSON.stringify(data.templates || []);
 
     ownerCardapio = data;
+    await loadOwnerDashboard();
     await loadOwnerProdutos();
     return true;
   };
@@ -2628,7 +2629,95 @@ async function initOwnerPage() {
     await loadAndFill();
     setupPriceInputs(editForm);
     setupPriceInputs(ownerProdutoForm);
+    setupOwnerDashboardHandlers(ownerPage);
   });
+
+  function setupOwnerDashboardHandlers(root) {
+    const qrBtn = root.querySelector("#btn-owner-qrcode");
+    if (qrBtn) {
+      qrBtn.onclick = () => {
+        if (!ownerCardapio?.slug) return;
+        const url = `${window.location.origin}/cardapio/${ownerCardapio.slug}`;
+        const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=400x400&data=${encodeURIComponent(url)}`;
+        window.open(qrUrl, "_blank");
+      };
+    }
+  }
+
+  async function loadOwnerDashboard() {
+    const statsContainer = ownerPage.querySelector("#owner-stats-container");
+    if (!ownerCardapio?.id || !statsContainer) return;
+
+    statsContainer.innerHTML = `<p class="muted">Carregando estatísticas...</p>`;
+
+    try {
+      const [{ data: history }, { data: top }] = await Promise.all([
+        supabase.rpc("get_sales_history", { p_cardapio_id: ownerCardapio.id }),
+        supabase.rpc("get_top_products", { p_cardapio_id: ownerCardapio.id })
+      ]);
+
+      renderOwnerDashboard(statsContainer, history || [], top || []);
+    } catch (e) {
+      console.warn("Erro ao carregar dashboard:", e);
+      statsContainer.innerHTML = "";
+    }
+  }
+
+  function renderOwnerDashboard(container, history, top) {
+    let html = `
+      <div class="owner-stats-grid">
+        <div class="stat-card">
+          <h4>Vendas (Últimos 7 dias)</h4>
+          <div class="simple-bar-chart">
+    `;
+
+    const max = Math.max(...history.map(h => Number(h.total_vendas || 0)), 1);
+    
+    // Garante que temos pelo menos os dias da semana representados
+    history.forEach(h => {
+      const pct = (Number(h.total_vendas || 0) / max) * 100;
+      const date = new Date(h.dia + 'T00:00:00');
+      const label = date.toLocaleDateString('pt-BR', { weekday: 'short' }).replace('.', '');
+      
+      html += `
+        <div class="bar-col">
+          <div class="bar-val" style="height: ${Math.max(pct, 2)}%" title="R$ ${h.total_vendas || 0}"></div>
+          <span class="bar-label">${label}</span>
+        </div>
+      `;
+    });
+
+    html += `
+          </div>
+        </div>
+
+        <div class="stat-card">
+          <h4>Top 3 Produtos</h4>
+          <div class="top-list">
+    `;
+
+    if (!top || top.length === 0) {
+      html += `<p class="muted" style="font-size: 0.8rem;">Ainda sem dados de vendas.</p>`;
+    } else {
+      top.forEach((p, idx) => {
+        html += `
+          <div class="top-item">
+            <span class="top-rank">${idx + 1}º</span>
+            <span class="top-name">${p.produto_nome}</span>
+            <span class="top-qty">${p.qtd_vendida}x</span>
+          </div>
+        `;
+      });
+    }
+
+    html += `
+          </div>
+        </div>
+      </div>
+    `;
+
+    container.innerHTML = html;
+  }
 
 
   editForm.addEventListener("submit", async (event) => {

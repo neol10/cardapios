@@ -42,6 +42,16 @@
         <form id="owner-edit-form" class="stack-gap is-hidden">
           <input type="hidden" name="slug" />
 
+          <div class="owner-dashboard-container" id="owner-stats-container">
+             <!-- Dashboard será renderizado aqui -->
+          </div>
+
+          <div class="topbar-actions" style="margin-bottom: 12px; justify-content: center;">
+             <button type="button" class="btn btn-ghost" id="btn-owner-qrcode" style="font-weight: 800; gap: 8px;">
+               📱 Gerar QR Code da Loja
+             </button>
+          </div>
+
           <label>
             Nome
             <input type="text" name="nome" required />
