@@ -229,35 +229,48 @@ body.bg-radial {
   flex: 0 0 auto;
 }
 
-.info-links {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-  margin-top: 6px;
-}
-
-.link {
+.btn {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px 24px;
+  border-radius: 16px;
+  border: 1px solid transparent;
+  font-family: var(--font);
   font-weight: 800;
-  font-size: 0.85rem;
-  color: color-mix(in srgb, var(--theme2) 70%, black);
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
   text-decoration: none;
-  padding: 6px 10px;
-  border-radius: 999px;
-  border: 1px solid color-mix(in srgb, var(--theme2) 26%, white);
-  background: color-mix(in srgb, var(--theme2) 10%, white);
-  transition: transform 140ms ease, filter 140ms ease, border-color 140ms ease;
+  user-select: none;
 }
 
-.link:hover {
-  filter: brightness(0.98);
-  transform: translateY(-1px);
+.btn-primary {
+  background: linear-gradient(135deg, var(--theme), var(--theme2));
+  color: #fff;
+  box-shadow: 0 10px 25px color-mix(in srgb, var(--theme) 25%, transparent);
+  text-shadow: 0 1px 2px rgba(0,0,0,0.15);
 }
 
-.link:active {
-  transform: translateY(0);
+.btn-primary:hover {
+  transform: translateY(-2px);
+  filter: brightness(1.08);
+  box-shadow: 0 14px 30px color-mix(in srgb, var(--theme) 35%, transparent);
+}
+
+.btn-primary:active {
+  transform: translateY(0) scale(0.97);
+}
+
+.btn-ghost {
+  background: rgba(255, 255, 255, 0.05);
+  border-color: var(--border);
+  color: var(--text);
+}
+
+.btn-ghost:hover {
+  background: rgba(255, 255, 255, 0.08);
 }
 
 .status {
@@ -1570,51 +1583,49 @@ button:disabled {
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 14px 16px;
-  border-radius: 14px;
+  padding: 16px 20px;
+  border-radius: 20px;
   border: 2px solid var(--border);
-  background: color-mix(in srgb, var(--surface) 95%, transparent);
+  background: rgba(255, 255, 255, 0.03);
+  backdrop-filter: blur(5px);
   cursor: pointer;
-  transition: border-color 0.18s ease, background 0.18s ease, transform 0.12s ease;
-  font-size: 1rem;
-  font-weight: 600;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  font-size: 1.05rem;
+  font-weight: 700;
   position: relative;
-  user-select: none;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
 }
 
 .wizard-item:hover {
   border-color: color-mix(in srgb, var(--theme) 40%, var(--border));
-  transform: translateY(-1px);
+  background: rgba(255, 255, 255, 0.05);
+  transform: scale(1.01);
 }
 
 .wizard-item.is-selected {
   border-color: var(--theme);
-  background: color-mix(in srgb, var(--theme) 6%, var(--surface));
-  box-shadow: 0 4px 14px color-mix(in srgb, var(--theme) 14%, transparent);
-}
-
-.wizard-item input {
-  position: absolute;
-  opacity: 0;
-  width: 0;
-  height: 0;
-  pointer-events: none;
-}
-
-.wizard-item-name {
-  flex: 1;
+  background: rgba(var(--theme-rgb, 255, 106, 0), 0.08);
+  box-shadow: 0 8px 20px color-mix(in srgb, var(--theme) 18%, transparent);
 }
 
 .wizard-item-check {
-  font-size: 1.1rem;
-  font-weight: 900;
-  color: var(--theme);
-  opacity: 0;
-  transform: scale(0.5);
-  transition: opacity 0.15s ease, transform 0.15s ease;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  border: 2px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  color: transparent;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
 }
 
 .wizard-item.is-selected .wizard-item-check {
+  background: var(--theme);
+  border-color: var(--theme);
+  color: #fff;
   opacity: 1;
   transform: scale(1);
 }
