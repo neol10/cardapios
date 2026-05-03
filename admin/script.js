@@ -2532,7 +2532,7 @@ async function initOwnerPage() {
   const loadAndFill = async () => {
     const query = supabase
       .from("cardapios")
-      .select("id,nome,slug,whatsapp,slogan,modo,modo_garcom_enabled,horario_funcionamento,abre_em,fecha_em,endereco,instagram_url,foto_url,banner_url");
+      .select("*"); // Busca todas as colunas para garantir sincronia total
     
     if (slug.length > 20) { // Provavelmente um UUID (ID)
       query.eq("id", slug);
@@ -2572,6 +2572,8 @@ async function initOwnerPage() {
     if (editForm.cor_fundo) editForm.cor_fundo.value = data.cor_fundo || "#fffaf3";
     if (editForm.cor_texto) editForm.cor_texto.value = data.cor_texto || "#2a211d";
     if (editForm.templates_json) editForm.templates_json.value = JSON.stringify(data.templates || []);
+
+    refreshAllColorPreviews(editForm); // Garante que as cores apareçam nos previews
 
     ownerCardapio = data;
     await loadOwnerDashboard();
@@ -2629,6 +2631,7 @@ async function initOwnerPage() {
     await loadAndFill();
     setupPriceInputs(editForm);
     setupPriceInputs(ownerProdutoForm);
+    setupHexInputs(ownerPage);
     setupOwnerDashboardHandlers(ownerPage);
   });
 
@@ -2817,10 +2820,12 @@ async function initOwnerPage() {
     let imagemFinal = payload.imagem_url;
 
     if (imagemFile instanceof File && imagemFile.size > 0) {
+      setOwnerMessage("Enviando imagem...");
       try {
-        imagemFinal = await fileToDataUrl(imagemFile);
+        // Upload para o Storage (suporta arquivos grandes de mobile)
+        imagemFinal = await uploadProductImage(ownerCardapio.id, imagemFile);
       } catch (error) {
-        setOwnerMessage(error?.message ? String(error.message) : "Não foi possível ler a imagem.", "error");
+        setOwnerMessage("Erro no upload: " + (error.message || "Tente uma foto menor."), "error");
         return;
       }
     }

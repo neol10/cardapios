@@ -126,38 +126,52 @@
 
           <details class="details details-sub">
             <summary>Identidade Visual (Cores)</summary>
-            <div class="two-cols">
-              <label>
-                Cor Principal (Botões)
-                <input type="color" name="cor_tema" value="#ff6a00" />
-              </label>
-              <label>
-                Cor Secundária
-                <input type="color" name="cor_secundaria" value="#c8945b" />
-              </label>
-            </div>
-            <div class="two-cols">
-              <label>
-                Cor de Fundo
-                <input type="color" name="cor_fundo" value="#fffaf3" />
-              </label>
-              <label>
-                Cor dos Textos
-                <input type="color" name="cor_texto" value="#2a211d" />
-              </label>
+            <div class="color-grid stack-gap" style="gap: 12px; padding: 12px 0;">
+              <div class="color-row">
+                <label>Cor Principal (Botões)</label>
+                <div class="color-input-group">
+                  <input type="color" name="cor_tema" value="#ff6a00" />
+                  <input type="text" class="color-hex-input" placeholder="#000000" />
+                </div>
+              </div>
+              <div class="color-row">
+                <label>Cor Secundária</label>
+                <div class="color-input-group">
+                  <input type="color" name="cor_secundaria" value="#c8945b" />
+                  <input type="text" class="color-hex-input" placeholder="#000000" />
+                </div>
+              </div>
+              <div class="color-row">
+                <label>Cor de Fundo</label>
+                <div class="color-input-group">
+                  <input type="color" name="cor_fundo" value="#fffaf3" />
+                  <input type="text" class="color-hex-input" placeholder="#000000" />
+                </div>
+              </div>
+              <div class="color-row">
+                <label>Cor dos Textos</label>
+                <div class="color-input-group">
+                  <input type="color" name="cor_texto" value="#2a211d" />
+                  <input type="text" class="color-hex-input" placeholder="#000000" />
+                </div>
+              </div>
             </div>
           </details>
 
           <details class="details details-sub">
             <summary>Configurações de Marmita</summary>
-            <label>
-              <input type="checkbox" name="modo_marmita_enabled" />
-              Ativar Modo Marmita
-            </label>
-            <label>
-              <input type="checkbox" name="marmita_agendamento_enabled" />
-              Habilitar agendamento
-            </label>
+            <div class="stack-gap" style="gap: 16px; padding: 12px 0;">
+              <label class="switch-label">
+                <input type="checkbox" name="modo_marmita_enabled" />
+                <span class="switch-slider"></span>
+                Ativar Modo Marmita
+              </label>
+              <label class="switch-label">
+                <input type="checkbox" name="marmita_agendamento_enabled" />
+                <span class="switch-slider"></span>
+                Habilitar agendamento
+              </label>
+            </div>
             <label>
               Horário limite (Hoje)
               <input type="time" name="marmita_deadline" />
