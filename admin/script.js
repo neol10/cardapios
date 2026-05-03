@@ -2309,9 +2309,14 @@ function getOwnerCardapioEditPayload(editForm) {
     instagram_url: String(editForm.instagram_url.value || "").trim(),
     foto_url: String(editForm.foto_url?.value || "").trim(),
     banner_url: String(editForm.banner_url?.value || "").trim(),
+    cor_tema: String(editForm.cor_tema?.value || "").trim(),
+    cor_secundaria: String(editForm.cor_secundaria?.value || "").trim(),
+    cor_fundo: String(editForm.cor_fundo?.value || "").trim(),
+    cor_texto: String(editForm.cor_texto?.value || "").trim(),
     templates: parseTemplates(editForm.templates_json?.value || "[]")
   };
 }
+
 
 function getOwnerProdutoPayload(form) {
   return {
@@ -2562,7 +2567,12 @@ async function initOwnerPage() {
     editForm.instagram_url.value = data.instagram_url || "";
     if (editForm.foto_url) editForm.foto_url.value = data.foto_url || "";
     if (editForm.banner_url) editForm.banner_url.value = data.banner_url || "";
+    if (editForm.cor_tema) editForm.cor_tema.value = data.cor_tema || "#ff6a00";
+    if (editForm.cor_secundaria) editForm.cor_secundaria.value = data.cor_secundaria || "#c8945b";
+    if (editForm.cor_fundo) editForm.cor_fundo.value = data.cor_fundo || "#fffaf3";
+    if (editForm.cor_texto) editForm.cor_texto.value = data.cor_texto || "#2a211d";
     if (editForm.templates_json) editForm.templates_json.value = JSON.stringify(data.templates || []);
+
     ownerCardapio = data;
     await loadOwnerProdutos();
     return true;
