@@ -2647,13 +2647,39 @@ async function initOwnerPage() {
       qrBtn.onclick = () => {
         if (!ownerCardapio?.slug) return;
         const url = `${window.location.origin}/cardapio/${ownerCardapio.slug}`;
-        const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=400x400&data=${encodeURIComponent(url)}`;
+        // Aumentado para 500x500 para leitura super nítida
+        const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=500x500&margin=20&data=${encodeURIComponent(url)}`;
         
-        qrContainer.innerHTML = `<img src="${qrUrl}" alt="QR Code" style="width: 250px; height: 250px; display: block;">`;
-        if (downloadLink) downloadLink.href = qrUrl;
+        qrContainer.innerHTML = `<img id="qr-img-el" src="${qrUrl}" alt="QR Code" style="width: 280px; height: 280px; display: block; margin: auto;">`;
         
         qrModal.classList.remove("is-hidden");
         document.body.classList.add("modal-open");
+      };
+    }
+
+    if (downloadLink) {
+      downloadLink.onclick = async (e) => {
+        e.preventDefault();
+        const img = document.querySelector("#qr-img-el");
+        if (!img) return;
+
+        try {
+          // Técnica do Canvas para download local (CORS-friendly)
+          const response = await fetch(img.src);
+          const blob = await response.blob();
+          const localUrl = URL.createObjectURL(blob);
+          
+          const a = document.createElement("a");
+          a.href = localUrl;
+          a.download = `qrcode-${ownerCardapio.slug}.png`;
+          document.body.appendChild(a);
+          a.click();
+          document.body.removeChild(a);
+          URL.revokeObjectURL(localUrl);
+        } catch (err) {
+          console.error("Erro ao baixar QR:", err);
+          window.open(img.src, "_blank"); // Fallback
+        }
       };
     }
 
