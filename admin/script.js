@@ -2634,14 +2634,33 @@ async function initOwnerPage() {
 
   function setupOwnerDashboardHandlers(root) {
     const qrBtn = root.querySelector("#btn-owner-qrcode");
-    if (qrBtn) {
+    const qrModal = document.querySelector("#qrcode-modal");
+    const qrContainer = document.querySelector("#qr-code-container");
+    const closeBtn = document.querySelector("#btn-close-qr");
+    const backdrop = document.querySelector("#qr-backdrop");
+    const downloadLink = document.querySelector("#link-download-qr");
+
+    if (qrBtn && qrModal && qrContainer) {
       qrBtn.onclick = () => {
         if (!ownerCardapio?.slug) return;
         const url = `${window.location.origin}/cardapio/${ownerCardapio.slug}`;
         const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=400x400&data=${encodeURIComponent(url)}`;
-        window.open(qrUrl, "_blank");
+        
+        qrContainer.innerHTML = `<img src="${qrUrl}" alt="QR Code" style="width: 250px; height: 250px; display: block;">`;
+        if (downloadLink) downloadLink.href = qrUrl;
+        
+        qrModal.classList.remove("is-hidden");
+        document.body.classList.add("modal-open");
       };
     }
+
+    const closeQr = () => {
+      qrModal?.classList.add("is-hidden");
+      document.body.classList.remove("modal-open");
+    };
+
+    closeBtn?.addEventListener("click", closeQr);
+    backdrop?.addEventListener("click", closeQr);
   }
 
   async function loadOwnerDashboard() {

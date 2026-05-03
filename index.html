@@ -311,6 +311,20 @@
       <p id="vitrine-message" class="vitrine-message" aria-live="polite"></p>
       <section id="cardapios" class="vitrine-grid" aria-label="Lista de cardápios"></section>
 
+      <!-- Modal QR Code -->
+      <div id="qrcode-modal" class="produto-modal is-hidden">
+        <div class="produto-modal-backdrop"></div>
+        <div class="produto-modal-dialog" style="max-width: 400px; text-align: center; padding: 24px;">
+          <button type="button" class="produto-modal-close" id="btn-close-qr">×</button>
+          <h3 style="margin-bottom: 16px;">QR Code da sua Loja</h3>
+          <div id="qr-code-container" style="background: white; padding: 12px; border-radius: 12px; display: inline-block;">
+             <!-- Imagem do QR será inserida aqui -->
+          </div>
+          <p class="muted" style="margin-top: 16px; font-size: 0.9rem;">Seus clientes podem escanear este código para abrir seu cardápio direto no celular.</p>
+          <a id="link-download-qr" download="qrcode-loja.png" class="btn btn-primary" style="margin-top: 20px; text-decoration: none; display: block;">Baixar QR Code</a>
+        </div>
+      </div>
+
       <hr style="border: 0; border-top: 1px solid var(--border); margin: 60px 0 40px;">
 
       <div class="vitrine-head" style="margin-bottom: 32px; text-align: center; display: block;">
@@ -343,6 +357,7 @@
           <ul class="plan-features">
             <li>✅ Pedidos no WhatsApp</li>
             <li>🤵 Modo Garçom / Mesa</li>
+            <li>📱 Gerador de QR Code</li>
             <li>📊 Relatório de Vendas</li>
             <li>🚀 Alta Conversão</li>
           </ul>
@@ -356,6 +371,7 @@
           <p class="plan-desc">Especialista em Marmitarias com agendamento, prazos e controle de estoque.</p>
           <ul class="plan-features">
             <li>📅 Agendamento de Pedidos</li>
+            <li>📱 Gerador de QR Code</li>
             <li>⏰ Horários de Retirada</li>
             <li>📦 Controle de Estoque</li>
             <li>🛑 Horário Limite (Hoje)</li>

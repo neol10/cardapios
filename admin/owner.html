@@ -273,6 +273,20 @@
       </section>
     </main>
 
+    <!-- Modal QR Code -->
+    <div id="qrcode-modal" class="produto-modal is-hidden">
+      <div class="produto-modal-backdrop" id="qr-backdrop"></div>
+      <div class="produto-modal-dialog" style="max-width: 400px; text-align: center; padding: 24px; margin: auto;">
+        <button type="button" class="produto-modal-close" id="btn-close-qr">×</button>
+        <h3 style="margin-bottom: 16px; font-weight: 800;">QR Code da sua Loja</h3>
+        <div id="qr-code-container" style="background: white; padding: 12px; border-radius: 12px; display: inline-block;">
+           <!-- Imagem do QR será inserida aqui -->
+        </div>
+        <p class="muted" style="margin-top: 16px; font-size: 0.9rem;">Seus clientes podem escanear este código para abrir seu cardápio direto no celular.</p>
+        <a id="link-download-qr" download="qrcode-loja.png" class="btn btn-primary" style="margin-top: 20px; text-decoration: none; display: block;">Baixar QR Code</a>
+      </div>
+    </div>
+
     <script type="module" src="/admin/script.js?v=37"></script>
   </body>
 </html>
