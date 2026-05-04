@@ -630,37 +630,44 @@ body.modo-catalogo .produto-body {
 
 /* Modo Marmita */
 body.modo-marmita .categories-container {
-  justify-content: center;
-  padding: 20px 0;
-  border-bottom: 2px solid var(--theme);
-  margin-bottom: 30px;
+  justify-content: flex-start;
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 20px;
+  background: color-mix(in srgb, var(--surface) 95%, transparent);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  position: sticky;
+  top: 64px;
+  z-index: 90;
 }
 
 body.modo-marmita .category-pill {
-  font-size: 1.2rem;
-  letter-spacing: 2px;
-  text-transform: uppercase;
-  border: none;
-  background: transparent;
+  font-size: 0.9rem;
+  letter-spacing: 0.5px;
+  text-transform: none;
+  border: 1px solid var(--border);
+  background: var(--surface);
   color: var(--muted);
+  border-radius: 999px;
+  padding: 8px 16px;
 }
 
 body.modo-marmita .category-pill.active {
-  color: var(--theme);
-  background: transparent;
-  box-shadow: none;
-  font-weight: 900;
-  border-bottom: 3px solid var(--theme);
-  border-radius: 0;
+  color: #fff;
+  background: var(--theme);
+  box-shadow: 0 4px 12px color-mix(in srgb, var(--theme) 20%, transparent);
+  font-weight: 700;
+  border-color: var(--theme);
 }
 
 body.modo-marmita .produto-card {
   border: 1px solid var(--border);
-  background: color-mix(in srgb, var(--surface) 92%, var(--bg));
+  background: var(--surface);
   box-shadow: var(--shadow);
-  text-align: center;
-  border-radius: 20px;
-  padding-bottom: 20px;
+  text-align: left;
+  border-radius: 16px;
+  padding-bottom: 0;
   overflow: hidden;
   transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
@@ -685,19 +692,19 @@ body.modo-marmita .produto-body {
 }
 
 body.modo-marmita .produto-body h3 {
-  font-size: 1.25rem;
-  letter-spacing: 0.5px;
-  margin-bottom: 8px;
-  color: var(--theme);
+  font-size: 1.15rem;
+  letter-spacing: -0.01em;
+  margin-bottom: 4px;
+  color: var(--text);
   font-weight: 800;
 }
 
 
 body.modo-marmita .produto-body .muted {
-  font-size: 1rem;
-  line-height: 1.6;
-  color: var(--text);
-  margin-bottom: 15px;
+  font-size: 0.92rem;
+  line-height: 1.4;
+  color: var(--muted);
+  margin-bottom: 12px;
 }
 
 body.modo-marmita #marmita-agendamento-wrap {
@@ -1399,7 +1406,7 @@ button:disabled {
   }
 
   body.modo-marmita .produto-card {
-    border-radius: 20px;
+    border-radius: 16px;
   }
 
   body.modo-marmita .produto-body {
@@ -1409,7 +1416,8 @@ button:disabled {
       "info"
       "price"
       "btn";
-    gap: 14px;
+    gap: 10px;
+    padding: 14px;
   }
 
   body.modo-marmita .produto-body .price {
