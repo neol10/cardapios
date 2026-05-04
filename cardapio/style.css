@@ -1370,6 +1370,8 @@ button:disabled {
 
 @media (max-width: 859px) {
   .content-grid {
+    display: grid;
+    grid-template-columns: 1fr;
     padding: 0 16px 120px;
   }
 
