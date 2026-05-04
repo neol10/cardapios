@@ -1359,13 +1359,65 @@ button:disabled {
 }
 
 @media (max-width: 859px) {
+  .content-grid {
+    padding: 0 16px 16px;
+  }
+
   .cart-box {
-    position: static;
-    bottom: auto;
+    position: sticky;
+    bottom: 0;
+    margin: 0 -16px;
+    border-radius: 18px 18px 0 0;
+    padding: 18px 16px calc(18px + env(safe-area-inset-bottom, 0px));
+  }
+
+  .cart-box h2 {
+    font-size: 1.25rem;
   }
 
   .cart-items {
-    max-height: 240px;
+    max-height: 260px;
+  }
+
+  .checkout-form {
+    gap: 12px;
+  }
+
+  .checkout-form label {
+    font-size: 0.95rem;
+  }
+
+  .checkout-form input,
+  .checkout-form textarea,
+  .checkout-form select {
+    font-size: 1rem;
+    min-height: 46px;
+  }
+
+  .cart-box .btn-primary {
+    width: 100%;
+  }
+
+  body.modo-marmita .produto-card {
+    border-radius: 20px;
+  }
+
+  body.modo-marmita .produto-body {
+    display: grid;
+    grid-template-columns: 1fr;
+    grid-template-areas:
+      "info"
+      "price"
+      "btn";
+    gap: 14px;
+  }
+
+  body.modo-marmita .produto-body .price {
+    justify-self: start;
+  }
+
+  body.modo-marmita .produto-body .btn {
+    width: 100%;
   }
 }
 
