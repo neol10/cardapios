@@ -1373,6 +1373,10 @@ button:disabled {
     padding: 0 16px 120px;
   }
 
+  .produtos-grid {
+    grid-template-columns: 1fr;
+  }
+
   .cart-box {
     position: sticky;
     bottom: 0;
