@@ -472,6 +472,7 @@ p {
 .produtos-grid {
   display: grid;
   gap: 12px;
+  min-height: 100px;
 }
 
 .galeria-wrap {
@@ -662,6 +663,8 @@ body.modo-marmita .category-pill.active {
 }
 
 body.modo-marmita .produto-card {
+  display: flex;
+  flex-direction: column;
   border: 1px solid var(--border);
   background: var(--surface);
   box-shadow: var(--shadow);
@@ -682,7 +685,7 @@ body.modo-marmita .produto-media {
   height: clamp(160px, 24vw, 220px);
   border-radius: 0;
   overflow: hidden;
-  margin-bottom: 12px;
+  flex-shrink: 0;
 }
 
 
