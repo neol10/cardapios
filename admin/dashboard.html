@@ -325,9 +325,22 @@
                 <select name="modo">
                   <option value="pedido">Carrinho de Compras</option>
                   <option value="marmita">Marmita (Agendamento)</option>
+                  <option value="agendamento">Agendamento (Serviços: Banho, Corte, etc)</option>
                   <option value="catalogo">Apenas Catálogo</option>
                 </select>
               </label>
+
+              <details class="details details-sub" id="agendamento-config" style="display:none;">
+                <summary>Configurações de Agendamento</summary>
+                <div class="two-cols">
+                  <label>Intervalo (minutos) <input type="number" name="agendamento_intervalo" value="30" /></label>
+                  <label>Dias da Semana (0-6) <input type="text" name="agendamento_dias_semana" value="1,2,3,4,5,6" placeholder="Ex: 1,2,3,4,5" /></label>
+                </div>
+                <div class="two-cols">
+                  <label>Início <input type="time" name="agendamento_horario_inicio" value="08:00" /></label>
+                  <label>Fim <input type="time" name="agendamento_horario_fim" value="18:00" /></label>
+                </div>
+              </details>
 
               <details class="details details-sub">
                 <summary>Avançado (Marmita/WhatsApp)</summary>

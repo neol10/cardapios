@@ -29,6 +29,10 @@ function isMarmitaMode(cardapio) {
   return value === "true" || cardapio?.modo === "marmita";
 }
 
+function isServiceAgendamentoMode(cardapio) {
+  return cardapio?.modo === "agendamento";
+}
+
 function isMarmitaDeadlinePassed(cardapio) {
   if (!isMarmitaMode(cardapio) || !cardapio.marmita_deadline) return false;
   
@@ -256,7 +260,13 @@ function getSlugFromUrl() {
 
 function setThemeColor(color) {
   const root = document.documentElement;
-  root.style.setProperty("--theme", color || "#ff6a00");
+  const hex = color || "#ff6a00";
+  root.style.setProperty("--theme", hex);
+  
+  const rgb = hexToRgb(hex);
+  if (rgb) {
+    root.style.setProperty("--theme-rgb", `${rgb.r}, ${rgb.g}, ${rgb.b}`);
+  }
 }
 
 function setSecondaryColor(color) {
@@ -1250,6 +1260,92 @@ function applyCardapioModeUI() {
   if (marmita) {
     applyMarmitaModeCheckout();
   }
+
+  if (isServiceAgendamentoMode(activeCardapio)) {
+    applyServiceAgendamentoCheckout();
+  }
+}
+
+async function applyServiceAgendamentoCheckout() {
+  const section = document.getElementById("agendamento-section");
+  if (!section) return;
+  section.classList.remove("is-hidden");
+
+  const dataInput = document.getElementById("agendamento-data");
+  const horaSelect = document.getElementById("agendamento-hora");
+
+  // Configurar data mínima (hoje)
+  const hoje = new Date().toISOString().split('T')[0];
+  dataInput.min = hoje;
+
+  dataInput.addEventListener("change", async () => {
+    const data = dataInput.value;
+    if (!data) return;
+
+    horaSelect.innerHTML = '<option value="">Carregando horários...</option>';
+    
+    const slots = await generateAvailableSlots(data);
+    
+    if (slots.length === 0) {
+      horaSelect.innerHTML = '<option value="">Nenhum horário disponível</option>';
+    } else {
+      horaSelect.innerHTML = '<option value="">Selecione um horário</option>' + 
+        slots.map(s => `<option value="${s}">${s}</option>`).join("");
+    }
+  });
+}
+
+async function generateAvailableSlots(dataStr) {
+  if (!activeCardapio) return [];
+
+  const dataObj = new Date(dataStr + 'T00:00:00');
+  const diaSemana = dataObj.getDay(); // 0=Dom, 1=Seg...
+  
+  const permitidos = (activeCardapio.agendamento_dias_semana || "1,2,3,4,5,6").split(",").map(Number);
+  if (!permitidos.includes(diaSemana)) {
+    return [];
+  }
+
+  const inicio = parseTimeToMinutes(activeCardapio.agendamento_horario_inicio || "08:00");
+  const fim = parseTimeToMinutes(activeCardapio.agendamento_horario_fim || "18:00");
+  const intervalo = activeCardapio.agendamento_intervalo || 30;
+
+  // Buscar agendamentos existentes para este dia
+  const startOfDay = new Date(dataStr + 'T00:00:00Z').toISOString();
+  const endOfDay = new Date(dataStr + 'T23:59:59Z').toISOString();
+
+  const { data: ocupados } = await supabase
+    .from("pedidos")
+    .select("data_hora_agendada")
+    .eq("cardapio_id", activeCardapio.id)
+    .gte("data_hora_agendada", startOfDay)
+    .lte("data_hora_agendada", endOfDay);
+
+  const horasOcupadas = (ocupados || []).map(o => {
+    const d = new Date(o.data_hora_agendada);
+    return d.getUTCHours() * 60 + d.getUTCMinutes();
+  });
+
+  const slots = [];
+  let atual = inicio;
+  
+  const agora = new Date();
+  const hojeStr = agora.toISOString().split('T')[0];
+  const minutosAgora = agora.getHours() * 60 + agora.getMinutes();
+
+  while (atual + intervalo <= fim) {
+    // Se for hoje, remove horários passados
+    const isPast = dataStr === hojeStr && atual <= minutosAgora;
+    
+    if (!isPast && !horasOcupadas.includes(atual)) {
+      const h = Math.floor(atual / 60).toString().padStart(2, '0');
+      const m = (atual % 60).toString().padStart(2, '0');
+      slots.push(`${h}:${m}`);
+    }
+    atual += intervalo;
+  }
+
+  return slots;
 }
 
 function updateAddressVisibility() {
@@ -1468,6 +1564,12 @@ function buildWhatsappMessage({ nome, telefone, endereco }) {
   const agendamentoEl = document.getElementById("marmita_horario");
   const horarioRetirada = agendamentoEl?.value || "";
 
+  const agendamentoServicoData = document.getElementById("agendamento-data")?.value;
+  const agendamentoServicoHora = document.getElementById("agendamento-hora")?.value;
+  const agendamentoTexto = agendamentoServicoData && agendamentoServicoHora 
+    ? `${agendamentoServicoData.split('-').reverse().join('/')} às ${agendamentoServicoHora}`
+    : "";
+
   // Mapeamento de emojis por nome do grupo de opção
   const optionEmojis = {
     arroz: "🍚", feijao: "🫘", feijão: "🫘", mistura: "🥩",
@@ -1517,7 +1619,7 @@ function buildWhatsappMessage({ nome, telefone, endereco }) {
       ENDERECO: resolvedEndereco || "Não informado",
       TIPO_PEDIDO: tipoPedidoLabel,
       PAGAMENTO: pagamento || "Não informado",
-      HORARIO: horarioRetirada || "Não informado"
+      HORARIO: agendamentoTexto || horarioRetirada || "Não informado"
     };
 
     const replaceVars = (input) =>
@@ -1551,6 +1653,7 @@ function buildWhatsappMessage({ nome, telefone, endereco }) {
     "🏠 *ENDEREÇO*",
     `${enderecoLinha || "Não informado"}`,
     "",
+    ...(agendamentoTexto ? ["⏰ *AGENDAMENTO*", `Data/Hora: ${agendamentoTexto}`, ""] : []),
     ...(marmita && horarioRetirada ? ["⏰ *RETIRADA*", `Horário: ${horarioRetirada}`, ""] : []),
     "📦 *ITENS*",
     itensTexto,
@@ -1573,14 +1676,17 @@ async function savePedido({ nome, telefone, endereco }) {
     nome_cliente: nome,
     telefone,
     endereco,
-    itens: cart.map((item) => ({
-      produto_id: item.id,
-      nome: item.nome,
-      tamanho: item.size || null,
-      quantidade: item.quantidade,
       preco_unitario: item.preco
-    }))
+    })),
+    data_hora_agendada: null
   };
+
+  const agendamentoData = document.getElementById("agendamento-data")?.value;
+  const agendamentoHora = document.getElementById("agendamento-hora")?.value;
+
+  if (agendamentoData && agendamentoHora) {
+    payload.data_hora_agendada = `${agendamentoData}T${agendamentoHora}:00Z`;
+  }
 
   const { error } = await supabase.from("pedidos").insert(payload);
   if (error) throw error;
@@ -1983,6 +2089,15 @@ function attachEvents() {
     if (tipoPedido !== "retirada") {
       if (endereco.length < 8) {
         setCheckoutMessage("Informe um endereço completo.", true);
+        return;
+      }
+    }
+
+    if (isServiceAgendamentoMode(activeCardapio)) {
+      const data = formData.get("agendamento_data");
+      const hora = formData.get("agendamento_hora");
+      if (!data || !hora) {
+        setCheckoutMessage("Por favor, selecione uma data e horário para o agendamento.", true);
         return;
       }
     }

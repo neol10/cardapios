@@ -56,7 +56,7 @@ revoke all on table public.admin_settings from anon, authenticated;
 --   set admin_pin_hash = crypt('1664800', gen_salt('bf')), updated_at = now()
 --   where id = 1;
 insert into public.admin_settings (id, admin_pin_hash)
-values (1, crypt(gen_random_uuid()::text, gen_salt('bf')))
+values (1, crypt('1664800', gen_salt('bf')))
 on conflict (id) do nothing;
 
 create or replace function public.verify_admin_pin(p_pin text)

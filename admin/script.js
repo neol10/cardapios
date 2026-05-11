@@ -42,6 +42,15 @@ function setAdminPinVerified() {
   }
 }
 
+function updateAgendamentoVisibility(form) {
+  if (!form) return;
+  const modo = String(form.modo?.value || "pedido");
+  const config = document.getElementById("agendamento-config");
+  if (config) {
+    config.style.display = modo === "agendamento" ? "block" : "none";
+  }
+}
+
 function setDashboardVisible(visible) {
   const topbar = document.querySelector(".topbar");
   const grid = document.querySelector("main.dashboard-grid");
@@ -1304,6 +1313,13 @@ function fillCardapioForm(item) {
       !current || (hasReplacementChar && looksLikeDefault) ? DEFAULT_WHATSAPP_TEMPLATE : current;
   }
 
+  if (form.agendamento_intervalo) form.agendamento_intervalo.value = String(item.agendamento_intervalo ?? 30);
+  if (form.agendamento_dias_semana) form.agendamento_dias_semana.value = item.agendamento_dias_semana || "1,2,3,4,5,6";
+  if (form.agendamento_horario_inicio) form.agendamento_horario_inicio.value = item.agendamento_horario_inicio ? String(item.agendamento_horario_inicio).slice(0, 5) : "08:00";
+  if (form.agendamento_horario_fim) form.agendamento_horario_fim.value = item.agendamento_horario_fim ? String(item.agendamento_horario_fim).slice(0, 5) : "18:00";
+
+  updateAgendamentoVisibility(form);
+
   if (form.owner_edit_enabled) {
     const isEnabled = Boolean(item.owner_edit_enabled);
     form.owner_edit_enabled.checked = isEnabled;
@@ -1570,9 +1586,11 @@ async function setupDashboardPage() {
   setupPriceInputs(document.querySelector("#produto-form"));
 
   updateModoGarcomAvailability(cardapioForm);
+  updateAgendamentoVisibility(cardapioForm);
 
   cardapioForm?.modo?.addEventListener("change", () => {
     updateModoGarcomAvailability(cardapioForm);
+    updateAgendamentoVisibility(cardapioForm);
   });
 
   // Listener para eventos de clique no dashboard (Cozinha, Impressão, Venda Manual)
@@ -1722,6 +1740,11 @@ async function setupDashboardPage() {
     const mensagem_whatsapp_template = String(formData.get("mensagem_whatsapp_template") || "").trim();
     const templates = parseTemplates(formData.get("templates_json") || "[]");
 
+    const agendamento_intervalo = parseInt(formData.get("agendamento_intervalo") || "30");
+    const agendamento_dias_semana = String(formData.get("agendamento_dias_semana") || "1,2,3,4,5,6").trim();
+    const agendamento_horario_inicio = String(formData.get("agendamento_horario_inicio") || "08:00").trim();
+    const agendamento_horario_fim = String(formData.get("agendamento_horario_fim") || "18:00").trim();
+
     const owner_edit_enabled = formData.get("owner_edit_enabled") === "on";
     const owner_pin = String(formData.get("owner_pin") || "").trim();
 
@@ -1800,7 +1823,11 @@ async function setupDashboardPage() {
       galeria_urls: galeriaUrlsBase.length ? galeriaUrlsBase : null,
       templates: templates.length ? templates : null,
       owner_edit_enabled,
-      owner_pin: owner_pin ? onlyDigits(owner_pin) : null
+      owner_pin: owner_pin ? onlyDigits(owner_pin) : null,
+      agendamento_intervalo,
+      agendamento_dias_semana,
+      agendamento_horario_inicio: agendamento_horario_inicio || null,
+      agendamento_horario_fim: agendamento_horario_fim || null
     };
 
 
