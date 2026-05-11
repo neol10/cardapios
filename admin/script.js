@@ -1773,8 +1773,8 @@ async function setupDashboardPage() {
       return;
     }
 
-    if (modo !== "pedido" && modo !== "catalogo" && modo !== "marmita") {
-      toast("Modo inválido. Selecione Pedido, Catálogo ou Marmita.", "error");
+    if (modo !== "pedido" && modo !== "catalogo" && modo !== "marmita" && modo !== "agendamento") {
+      toast("Modo inválido. Selecione Pedido, Catálogo, Marmita ou Agendamento.", "error");
       return;
     }
 
@@ -2340,7 +2340,11 @@ function getOwnerCardapioEditPayload(editForm) {
     cor_secundaria: String(editForm.cor_secundaria?.value || "").trim(),
     cor_fundo: String(editForm.cor_fundo?.value || "").trim(),
     cor_texto: String(editForm.cor_texto?.value || "").trim(),
-    templates: parseTemplates(editForm.templates_json?.value || "[]")
+    templates: parseTemplates(editForm.templates_json?.value || "[]"),
+    agendamento_intervalo: parseInt(editForm.agendamento_intervalo?.value || "30"),
+    agendamento_dias_semana: String(editForm.agendamento_dias_semana?.value || "1,2,3,4,5,6").trim(),
+    agendamento_horario_inicio: String(editForm.agendamento_horario_inicio?.value || "08:00").trim(),
+    agendamento_horario_fim: String(editForm.agendamento_horario_fim?.value || "18:00").trim()
   };
 }
 
@@ -2599,6 +2603,11 @@ async function initOwnerPage() {
     if (editForm.cor_fundo) editForm.cor_fundo.value = data.cor_fundo || "#fffaf3";
     if (editForm.cor_texto) editForm.cor_texto.value = data.cor_texto || "#2a211d";
     if (editForm.templates_json) editForm.templates_json.value = JSON.stringify(data.templates || []);
+
+    if (editForm.agendamento_intervalo) editForm.agendamento_intervalo.value = String(data.agendamento_intervalo ?? 30);
+    if (editForm.agendamento_dias_semana) editForm.agendamento_dias_semana.value = data.agendamento_dias_semana || "1,2,3,4,5,6";
+    if (editForm.agendamento_horario_inicio) editForm.agendamento_horario_inicio.value = data.agendamento_horario_inicio ? String(data.agendamento_horario_inicio).slice(0, 5) : "08:00";
+    if (editForm.agendamento_horario_fim) editForm.agendamento_horario_fim.value = data.agendamento_horario_fim ? String(data.agendamento_horario_fim).slice(0, 5) : "18:00";
 
     refreshAllColorPreviews(editForm); // Garante que as cores apareçam nos previews
 

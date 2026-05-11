@@ -75,6 +75,8 @@
             Tipo de cardápio
             <select name="modo">
               <option value="pedido">Com sistema de pedidos</option>
+              <option value="marmita">Modo Marmita</option>
+              <option value="agendamento">Agendamento (Serviços)</option>
               <option value="catalogo">Apenas catálogo (sem pedidos)</option>
             </select>
           </label>
@@ -184,6 +186,18 @@
               Horários de retirada
               <input type="text" name="marmita_horarios_retirada" placeholder="11:30, 12:00, 12:30" />
             </label>
+          </details>
+
+          <details class="details details-sub">
+            <summary>Configurações de Agendamento (Serviços)</summary>
+            <div class="two-cols">
+              <label>Intervalo (min) <input type="number" name="agendamento_intervalo" /></label>
+              <label>Dias (0-6) <input type="text" name="agendamento_dias_semana" placeholder="1,2,3,4,5" /></label>
+            </div>
+            <div class="two-cols">
+              <label>Início <input type="time" name="agendamento_horario_inicio" /></label>
+              <label>Fim <input type="time" name="agendamento_horario_fim" /></label>
+            </div>
           </details>
         </details>
 
