@@ -1715,6 +1715,11 @@ async function savePedido({ nome, telefone, endereco }) {
     nome_cliente: nome,
     telefone,
     endereco,
+    itens: cart.map((item) => ({
+      produto_id: item.id,
+      nome: item.nome,
+      tamanho: item.size || null,
+      quantidade: item.quantidade,
       preco_unitario: item.preco
     })),
     data_hora_agendada: null
