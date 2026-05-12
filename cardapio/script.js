@@ -684,6 +684,8 @@ function renderProdutos() {
   const deadlinePassed = isMarmitaDeadlinePassed(activeCardapio);
   const catalogo = isCatalogMode(activeCardapio);
   const marmita = isMarmitaMode(activeCardapio);
+  const agendamento = isServiceAgendamentoMode(activeCardapio);
+  const btnLabel = agendamento ? "Agendar" : "Adicionar ao pedido";
 
   if (deadlinePassed && !catalogo) {
     const alert = document.createElement("div");
@@ -726,7 +728,7 @@ function renderProdutos() {
             catalogo
               ? ""
               : (disponivel && !deadlinePassed)
-                ? `<button type="button" class="btn btn-primary add-to-cart" data-id="${produto.id}">Adicionar ao pedido</button>`
+                ? `<button type="button" class="btn btn-primary add-to-cart" data-id="${produto.id}">${btnLabel}</button>`
                 : `<button type="button" class="btn btn-disabled" disabled>${deadlinePassed ? 'Horário Encerrado' : 'Indisponível'}</button>`
           }
         </div>
@@ -892,7 +894,7 @@ function ensureProdutoModal() {
         </div>
 
         <div class="modal-footer" id="produto-modal-footer">
-          <button type="button" id="produto-modal-add" class="btn btn-primary btn-block">Adicionar ao pedido</button>
+          <button type="button" id="produto-modal-add" class="btn btn-primary btn-block">Adicionar</button>
         </div>
       </div>
     </div>
@@ -1089,7 +1091,8 @@ function renderWizardStep() {
   // Botões de navegação
   if (modal.wizardPrevBtn) modal.wizardPrevBtn.classList.toggle("is-hidden", step === 0);
   if (modal.wizardNextBtn) {
-    modal.wizardNextBtn.textContent = isLast ? "✓ Adicionar ao pedido" : "Próximo →";
+    const agendamento = isServiceAgendamentoMode(activeCardapio);
+    modal.wizardNextBtn.textContent = isLast ? (agendamento ? "✓ Agendar" : "✓ Adicionar ao pedido") : "Próximo →";
     modal.wizardNextBtn.classList.toggle("btn-success", isLast);
     modal.wizardNextBtn.classList.toggle("btn-primary", !isLast);
   }
@@ -1263,7 +1266,38 @@ function applyCardapioModeUI() {
 
   if (isServiceAgendamentoMode(activeCardapio)) {
     applyServiceAgendamentoCheckout();
+    updateAgendamentoLabels();
   }
+}
+
+function updateAgendamentoLabels() {
+  const cartTitle = document.querySelector(".cart-box h2");
+  if (cartTitle) cartTitle.textContent = "Seu Agendamento";
+
+  const checkoutBtn = checkoutForm?.querySelector('button[type="submit"]');
+  if (checkoutBtn) checkoutBtn.textContent = "Finalizar Agendamento";
+
+  const tipoPedidoLabel = document.querySelector("#tipo-pedido-wrap");
+  if (tipoPedidoLabel) {
+    // Tenta encontrar o texto direto ou via firstChild
+    const labelText = Array.from(tipoPedidoLabel.childNodes).find(n => n.nodeType === Node.TEXT_NODE);
+    if (labelText) labelText.textContent = "Tipo de Agendamento";
+    
+    const entregaOpt = tipoPedidoLabel.querySelector('option[value="entrega"]');
+    if (entregaOpt) entregaOpt.textContent = "Atendimento em Domicílio";
+    
+    const retiradaOpt = tipoPedidoLabel.querySelector('option[value="retirada"]');
+    if (retiradaOpt) retiradaOpt.textContent = "No Local / Salão";
+  }
+
+  const subtotalLabel = document.querySelector("#cart-subtotal [data-label]");
+  if (subtotalLabel) subtotalLabel.textContent = "Total Serviços";
+
+  const totalLabel = document.querySelector("#cart-total [data-label]");
+  if (totalLabel) totalLabel.textContent = "Total Geral";
+
+  const enderecoInput = document.querySelector('textarea[name="endereco"]');
+  if (enderecoInput) enderecoInput.placeholder = "Rua, nº, bairro e complemento para o atendimento";
 }
 
 async function applyServiceAgendamentoCheckout() {
@@ -1425,12 +1459,13 @@ function calculateSubtotal() {
 }
 
 function renderCart() {
+  const agendamento = isServiceAgendamentoMode(activeCardapio);
   if (!cart.length) {
-    cartItemsContainer.innerHTML = '<p class="muted">Seu carrinho está vazio.</p>';
-    setTotalLineValue(cartSubtotal, "Subtotal", "R$ 0,00");
+    cartItemsContainer.innerHTML = `<p class="muted">${agendamento ? 'Sua lista de serviços está vazia.' : 'Seu carrinho está vazio.'}</p>`;
+    setTotalLineValue(cartSubtotal, agendamento ? "Total Serviços" : "Subtotal", "R$ 0,00");
     if (cartTaxa) cartTaxa.classList.add("is-hidden");
     if (cartMinimo) cartMinimo.classList.add("is-hidden");
-    setTotalLineValue(cartTotal, "Total", "R$ 0,00");
+    setTotalLineValue(cartTotal, agendamento ? "Total Geral" : "Total", "R$ 0,00");
     updateCheckoutAvailability();
     return;
   }
@@ -1453,7 +1488,7 @@ function renderCart() {
             <span class="cart-price">${formatPriceBRL(item.preco * item.quantidade)}</span>
           </div>
         </div>
-        <button class="btn btn-ghost remove-item" data-id="${item.cartKey}" aria-label="Remover 1 unidade de ${escapeHtml(item.nome)}">Remover 1</button>
+        <button class="btn btn-ghost remove-item" data-id="${item.cartKey}" aria-label="Remover">${agendamento ? 'Remover' : 'Remover 1'}</button>
       </div>
     `
     )
@@ -1461,7 +1496,7 @@ function renderCart() {
 
   const subtotal = calculateSubtotal();
   const taxa = getTaxaEntregaAtual();
-  setTotalLineValue(cartSubtotal, "Subtotal", formatPriceBRL(subtotal));
+  setTotalLineValue(cartSubtotal, agendamento ? "Total Serviços" : "Subtotal", formatPriceBRL(subtotal));
 
   if (cartTaxa) {
     if (taxa > 0) {
@@ -1482,7 +1517,7 @@ function renderCart() {
     }
   }
 
-  setTotalLineValue(cartTotal, "Total", formatPriceBRL(calculateTotal()));
+  setTotalLineValue(cartTotal, agendamento ? "Total Geral" : "Total", formatPriceBRL(calculateTotal()));
 
   updateCheckoutAvailability();
 }
@@ -1531,9 +1566,10 @@ function addToCart(produtoId, buttonElement, size = null, options = []) {
       if (!buttonElement.dataset.originalText) {
         buttonElement.dataset.originalText = buttonElement.textContent || "";
       }
+      const agendamento = isServiceAgendamentoMode(activeCardapio);
       buttonElement.textContent = "Adicionado";
       window.setTimeout(() => {
-        buttonElement.textContent = buttonElement.dataset.originalText || "Adicionar ao pedido";
+        buttonElement.textContent = buttonElement.dataset.originalText || (agendamento ? "Agendar" : "Adicionar ao pedido");
       }, 520);
     }
   }
@@ -1558,7 +1594,10 @@ function buildWhatsappMessage({ nome, telefone, endereco }) {
   const taxaEntrega = getTaxaEntregaAtual();
   const total = subtotal + taxaEntrega;
   const tipoPedido = getTipoPedido();
-  const tipoPedidoLabel = tipoPedido === "retirada" ? "Retirada" : "Entrega";
+  const agendamentoMode = isServiceAgendamentoMode(activeCardapio);
+  const tipoPedidoLabel = tipoPedido === "retirada" 
+    ? (agendamentoMode ? "No Local / Salão" : "Retirada") 
+    : (agendamentoMode ? "Atendimento em Domicílio" : "Entrega");
   const pagamento = String(pagamentoSelect?.value || "").trim();
   const marmita = isMarmitaMode(activeCardapio);
   const agendamentoEl = document.getElementById("marmita_horario");
