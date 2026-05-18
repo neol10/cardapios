@@ -151,12 +151,30 @@
                   </select>
                 </label>
                 <div class="two-cols js-fundo-solido">
-                  <label>Cor Fundo <input type="color" name="cor_fundo" value="#fffaf3" /></label>
+                  <label>Cor Fundo
+                    <div class="color-row">
+                      <input type="color" name="cor_fundo" value="#fffaf3" />
+                      <span class="color-swatch"></span>
+                      <input class="color-hex color-hex-input" value="#FFFAF3" maxlength="7" />
+                    </div>
+                  </label>
                   <label class="js-fundo-angulo">Ângulo <input type="number" name="fundo_angulo" value="135" /></label>
                 </div>
                 <div class="two-cols js-fundo-degrade is-hidden">
-                  <label>Cor 1 <input type="color" name="fundo_cor_1" value="#ff6a00" /></label>
-                  <label>Cor 2 <input type="color" name="fundo_cor_2" value="#ffe6ce" /></label>
+                  <label>Cor 1
+                    <div class="color-row">
+                      <input type="color" name="fundo_cor_1" value="#ff6a00" />
+                      <span class="color-swatch"></span>
+                      <input class="color-hex color-hex-input" value="#FF6A00" maxlength="7" />
+                    </div>
+                  </label>
+                  <label>Cor 2
+                    <div class="color-row">
+                      <input type="color" name="fundo_cor_2" value="#ffe6ce" />
+                      <span class="color-swatch"></span>
+                      <input class="color-hex color-hex-input" value="#FFE6CE" maxlength="7" />
+                    </div>
+                  </label>
                 </div>
               </details>
 
@@ -166,6 +184,17 @@
                   <div class="palette-row" style="display:flex; gap:8px;">
                     <input type="text" id="palette-input" placeholder="#FF6A00 #C8945B #FFFAF3 #2A211D" style="flex:1;" autocomplete="off" spellcheck="false" />
                     <button type="button" class="btn js-apply-palette">Aplicar</button>
+                  </div>
+                  <div id="palette-preview-container" class="palette-preview-container" style="display:flex; gap:10px; margin-top:10px; flex-wrap:wrap; min-height:38px; align-items:center;"></div>
+                </label>
+
+                <label style="margin-top: 14px;">Gerar Cores de Imagem (Logo, Fachada, Prato...)
+                  <div class="image-palette-row" style="display:flex; gap:8px; align-items:center; margin-top:6px;">
+                    <label class="btn btn-secondary" style="margin:0; cursor:pointer; display:flex; align-items:center; gap:8px; background:var(--primary); color:var(--primary-contrast); border:none; padding:8px 16px; border-radius:8px; font-size:0.9rem; font-weight:600;">
+                      📸 Carregar Imagem
+                      <input type="file" id="palette-image-input" accept="image/*" style="display:none;" />
+                    </label>
+                    <span id="palette-image-status" class="muted" style="font-size:0.9rem;">Nenhuma imagem selecionada</span>
                   </div>
                 </label>
 
@@ -330,6 +359,14 @@
                 </select>
               </label>
 
+              <label>Botão do WhatsApp
+                <select name="whatsapp_botao">
+                  <option value="flutuante" selected>Flutuante (Canto inferior direito)</option>
+                  <option value="topo">No topo (Junto ao Instagram)</option>
+                  <option value="nenhum">Ocultar</option>
+                </select>
+              </label>
+
               <details class="details details-sub" id="agendamento-config" style="display:none;">
                 <summary>Configurações de Agendamento</summary>
                 <div class="two-cols">
@@ -427,6 +464,6 @@
       </section>
     </main>
 
-    <script type="module" src="/admin/script.js?v=37"></script>
+    <script type="module" src="/admin/script.js?v=39"></script>
   </body>
 </html>

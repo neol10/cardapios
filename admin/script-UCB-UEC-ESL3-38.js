@@ -339,6 +339,92 @@ function applyPaletteToCardapioForm(cardapioForm, paletteText) {
   updateFundoVisibility(cardapioForm);
 }
 
+function updatePalettePreview(form, text) {
+  const container = document.querySelector("#palette-preview-container");
+  if (!container) return;
+  container.innerHTML = "";
+
+  const colors = extractHexColors(text);
+  if (colors.length === 0) return;
+
+  colors.forEach((color, idx) => {
+    const swatch = document.createElement("div");
+    swatch.className = "palette-swatch-item";
+    swatch.style.position = "relative";
+    swatch.style.display = "inline-block";
+    swatch.style.cursor = "pointer";
+
+    swatch.innerHTML = `
+      <div class="swatch-circle" style="background: ${color}; width: 34px; height: 34px; border-radius: 50%; border: 2px solid var(--border); box-shadow: 0 4px 10px rgba(0,0,0,0.35); transition: transform 0.2s;" title="Cor ${idx + 1}: ${color}"></div>
+    `;
+
+    swatch.addEventListener("click", (e) => {
+      e.stopPropagation();
+      document.querySelectorAll(".swatch-menu").forEach((m) => m.remove());
+
+      const menu = document.createElement("div");
+      menu.className = "swatch-menu";
+      menu.style = `
+        position: absolute;
+        z-index: 1000;
+        bottom: 40px;
+        left: 50%;
+        transform: translateX(-50%);
+        background: rgba(18, 16, 14, 0.98);
+        border: 1px solid var(--border);
+        border-radius: 14px;
+        padding: 8px;
+        display: grid;
+        gap: 4px;
+        box-shadow: 0 12px 30px rgba(0,0,0,0.6);
+        min-width: 155px;
+        backdrop-filter: blur(10px);
+      `;
+
+      const options = [
+        { label: "🎨 Principal", name: "cor_tema" },
+        { label: "🌟 Secundária", name: "cor_secundaria" },
+        { label: "🖼️ Cor de Fundo", name: "cor_fundo" },
+        { label: "🔲 Fundo 1 (Degradê)", name: "fundo_cor_1" },
+        { label: "🖼️ Fundo 2 (Degradê)", name: "fundo_cor_2" },
+        { label: "📝 Texto Principal", name: "cor_texto" },
+        { label: "📝 Texto Secundário", name: "cor_muted" },
+        { label: "🔲 Fundo dos Cards", name: "cor_surface" },
+        { label: "➖ Linha da Borda", name: "cor_borda" }
+      ];
+
+      options.forEach((opt) => {
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = "btn";
+        btn.style = "text-align: left; padding: 7px 10px; font-size: 0.82rem; border-radius: 8px; width: 100%; border: none; background: transparent; color: var(--text); cursor: pointer; font-weight: 700; display: block; transition: background 0.15s;";
+        btn.innerHTML = opt.label;
+        btn.addEventListener("click", () => {
+          const input = form.querySelector(`[name="${CSS.escape(opt.name)}"]`);
+          if (input instanceof HTMLInputElement) {
+            input.value = color;
+            refreshColorPreviewForInput(input);
+            updateThemePreview(form);
+            updateFundoVisibility(form);
+          }
+          menu.remove();
+        });
+        btn.addEventListener("mouseover", () => btn.style.background = "rgba(255,255,255,0.08)");
+        btn.addEventListener("mouseout", () => btn.style.background = "transparent");
+        menu.appendChild(btn);
+      });
+
+      swatch.appendChild(menu);
+    });
+
+    const circle = swatch.querySelector(".swatch-circle");
+    swatch.addEventListener("mouseover", () => circle.style.transform = "scale(1.15)");
+    swatch.addEventListener("mouseout", () => circle.style.transform = "scale(1)");
+
+    container.appendChild(swatch);
+  });
+}
+
 function setupHexInputs(root) {
   if (!root) return;
 
@@ -430,7 +516,7 @@ function setupColorPreviewListeners(root) {
 function updateFundoVisibility(form) {
   if (!form) return;
   const estilo = String(form.fundo_estilo?.value || "padrao");
-  const showSolido = estilo === "solido";
+  const showSolido = estilo === "solido" || estilo === "padrao";
   const showDegrade = estilo === "degrade_linear" || estilo === "degrade_radial";
   const showAngulo = estilo === "degrade_linear";
 
@@ -491,6 +577,209 @@ function updateThemePreview(form) {
   }
 }
 
+function setupImagePaletteExtractor(form) {
+  if (!form) return;
+  const imageInput = document.querySelector("#palette-image-input");
+  const imageStatus = document.querySelector("#palette-image-status");
+  if (!imageInput || !imageStatus) {
+    console.warn("Imagem input ou status não encontrado no DOM.");
+    return;
+  }
+
+  console.log("setupImagePaletteExtractor inicializado com sucesso.");
+
+  imageInput.addEventListener("change", (event) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    console.log("Imagem selecionada:", file.name);
+    imageStatus.textContent = "Processando...";
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const img = new Image();
+      img.onload = () => {
+        try {
+          const canvas = document.createElement("canvas");
+          const ctx = canvas.getContext("2d");
+          if (!ctx) throw new Error("Não foi possível inicializar canvas.");
+
+          canvas.width = 60;
+          canvas.height = 60;
+          ctx.drawImage(img, 0, 0, 60, 60);
+
+          const imgData = ctx.getImageData(0, 0, 60, 60).data;
+          const colorCounts = {};
+
+          for (let i = 0; i < imgData.length; i += 4) {
+            const r = imgData[i];
+            const g = imgData[i + 1];
+            const b = imgData[i + 2];
+            const a = imgData[i + 3];
+            if (a < 128) continue;
+
+            const qr = Math.round(r / 24) * 24;
+            const qg = Math.round(g / 24) * 24;
+            const qb = Math.round(b / 24) * 24;
+            const key = `${qr},${qg},${qb}`;
+
+            colorCounts[key] = (colorCounts[key] || 0) + 1;
+          }
+
+          const uniqueColors = Object.entries(colorCounts).map(([key, count]) => {
+            const [r, g, b] = key.split(",").map(Number);
+            const hex = rgbChannelsToHex(r, g, b);
+            const hsl = rgbToHsl(r, g, b);
+            return { r, g, b, hex, hsl, count };
+          });
+
+          if (!uniqueColors.length) {
+            throw new Error("Nenhuma cor detectada.");
+          }
+
+          uniqueColors.sort((a, b) => b.count - a.count);
+
+          let vibrant = uniqueColors.find((c) => c.hsl.s >= 25 && c.hsl.l >= 15 && c.hsl.l <= 75);
+          if (!vibrant) {
+            vibrant = uniqueColors[0];
+          }
+          const primaryHex = vibrant.hex;
+          const primaryHsl = vibrant.hsl;
+
+          let secondary = uniqueColors.find(
+            (c) => c.hex !== primaryHex && c.hsl.s >= 20 && c.hsl.l >= 15 && c.hsl.l <= 75 && Math.abs(c.hsl.h - primaryHsl.h) >= 30
+          );
+          if (!secondary) {
+            secondary = uniqueColors.find((c) => c.hex !== primaryHex && c.hsl.s >= 15 && c.hsl.l >= 15 && c.hsl.l <= 75);
+          }
+          if (!secondary) {
+            const secH = (primaryHsl.h + 30) % 360;
+            const secS = Math.min(100, primaryHsl.s * 0.9);
+            const secL = primaryHsl.l > 50 ? primaryHsl.l - 15 : primaryHsl.l + 15;
+            secondary = { hex: hslToHex(secH, secS, secL) };
+          }
+          const secondaryHex = secondary.hex;
+
+          const dominant = uniqueColors[0] || vibrant;
+          const isDarkImage = dominant.hsl.l < 50;
+
+          let backgroundHex, surfaceHex, textoHex, mutedHex, bordaHex;
+
+          if (isDarkImage) {
+            const bgH = dominant.hsl.h;
+            const bgS = Math.min(15, dominant.hsl.s);
+            backgroundHex = hslToHex(bgH, bgS, 8);
+            surfaceHex = hslToHex(bgH, bgS, 13);
+            textoHex = hslToHex(primaryHsl.h, 10, 94);
+            mutedHex = hslToHex(primaryHsl.h, 10, 65);
+            bordaHex = hslToHex(bgH, bgS, 20);
+          } else {
+            const bgH = dominant.hsl.h;
+            const bgS = Math.min(10, dominant.hsl.s);
+            backgroundHex = hslToHex(bgH, bgS, 98);
+            surfaceHex = "#FFFFFF";
+            textoHex = hslToHex(primaryHsl.h, 15, 12);
+            mutedHex = hslToHex(primaryHsl.h, 10, 45);
+            bordaHex = hslToHex(bgH, bgS, 90);
+          }
+
+          const updates = {
+            cor_tema: primaryHex,
+            cor_secundaria: secondaryHex,
+            cor_fundo: backgroundHex,
+            fundo_cor_1: primaryHex,
+            fundo_cor_2: secondaryHex,
+            cor_surface: surfaceHex,
+            cor_texto: textoHex,
+            cor_muted: mutedHex,
+            cor_borda: bordaHex
+          };
+
+          Object.entries(updates).forEach(([name, hex]) => {
+            const input = form.querySelector(`input[name="${name}"]`);
+            if (input instanceof HTMLInputElement) {
+              input.value = hex.toLowerCase();
+            }
+          });
+
+          if (form.fundo_estilo) {
+            form.fundo_estilo.value = "solido";
+          }
+
+          refreshAllColorPreviews(form);
+          updateFundoVisibility(form);
+          updateThemePreview(form);
+
+          imageStatus.textContent = "Concluído!";
+          toast("Cores extraídas com sucesso!");
+        } catch (err) {
+          imageStatus.textContent = "Erro!";
+          toast(err?.message || "Erro no processamento", "error");
+        }
+      };
+      img.src = String(e.target.result || "");
+    };
+    reader.onerror = () => {
+      imageStatus.textContent = "Erro de leitura.";
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
+function rgbChannelsToHex(r, g, b) {
+  const toHex = (x) => {
+    const hex = Math.max(0, Math.min(255, Math.round(x))).toString(16);
+    return hex.length === 1 ? "0" + hex : hex;
+  };
+  return `#${toHex(r)}${toHex(g)}${toHex(b)}`.toUpperCase();
+}
+
+function rgbToHsl(r, g, b) {
+  r /= 255; g /= 255; b /= 255;
+  const max = Math.max(r, g, b), min = Math.min(r, g, b);
+  let h, s, l = (max + min) / 2;
+
+  if (max === min) {
+    h = s = 0;
+  } else {
+    const d = max - min;
+    s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+    switch (max) {
+      case r: h = (g - b) / d + (g < b ? 6 : 0); break;
+      case g: h = (b - r) / d + 2; break;
+      case b: h = (r - g) / d + 4; break;
+    }
+    h /= 6;
+  }
+  return { h: h * 360, s: s * 100, l: l * 100 };
+}
+
+function hslToHex(h, s, l) {
+  s /= 100;
+  l /= 100;
+  let c = (1 - Math.abs(2 * l - 1)) * s;
+  let x = c * (1 - Math.abs((h / 60) % 2 - 1));
+  let m = l - c / 2;
+  let r = 0, g = 0, b = 0;
+  if (0 <= h && h < 60) {
+    r = c; g = x; b = 0;
+  } else if (60 <= h && h < 120) {
+    r = x; g = c; b = 0;
+  } else if (120 <= h && h < 180) {
+    r = 0; g = c; b = x;
+  } else if (180 <= h && h < 240) {
+    r = 0; g = x; b = c;
+  } else if (240 <= h && h < 300) {
+    r = x; g = 0; b = c;
+  } else if (300 <= h && h < 360) {
+    r = c; g = 0; b = x;
+  }
+  const toHex = (val) => {
+    const hex = Math.max(0, Math.min(255, Math.round((val + m) * 255))).toString(16);
+    return hex.length === 1 ? "0" + hex : hex;
+  };
+  return `#${toHex(r)}${toHex(g)}${toHex(b)}`.toUpperCase();
+}
+
 function setupThemeControls(form) {
   if (!form) return;
   const updateAll = () => {
@@ -504,6 +793,7 @@ function setupThemeControls(form) {
   });
 
   updateAll();
+  setupImagePaletteExtractor(form);
 }
 
 function maskTelefone(value) {
@@ -1096,18 +1386,7 @@ function getOwnerEditLink(slug) {
 function resetForms() {
   const cardapioForm = document.querySelector("#cardapio-form");
 
-  const galeriaPreview = document.querySelector("#galeria-preview");
-  galeriaPreview?.addEventListener("click", (event) => {
-    const target = event.target;
-    if (!(target instanceof HTMLElement)) return;
-    if (!target.classList.contains("js-remove-gallery")) return;
-    const idx = Number.parseInt(String(target.dataset.idx || ""), 10);
-    if (!Number.isFinite(idx)) return;
-    const urls = getGaleriaUrls(cardapioForm);
-    urls.splice(idx, 1);
-    setGaleriaUrls(cardapioForm, urls);
-    renderGaleriaPreview(cardapioForm);
-  });
+
   const produtoForm = document.querySelector("#produto-form");
   cardapioForm?.reset();
   produtoForm?.reset();
@@ -1213,19 +1492,49 @@ async function setupDashboardPage() {
 
   const cardapioForm = document.querySelector("#cardapio-form");
 
+  document.body.addEventListener("click", (event) => {
+    const target = event.target;
+    if (!(target instanceof HTMLElement)) return;
+    if (!target.classList.contains("js-remove-gallery")) return;
+    event.preventDefault();
+    event.stopPropagation();
+    const idx = Number.parseInt(String(target.dataset.idx || ""), 10);
+    if (!Number.isFinite(idx)) return;
+    const form = document.querySelector("#cardapio-form");
+    if (!form) return;
+    const urls = getGaleriaUrls(form);
+    urls.splice(idx, 1);
+    setGaleriaUrls(form, urls);
+    renderGaleriaPreview(form);
+  });
+
   setupColorPreviewListeners(cardapioForm);
   setupThemeControls(cardapioForm);
 
   const paletteInput = document.querySelector("#palette-input");
   const applyPaletteBtn = document.querySelector(".js-apply-palette");
   if (cardapioForm && paletteInput instanceof HTMLInputElement && applyPaletteBtn) {
+    // Atualiza a paleta visual em tempo real
+    paletteInput.addEventListener("input", () => {
+      updatePalettePreview(cardapioForm, paletteInput.value);
+    });
+
+    // Inicia a paleta visual
+    updatePalettePreview(cardapioForm, paletteInput.value);
+
     applyPaletteBtn.addEventListener("click", () => {
       try {
         applyPaletteToCardapioForm(cardapioForm, paletteInput.value);
+        updatePalettePreview(cardapioForm, paletteInput.value);
         toast("Paleta aplicada.");
       } catch (error) {
         toast(error?.message ? String(error.message) : "Falha ao aplicar paleta", "error");
       }
+    });
+
+    // Fecha os menus de paleta ao clicar fora
+    document.addEventListener("click", () => {
+      document.querySelectorAll(".swatch-menu").forEach((m) => m.remove());
     });
   }
 

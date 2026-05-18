@@ -450,6 +450,52 @@ function parseGaleriaUrls(value) {
   }
 }
 
+function setupDragToScroll(el) {
+  if (!el || el.dataset.dragInitialized === "true") return;
+  el.dataset.dragInitialized = "true";
+  
+  let isDown = false;
+  let startX;
+  let scrollLeft;
+  let hasMoved = false;
+
+  el.addEventListener("mousedown", (e) => {
+    isDown = true;
+    startX = e.pageX - el.offsetLeft;
+    scrollLeft = el.scrollLeft;
+    hasMoved = false;
+    el.style.cursor = "grabbing";
+  });
+
+  el.addEventListener("mouseleave", () => {
+    isDown = false;
+    el.style.cursor = "";
+  });
+
+  el.addEventListener("mouseup", () => {
+    isDown = false;
+    el.style.cursor = "";
+  });
+
+  el.addEventListener("mousemove", (e) => {
+    if (!isDown) return;
+    const x = e.pageX - el.offsetLeft;
+    const walk = (x - startX) * 1.5;
+    if (Math.abs(walk) > 5) {
+      hasMoved = true;
+    }
+    el.scrollLeft = scrollLeft - walk;
+  });
+
+  el.addEventListener("click", (e) => {
+    if (hasMoved) {
+      e.preventDefault();
+      e.stopPropagation();
+      hasMoved = false;
+    }
+  }, true);
+}
+
 function renderGaleria(urls) {
   if (!galeriaWrap || !galeriaEl) return;
   const list = (Array.isArray(urls) ? urls : []).map((u) => safeHttpUrl(u)).filter(Boolean);
@@ -459,8 +505,10 @@ function renderGaleria(urls) {
     return;
   }
   galeriaEl.innerHTML = list
-    .map((url, idx) => `<img src="${url}" alt="Imagem do estabelecimento ${idx + 1}" loading="lazy" decoding="async" />`)
+    .map((url, idx) => `<img src="${url}" class="js-open-lightbox" alt="Imagem do estabelecimento ${idx + 1}" loading="lazy" decoding="async" style="cursor: zoom-in;" />`)
     .join("");
+  
+  setupDragToScroll(galeriaEl);
 }
 
 function parsePayments(text) {
