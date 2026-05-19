@@ -996,10 +996,15 @@ function renderCardapios() {
         <p class="muted">Slug: /cardapio/${slugText}</p>
         <p class="muted">WhatsApp: ${whatsapp}</p>
         <p class="muted">Modo: ${modo}</p>
+
+        <div style="margin: 10px 0 6px; padding: 10px 12px; background: rgba(200, 148, 91, 0.07); border: 1px solid rgba(200, 148, 91, 0.18); border-radius: 10px; display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
+          <span style="font-size: 0.75rem; font-weight: 700; color: var(--primary); text-transform: uppercase; letter-spacing: 0.04em; margin-right: 4px;">📢 Divulgar</span>
+          <a class="btn" href="/cardapio/${slugHref}" target="_blank" rel="noopener" style="font-size: 0.82rem; padding: 7px 12px;">🔗 Abrir</a>
+          <button class="btn btn-primary js-qrcode-cardapio" data-id="${item.id}" data-slug="${slugText}" data-nome="${nome}" style="font-size: 0.82rem; padding: 7px 12px; color: #1a1410;">📱 QR Code</button>
+        </div>
+
         <div class="list-actions">
-          <a class="btn" href="/cardapio/${slugHref}" target="_blank" rel="noopener">Abrir cardápio</a>
           <button class="btn js-manage-cardapio" data-id="${item.id}">${isSelected ? "Gerenciando" : "Gerenciar"}</button>
-          <button class="btn js-qrcode-cardapio" data-id="${item.id}" data-slug="${slugText}" data-nome="${nome}">QR Code</button>
           <button class="btn js-edit-cardapio" data-id="${item.id}">Editar dados</button>
           <button class="btn js-delete-cardapio" data-id="${item.id}">Excluir</button>
         </div>
