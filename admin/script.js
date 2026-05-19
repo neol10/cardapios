@@ -1125,6 +1125,8 @@ function setSelectedCardapio(id) {
       ? `Gerenciando produtos de ${selected.nome}`
       : "Selecione um cardápio para gerenciar produtos.";
   }
+
+  setupRealtimePedidos(id);
 }
 
 function setEditingMode(isEditing) {
@@ -1170,6 +1172,7 @@ function renderCardapios() {
           <a class="btn" href="/garcom/${slugHref}" target="_blank" rel="noopener">Abrir garçom</a>
           <button class="btn js-manage-cardapio" data-id="${item.id}">${isSelected ? "Gerenciando" : "Gerenciar"}</button>
           <button class="btn js-venda-manual" data-id="${item.id}" title="Lançar venda manual">💰</button>
+          <button class="btn js-qrcode-cardapio" data-id="${item.id}" data-slug="${slugText}" data-nome="${nome}">QR Code</button>
           <button class="btn js-edit-cardapio" data-id="${item.id}">Editar dados</button>
           <button class="btn js-delete-cardapio" data-id="${item.id}">Excluir</button>
         </div>
@@ -1442,6 +1445,7 @@ function renderPedidos(pedidos) {
             <option value="entregue" ${status === "entregue" ? "selected" : ""}>Entregue</option>
           </select>
           <button class="btn js-notificar-saida" data-id="${pedido.id}" style="background:#25D366; color:white; border:none;">🚀 Saiu</button>
+          <button class="btn js-print-pedido" data-id="${pedido.id}" style="background:#0284c7; color:white; border:none;">🖨️ Imprimir</button>
           <button class="btn js-copy-pedido" data-id="${pedido.id}">Copiar</button>
         </div>
         <p class="muted" style="font-size:0.8rem; margin-top:8px;">${new Date(pedido.created_at).toLocaleString("pt-BR")}</p>
@@ -2536,6 +2540,21 @@ async function setupDashboardPage() {
         toast("Copiado.", "success");
       } catch {
         toast("Não foi possível copiar.", "error");
+      }
+    }
+
+    if (target.classList.contains("js-qrcode-cardapio") && cardapioId) {
+      const slug = target.dataset.slug;
+      const nome = target.dataset.nome;
+      if (slug && nome) {
+        showQrCodeModal(slug, nome);
+      }
+    }
+
+    if (target.classList.contains("js-print-pedido") && cardapioId) {
+      const pedido = state.pedidos.find((p) => p.id === cardapioId);
+      if (pedido) {
+        printOrderTicket(pedido);
       }
     }
   });
@@ -3722,7 +3741,6 @@ window.copyToClipboard = function(text) {
   navigator.clipboard.writeText(text).then(() => {
     toast("Link copiado!");
   }).catch(() => {
-    // Fallback para navegadores sem suporte a clipboard API (raro hoje em dia)
     const el = document.createElement('textarea');
     el.value = text;
     document.body.appendChild(el);
@@ -3732,4 +3750,324 @@ window.copyToClipboard = function(text) {
     toast("Link copiado!");
   });
 };
+
+function playNotificationSound() {
+  try {
+    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    
+    // Tom 1
+    const osc1 = audioCtx.createOscillator();
+    const gain1 = audioCtx.createGain();
+    osc1.connect(gain1);
+    gain1.connect(audioCtx.destination);
+    osc1.type = "sine";
+    osc1.frequency.setValueAtTime(784.00, audioCtx.currentTime); // G5
+    gain1.gain.setValueAtTime(0.3, audioCtx.currentTime);
+    gain1.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.3);
+    osc1.start(audioCtx.currentTime);
+    osc1.stop(audioCtx.currentTime + 0.3);
+    
+    // Tom 2
+    const osc2 = audioCtx.createOscillator();
+    const gain2 = audioCtx.createGain();
+    osc2.connect(gain2);
+    gain2.connect(audioCtx.destination);
+    osc2.type = "sine";
+    osc2.frequency.setValueAtTime(1046.50, audioCtx.currentTime + 0.15); // C6
+    gain2.gain.setValueAtTime(0.3, audioCtx.currentTime + 0.15);
+    gain2.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.45);
+    osc2.start(audioCtx.currentTime + 0.15);
+    osc2.stop(audioCtx.currentTime + 0.45);
+  } catch (err) {
+    console.warn("Erro ao tocar som de notificação:", err);
+  }
+}
+
+let pedidosSubscription = null;
+
+function setupRealtimePedidos(cardapioId) {
+  if (pedidosSubscription) {
+    supabase.removeChannel(pedidosSubscription);
+    pedidosSubscription = null;
+  }
+
+  if (!cardapioId) return;
+
+  pedidosSubscription = supabase
+    .channel('realtime-pedidos')
+    .on(
+      'postgres_changes',
+      { event: 'INSERT', schema: 'public', table: 'pedidos' },
+      (payload) => {
+        const novoPedido = payload.new;
+        if (String(novoPedido.cardapio_id) === String(cardapioId)) {
+          playNotificationSound();
+          loadPedidos();
+          toast("🔔 Novo pedido recebido!");
+        }
+      }
+    )
+    .subscribe();
+}
+
+function showQrCodeModal(slug, nome) {
+  const fullUrl = `${window.location.origin}/cardapio/${slug}`;
+  
+  let modal = document.getElementById("qrcode-modal");
+  if (!modal) {
+    modal = document.createElement("div");
+    modal.id = "qrcode-modal";
+    modal.style.cssText = `
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.85);
+      z-index: 99999;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      backdrop-filter: blur(8px);
+    `;
+    document.body.appendChild(modal);
+  }
+  
+  modal.innerHTML = `
+    <div style="background: var(--surface, #1e1e24); border: 1px solid var(--border, #2d2d39); border-radius: 20px; padding: 28px 24px; max-width: 400px; width: 90%; text-align: center; color: var(--text, #fff); box-shadow: 0 25px 60px rgba(0,0,0,0.6);">
+      <h3 style="margin-top:0; margin-bottom: 8px; font-size: 1.4rem; font-family: 'Playfair Display', serif;">QR Code do Cardápio</h3>
+      <p class="muted" style="margin-bottom: 20px; font-size: 0.95rem;">${nome}</p>
+      
+      <div style="background: #fff; padding: 18px; border-radius: 16px; display: inline-block; margin-bottom: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.15);">
+        <canvas id="qrcode-canvas" style="display: block;"></canvas>
+      </div>
+      
+      <p style="font-size: 0.85rem; word-break: break-all; margin-bottom: 24px; color: var(--muted); padding: 8px 12px; background: rgba(0,0,0,0.15); border-radius: 8px;">${fullUrl}</p>
+      
+      <div style="display: flex; gap: 8px; justify-content: center;">
+        <button id="btn-print-qrcode" class="btn btn-primary" style="flex: 1;">🖨️ Imprimir</button>
+        <button id="btn-download-qrcode" class="btn" style="flex: 1;">💾 Baixar</button>
+        <button id="btn-close-qrcode" class="btn" style="background: #ef4444; color: #fff; flex: 1; border: none;">Fechar</button>
+      </div>
+    </div>
+  `;
+
+  modal.style.display = "flex";
+
+  const canvas = document.getElementById("qrcode-canvas");
+  
+  if (window.QRCode) {
+    window.QRCode.toCanvas(canvas, fullUrl, {
+      width: 200,
+      margin: 1,
+      color: {
+        dark: "#000000",
+        light: "#FFFFFF"
+      }
+    }, function (error) {
+      if (error) {
+        console.error("Erro ao gerar QR Code:", error);
+        toast("Erro ao gerar QR Code", "error");
+      }
+    });
+  } else {
+    canvas.parentElement.innerHTML = "<p style='color: red;'>Erro ao carregar gerador de QR Code</p>";
+  }
+
+  document.getElementById("btn-close-qrcode").onclick = () => {
+    modal.style.display = "none";
+  };
+
+  document.getElementById("btn-download-qrcode").onclick = () => {
+    const link = document.createElement("a");
+    link.download = `qrcode-${slug}.png`;
+    link.href = canvas.toDataURL("image/png");
+    link.click();
+  };
+
+  document.getElementById("btn-print-qrcode").onclick = () => {
+    const printWindow = window.open("", "_blank");
+    printWindow.document.write(`
+      <html>
+        <head>
+          <title>Imprimir QR Code - ${nome}</title>
+          <style>
+            body {
+              font-family: system-ui, sans-serif;
+              text-align: center;
+              padding: 40px;
+            }
+            .container {
+              max-width: 400px;
+              margin: 0 auto;
+              border: 1px solid #ccc;
+              border-radius: 16px;
+              padding: 24px;
+            }
+            img {
+              max-width: 100%;
+              height: auto;
+              margin: 20px 0;
+            }
+            h2 { margin: 0 0 8px 0; }
+            p { margin: 0; color: #666; font-size: 0.95rem; }
+          </style>
+        </head>
+        <body>
+          <div class="container">
+            <h2>${nome}</h2>
+            <p>Aponte a câmera do celular para abrir o cardápio</p>
+            <img src="${canvas.toDataURL("image/png")}" />
+            <p style="font-size: 0.85rem; color: #999;">${fullUrl}</p>
+          </div>
+          <script>
+            window.onload = function() {
+              window.print();
+              setTimeout(function() { window.close(); }, 500);
+            };
+          </script>
+        </body>
+      </html>
+    `);
+    printWindow.document.close();
+  };
+}
+
+function printOrderTicket(pedido) {
+  const printWindow = window.open("", "_blank");
+  const storeName = state.cardapios.find(c => c.id === pedido.cardapio_id)?.nome || "Cardápio Digital";
+  const dateStr = new Date(pedido.created_at).toLocaleString("pt-BR");
+  
+  let itemsHtml = "";
+  let total = 0;
+  if (Array.isArray(pedido.itens)) {
+    pedido.itens.forEach(item => {
+      const subtotal = item.quantidade * item.preco_unitario;
+      total += subtotal;
+      itemsHtml += `
+        <tr>
+          <td style="padding: 6px 0; text-align: left; vertical-align: top;">${item.quantidade}x ${item.nome}</td>
+          <td style="text-align: right; padding: 6px 0; vertical-align: top;">${formatPriceBRL(item.preco_unitario)}</td>
+          <td style="text-align: right; padding: 6px 0; vertical-align: top;">${formatPriceBRL(subtotal)}</td>
+        </tr>
+      `;
+    });
+  }
+
+  printWindow.document.write(`
+    <html>
+      <head>
+        <title>Pedido #${pedido.id.toString().slice(0, 8)}</title>
+        <style>
+          @page {
+            margin: 0;
+          }
+          body {
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 13px;
+            color: #000;
+            padding: 8px;
+            width: 76mm;
+            margin: 0 auto;
+            background: #fff;
+          }
+          .title {
+            font-size: 18px;
+            font-weight: bold;
+            text-align: center;
+            text-transform: uppercase;
+            margin-bottom: 4px;
+          }
+          .subtitle {
+            text-align: center;
+            border-bottom: 2px dashed #000;
+            padding-bottom: 8px;
+            margin-bottom: 12px;
+            font-weight: bold;
+          }
+          .info-block {
+            border-bottom: 1px dashed #000;
+            padding-bottom: 8px;
+            margin-bottom: 10px;
+            line-height: 1.4;
+          }
+          table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 10px;
+          }
+          th {
+            border-bottom: 1px solid #000;
+            text-align: left;
+            padding: 4px 0;
+            font-weight: bold;
+          }
+          .totals-block {
+            border-top: 2px dashed #000;
+            padding-top: 8px;
+            text-align: right;
+            font-size: 15px;
+            font-weight: bold;
+            margin-bottom: 16px;
+          }
+          .footer {
+            text-align: center;
+            font-size: 11px;
+            border-top: 1px dashed #000;
+            padding-top: 8px;
+            margin-top: 12px;
+          }
+          @media print {
+            body {
+              width: 100%;
+              padding: 0;
+            }
+          }
+        </style>
+      </head>
+      <body>
+        <div class="title">${storeName}</div>
+        <div class="subtitle">COMPROVANTE DE PEDIDO</div>
+        
+        <div class="info-block">
+          <strong>Pedido:</strong> #${pedido.id.toString().slice(0, 8).toUpperCase()}<br>
+          <strong>Data/Hora:</strong> ${dateStr}<br>
+          <strong>Cliente:</strong> ${pedido.nome_cliente}<br>
+          <strong>Telefone:</strong> ${pedido.telefone}
+        </div>
+        
+        <div class="info-block">
+          <strong>📍 Endereço de Entrega:</strong><br>
+          ${pedido.endereco}
+        </div>
+
+        <table>
+          <thead>
+            <tr>
+              <th style="width: 50%;">Item</th>
+              <th style="text-align: right; width: 22%;">Unit</th>
+              <th style="text-align: right; width: 28%;">Subtotal</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${itemsHtml}
+          </tbody>
+        </table>
+
+        <div class="totals-block">
+          TOTAL GERAL: ${formatPriceBRL(total)}
+        </div>
+
+        <div class="footer">
+          Obrigado pela preferência!
+        </div>
+        
+        <script>
+          window.onload = function() {
+            window.print();
+            setTimeout(function() { window.close(); }, 500);
+          };
+        </script>
+      </body>
+    </html>
+  `);
+  printWindow.document.close();
+}
 

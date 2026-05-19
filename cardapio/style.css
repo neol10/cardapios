@@ -407,17 +407,21 @@ p {
   position: sticky;
   top: 10px;
   z-index: 100;
+  display: flex;
+  gap: 8px;
+  align-items: center;
 }
 
 .search-input-wrapper {
   position: relative;
   display: flex;
   align-items: center;
+  flex: 1;
 }
 
 .search-input {
   width: 100%;
-  padding: 14px 16px 14px 44px;
+  padding: 14px 44px 14px 44px;
   border-radius: 16px;
   border: 1px solid var(--border);
   background: color-mix(in srgb, var(--surface) 85%, transparent);
@@ -437,12 +441,74 @@ p {
   transform: translateY(-1px);
 }
 
-
 .search-icon {
   position: absolute;
   left: 16px;
   color: var(--muted);
   pointer-events: none;
+}
+
+.voice-search-btn {
+  position: absolute;
+  right: 12px;
+  background: transparent;
+  border: none;
+  font-size: 1.25rem;
+  cursor: pointer;
+  color: var(--muted);
+  transition: all 0.2s ease;
+  padding: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.voice-search-btn.recording {
+  color: #ff3b30;
+  animation: pulse-voice 1.5s infinite;
+}
+
+@keyframes pulse-voice {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.15); opacity: 0.8; }
+  100% { transform: scale(1); }
+}
+
+.search-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.action-btn {
+  background: color-mix(in srgb, var(--surface) 85%, transparent);
+  backdrop-filter: blur(12px) saturate(160%);
+  -webkit-backdrop-filter: blur(12px) saturate(160%);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: var(--text);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
+  transition: all 0.2s ease;
+  padding: 0;
+  font-size: 1.25rem;
+}
+
+.action-btn:hover {
+  border-color: var(--theme);
+  transform: translateY(-1px);
+}
+
+.layout-icon {
+  color: var(--text);
+}
+
+.layout-icon.is-hidden {
+  display: none !important;
 }
 
 /* Barra de Categorias */
@@ -1827,4 +1893,94 @@ button:disabled {
   0% { transform: scale(0.97); }
   60% { transform: scale(1.02); }
   100% { transform: scale(1); }
+}
+
+/* Modo Escuro (Dark Mode) da Loja */
+body.theme-dark {
+  --bg: #0d0c0a !important;
+  --surface: #171512 !important;
+  --text: #f3edd8 !important;
+  --muted: #9c9380 !important;
+  --border: #2c2720 !important;
+  --shadow: 0 8px 30px rgba(0,0,0,0.5) !important;
+  background-color: var(--bg) !important;
+  color: var(--text) !important;
+}
+
+body.theme-dark .hero {
+  background: linear-gradient(135deg, #1d1a15, #0d0c0a) !important;
+  border-bottom: 1px solid var(--border);
+}
+
+body.theme-dark .hero-media img {
+  border-color: var(--border) !important;
+}
+
+body.theme-dark .produto-card {
+  background: var(--surface) !important;
+  border-color: var(--border) !important;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.4) !important;
+}
+
+body.theme-dark .produto-card:hover {
+  border-color: var(--theme) !important;
+  box-shadow: 0 18px 40px rgba(0,0,0,0.6), 0 0 0 1px var(--theme) !important;
+}
+
+body.theme-dark .cart-box,
+body.theme-dark .category-pill,
+body.theme-dark .action-btn {
+  background: var(--surface) !important;
+  border-color: var(--border) !important;
+  color: var(--text) !important;
+}
+
+body.theme-dark .category-pill.active {
+  background: var(--theme) !important;
+  color: #fff !important;
+}
+
+body.theme-dark .totals {
+  border-top: 1px solid var(--border) !important;
+}
+
+body.theme-dark input,
+body.theme-dark textarea,
+body.theme-dark select {
+  background: var(--bg) !important;
+  border-color: var(--border) !important;
+  color: var(--text) !important;
+}
+
+body.theme-dark .lightbox {
+  background: rgba(0, 0, 0, 0.95) !important;
+}
+
+body.theme-dark .lightbox-content {
+  background: var(--surface) !important;
+  border-color: var(--border) !important;
+}
+
+body.theme-dark .wizard-question-card {
+  background: var(--surface) !important;
+  border-color: var(--border) !important;
+  color: var(--text) !important;
+}
+
+body.theme-dark .wizard-item {
+  background: rgba(255, 255, 255, 0.02) !important;
+  border-color: var(--border) !important;
+}
+
+body.theme-dark .wizard-item:hover {
+  border-color: var(--theme) !important;
+}
+
+body.theme-dark .wizard-item.is-selected {
+  border-color: var(--theme) !important;
+  background: rgba(var(--theme-rgb, 255, 106, 0), 0.08) !important;
+}
+
+body.theme-dark .cart-item {
+  border-bottom: 1px solid var(--border) !important;
 }

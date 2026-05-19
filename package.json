@@ -21,6 +21,7 @@
   "engines": {
     "node": ">=14.0.0"
   },
-  "devDependencies": {},
-  "dependencies": {}
+  "dependencies": {
+    "qrcode": "^1.5.4"
+  }
 }

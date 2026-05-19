@@ -844,6 +844,104 @@ function initSearch() {
   });
 }
 
+function initVoiceSearch() {
+  const voiceBtn = document.getElementById("voice-search-btn");
+  if (!voiceBtn || !searchInput) return;
+
+  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SpeechRecognition) {
+    voiceBtn.style.display = "none";
+    return;
+  }
+
+  const recognition = new SpeechRecognition();
+  recognition.lang = "pt-BR";
+  recognition.interimResults = false;
+  recognition.maxAlternatives = 1;
+
+  voiceBtn.addEventListener("click", () => {
+    if (voiceBtn.classList.contains("recording")) {
+      recognition.stop();
+    } else {
+      recognition.start();
+    }
+  });
+
+  recognition.onstart = () => {
+    voiceBtn.classList.add("recording");
+    voiceBtn.textContent = "🛑";
+    searchInput.placeholder = "Ouvindo...";
+  };
+
+  recognition.onend = () => {
+    voiceBtn.classList.remove("recording");
+    voiceBtn.textContent = "🎤";
+    searchInput.placeholder = "O que você está procurando?";
+  };
+
+  recognition.onresult = (event) => {
+    const text = event.results[0][0].transcript;
+    searchInput.value = text;
+    searchInput.dispatchEvent(new Event("input", { bubbles: true }));
+  };
+
+  recognition.onerror = (event) => {
+    console.error("Erro na busca por voz:", event.error);
+    voiceBtn.classList.remove("recording");
+    voiceBtn.textContent = "🎤";
+  };
+}
+
+function initStorefrontToggles() {
+  const themeBtn = document.getElementById("theme-toggle-btn");
+  const layoutBtn = document.getElementById("layout-toggle-btn");
+  const body = document.body;
+
+  // Carregar e aplicar Modo Escuro
+  const savedTheme = localStorage.getItem("storefront-theme") || "light";
+  if (savedTheme === "dark") {
+    body.classList.add("theme-dark");
+    if (themeBtn) themeBtn.textContent = "☀️";
+  }
+
+  if (themeBtn) {
+    themeBtn.addEventListener("click", () => {
+      body.classList.toggle("theme-dark");
+      const isDark = body.classList.contains("theme-dark");
+      themeBtn.textContent = isDark ? "☀️" : "🌙";
+      localStorage.setItem("storefront-theme", isDark ? "dark" : "light");
+    });
+  }
+
+  // Carregar e aplicar Mudar Visualização
+  const savedLayout = localStorage.getItem("storefront-layout") || "grid";
+  if (savedLayout === "list") {
+    body.classList.add("layout-lista");
+    const gridIcon = layoutBtn?.querySelector(".grid-icon");
+    const listIcon = layoutBtn?.querySelector(".list-icon");
+    gridIcon?.classList.add("is-hidden");
+    listIcon?.classList.remove("is-hidden");
+  }
+
+  if (layoutBtn) {
+    layoutBtn.addEventListener("click", () => {
+      body.classList.toggle("layout-lista");
+      const isList = body.classList.contains("layout-lista");
+      const gridIcon = layoutBtn.querySelector(".grid-icon");
+      const listIcon = layoutBtn.querySelector(".list-icon");
+      if (isList) {
+        gridIcon?.classList.add("is-hidden");
+        listIcon?.classList.remove("is-hidden");
+        localStorage.setItem("storefront-layout", "list");
+      } else {
+        gridIcon?.classList.remove("is-hidden");
+        listIcon?.classList.add("is-hidden");
+        localStorage.setItem("storefront-layout", "grid");
+      }
+    });
+  }
+}
+
 function initLightbox() {
   if (!lightbox || !lightboxImage || !lightboxClose) return;
 
@@ -2039,6 +2137,8 @@ async function loadCardapio() {
 
   renderCategories();
   initSearch();
+  initVoiceSearch();
+  initStorefrontToggles();
   initLightbox();
   renderProdutos();
   renderCart();

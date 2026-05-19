@@ -61,8 +61,8 @@
       href="https://fonts.googleapis.com/css2?family=Sora:wght@200;300;400;500;600;700;800&family=Inter:wght@200;300;400;500;600;700;800;900&family=Poppins:wght@200;300;400;500;600;700;800;900&family=Montserrat:wght@200;300;400;500;600;700;800;900&family=Nunito:wght@200;300;400;500;600;700;800;900&family=Rubik:wght@300;400;500;600;700;800;900&family=Outfit:wght@200;300;400;500;600;700;800;900&family=DM+Sans:wght@200;300;400;500;600;700;800;900&family=Work+Sans:wght@200;300;400;500;600;700;800;900&family=Lora:wght@400;500;600;700&family=Merriweather:wght@300;400;700;900&display=swap"
       rel="stylesheet"
     />
-    <link rel="preload" as="style" href="./style.css?v=24" />
-    <link rel="stylesheet" href="./style.css?v=24" />
+    <link rel="preload" as="style" href="./style.css?v=25" />
+    <link rel="stylesheet" href="./style.css?v=25" />
     <style>
       body.is-loading main,
       body.is-loading aside,
@@ -134,6 +134,14 @@
       <div class="search-input-wrapper">
         <span class="search-icon">🔍</span>
         <input type="text" id="produto-search" class="search-input" placeholder="O que você está procurando?" />
+        <button type="button" id="voice-search-btn" class="voice-search-btn" title="Pesquisar por voz">🎤</button>
+      </div>
+      <div class="search-actions">
+        <button type="button" id="theme-toggle-btn" class="action-btn" title="Alternar Modo Escuro">🌙</button>
+        <button type="button" id="layout-toggle-btn" class="action-btn" title="Mudar Visualização">
+          <svg class="layout-icon grid-icon" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+          <svg class="layout-icon list-icon is-hidden" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"></line><line x1="8" y1="12" x2="21" y2="12"></line><line x1="8" y1="18" x2="21" y2="18"></line><line x1="3" y1="6" x2="3.01" y2="6"></line><line x1="3" y1="12" x2="3.01" y2="12"></line><line x1="3" y1="18" x2="3.01" y2="18"></line></svg>
+        </button>
       </div>
     </div>
 
@@ -244,7 +252,7 @@
       </div>
     </div>
 
-    <link rel="modulepreload" href="./script.js?v=39" />
-    <script type="module" src="./script.js?v=39"></script>
+    <link rel="modulepreload" href="./script.js?v=40" />
+    <script type="module" src="./script.js?v=40"></script>
   </body>
 </html>
