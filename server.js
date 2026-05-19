@@ -109,29 +109,29 @@ function handleRequest(req, res) {
   // Redireciona URLs com .html para URLs limpas
   if (pathname === "/admin/index.html") {
     const qs = requestUrl.search || "";
-    res.writeHead(308, { Location: `/admin${qs}` });
+    res.writeHead(307, { Location: `/admin${qs}` });
     res.end();
     return;
   }
   if (pathname === "/admin/dashboard.html") {
     const qs = requestUrl.search || "";
-    res.writeHead(308, { Location: `/admin/dashboard${qs}` });
+    res.writeHead(307, { Location: `/admin/dashboard${qs}` });
     res.end();
     return;
   }
   if (pathname === "/admin/owner.html") {
     const qs = requestUrl.search || "";
-    res.writeHead(308, { Location: `/admin/owner${qs}` });
+    res.writeHead(307, { Location: `/admin/owner${qs}` });
     res.end();
     return;
   }
   if (pathname === "/garcom/index.html") {
-    res.writeHead(308, { Location: "/garcom" });
+    res.writeHead(307, { Location: "/garcom" });
     res.end();
     return;
   }
   if (pathname === "/cardapio/index.html") {
-    res.writeHead(308, { Location: "/cardapio" });
+    res.writeHead(307, { Location: "/cardapio" });
     res.end();
     return;
   }

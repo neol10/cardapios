@@ -985,6 +985,8 @@ function renderCardapios() {
       const whatsapp = escapeHtml(item.whatsapp);
       const fotoUrl = safeHttpUrl(item.foto_url);
       const modo = String(item.modo || "pedido").toLowerCase() === "catalogo" ? "Catálogo" : "Pedido";
+      const garcomStatus = Boolean(item.modo_garcom_enabled) ? "Ativo" : "Desativado";
+      const ownerStatus = Boolean(item.permitir_edicao_proprietario) ? "Ativo" : "Desativado";
       const isSelected = state.selectedCardapioId === item.id;
 
       return `
@@ -995,7 +997,7 @@ function renderCardapios() {
         </div>
         <p class="muted">Slug: /cardapio/${slugText}</p>
         <p class="muted">WhatsApp: ${whatsapp}</p>
-        <p class="muted">Modo: ${modo}</p>
+        <p class="muted">Modo: ${modo} &nbsp;|&nbsp; Garçom: <strong style="color: ${Boolean(item.modo_garcom_enabled) ? 'var(--success)' : 'var(--muted)'}">${garcomStatus}</strong> &nbsp;|&nbsp; Proprietário: <strong style="color: ${Boolean(item.permitir_edicao_proprietario) ? 'var(--success)' : 'var(--muted)'}">${ownerStatus}</strong></p>
 
         <div style="margin: 10px 0 6px; padding: 10px 12px; background: rgba(200, 148, 91, 0.07); border: 1px solid rgba(200, 148, 91, 0.18); border-radius: 10px; display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
           <span style="font-size: 0.75rem; font-weight: 700; color: var(--primary); text-transform: uppercase; letter-spacing: 0.04em; margin-right: 4px;">📢 Divulgar</span>
@@ -2618,35 +2620,29 @@ function showQrCodeModal(slug, nome) {
 
   modal.style.display = "flex";
 
-  const canvas = document.getElementById("qrcode-canvas");
-  
-  if (window.QRCode) {
-    window.QRCode.toCanvas(canvas, fullUrl, {
-      width: 200,
-      margin: 1,
-      color: {
-        dark: "#000000",
-        light: "#FFFFFF"
-      }
-    }, function (error) {
-      if (error) {
-        console.error("Erro ao gerar QR Code:", error);
-        toast("Erro ao gerar QR Code", "error");
-      }
-    });
-  } else {
-    canvas.parentElement.innerHTML = "<p style='color: red;'>Erro ao carregar gerador de QR Code</p>";
-  }
+  const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=500x500&margin=20&data=${encodeURIComponent(fullUrl)}`;
+  const canvasContainer = document.getElementById("qrcode-canvas").parentElement;
+  canvasContainer.innerHTML = `<img id="qr-img-dashboard" src="${qrUrl}" alt="QR Code" style="width: 200px; height: 200px; display: block; margin: auto;">`;
 
   document.getElementById("btn-close-qrcode").onclick = () => {
     modal.style.display = "none";
   };
 
-  document.getElementById("btn-download-qrcode").onclick = () => {
-    const link = document.createElement("a");
-    link.download = `qrcode-${slug}.png`;
-    link.href = canvas.toDataURL("image/png");
-    link.click();
+  document.getElementById("btn-download-qrcode").onclick = async () => {
+    try {
+      const response = await fetch(qrUrl);
+      const blob = await response.blob();
+      const localUrl = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.download = `qrcode-${slug}.png`;
+      link.href = localUrl;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(localUrl);
+    } catch (err) {
+      toast("Erro ao baixar a imagem", "error");
+    }
   };
 
   document.getElementById("btn-print-qrcode").onclick = () => {
