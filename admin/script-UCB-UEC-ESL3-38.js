@@ -986,7 +986,7 @@ function renderCardapios() {
       const fotoUrl = safeHttpUrl(item.foto_url);
       const modo = String(item.modo || "pedido").toLowerCase() === "catalogo" ? "Catálogo" : "Pedido";
       const garcomStatus = Boolean(item.modo_garcom_enabled) ? "Ativo" : "Desativado";
-      const ownerStatus = Boolean(item.permitir_edicao_proprietario) ? "Ativo" : "Desativado";
+      const ownerStatus = Boolean(item.owner_edit_enabled) ? "Ativo" : "Desativado";
       const isSelected = state.selectedCardapioId === item.id;
 
       return `
@@ -997,7 +997,7 @@ function renderCardapios() {
         </div>
         <p class="muted">Slug: /cardapio/${slugText}</p>
         <p class="muted">WhatsApp: ${whatsapp}</p>
-        <p class="muted">Modo: ${modo} &nbsp;|&nbsp; Garçom: <strong style="color: ${Boolean(item.modo_garcom_enabled) ? 'var(--success)' : 'var(--muted)'}">${garcomStatus}</strong> &nbsp;|&nbsp; Proprietário: <strong style="color: ${Boolean(item.permitir_edicao_proprietario) ? 'var(--success)' : 'var(--muted)'}">${ownerStatus}</strong></p>
+        <p class="muted">Modo: ${modo} &nbsp;|&nbsp; Garçom: <strong style="color: ${Boolean(item.modo_garcom_enabled) ? 'var(--success)' : 'var(--muted)'}">${garcomStatus}</strong> &nbsp;|&nbsp; Proprietário: <strong style="color: ${Boolean(item.owner_edit_enabled) ? 'var(--success)' : 'var(--muted)'}">${ownerStatus}</strong></p>
 
         <div style="margin: 10px 0 6px; padding: 10px 12px; background: rgba(200, 148, 91, 0.07); border: 1px solid rgba(200, 148, 91, 0.18); border-radius: 10px; display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
           <span style="font-size: 0.75rem; font-weight: 700; color: var(--primary); text-transform: uppercase; letter-spacing: 0.04em; margin-right: 4px;">📢 Divulgar</span>
