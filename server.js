@@ -156,6 +156,14 @@ function handleRequest(req, res) {
     return;
   }
 
+  if (pathname === "/admin") {
+    const adminPath = path.join(ROOT, "admin", "index.html");
+    if (fileExists(adminPath)) {
+      serveFile(res, adminPath);
+      return;
+    }
+  }
+
   if (pathname === "/garcom") {
     const garcomPath = path.join(ROOT, "garcom", "index.html");
     if (fileExists(garcomPath)) {
