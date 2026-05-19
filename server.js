@@ -108,17 +108,20 @@ function handleRequest(req, res) {
 
   // Redireciona URLs com .html para URLs limpas
   if (pathname === "/admin/index.html") {
-    res.writeHead(308, { Location: "/admin" });
+    const qs = requestUrl.search || "";
+    res.writeHead(308, { Location: `/admin${qs}` });
     res.end();
     return;
   }
   if (pathname === "/admin/dashboard.html") {
-    res.writeHead(308, { Location: "/admin/dashboard" });
+    const qs = requestUrl.search || "";
+    res.writeHead(308, { Location: `/admin/dashboard${qs}` });
     res.end();
     return;
   }
   if (pathname === "/admin/owner.html") {
-    res.writeHead(308, { Location: "/admin/owner" });
+    const qs = requestUrl.search || "";
+    res.writeHead(308, { Location: `/admin/owner${qs}` });
     res.end();
     return;
   }
@@ -162,6 +165,15 @@ function handleRequest(req, res) {
   }
 
   if (pathname === "/admin/owner") {
+    const ownerPath = path.join(ROOT, "admin", "owner.html");
+    if (fileExists(ownerPath)) {
+      serveFile(res, ownerPath);
+      return;
+    }
+  }
+
+  // Suporte a /admin/owner/:slug (path-based slug)
+  if (pathname.startsWith("/admin/owner/")) {
     const ownerPath = path.join(ROOT, "admin", "owner.html");
     if (fileExists(ownerPath)) {
       serveFile(res, ownerPath);

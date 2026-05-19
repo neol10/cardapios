@@ -2793,8 +2793,8 @@ function openTemplatesModal(cardapioForm) {
 
 function clearOwnerSession(slug) {
   try {
-    sessionStorage.removeItem(getOwnerSessionKey(slug));
-    sessionStorage.removeItem(getOwnerPinCacheKey(slug));
+    localStorage.removeItem(getOwnerSessionKey(slug));
+    localStorage.removeItem(getOwnerPinCacheKey(slug));
   } catch {
     // ignore
   }
@@ -2802,7 +2802,7 @@ function clearOwnerSession(slug) {
 
 function setOwnerVerified(slug) {
   try {
-    sessionStorage.setItem(getOwnerSessionKey(slug), "1");
+    localStorage.setItem(getOwnerSessionKey(slug), "1");
   } catch {
     // ignore
   }
@@ -2810,7 +2810,7 @@ function setOwnerVerified(slug) {
 
 function isOwnerVerified(slug) {
   try {
-    return sessionStorage.getItem(getOwnerSessionKey(slug)) === "1";
+    return localStorage.getItem(getOwnerSessionKey(slug)) === "1";
   } catch {
     return false;
   }
@@ -2820,10 +2820,10 @@ function setOwnerPinCache(slug, pin) {
   try {
     const safePin = onlyDigits(pin).slice(0, 12);
     if (!safePin) {
-      sessionStorage.removeItem(getOwnerPinCacheKey(slug));
+      localStorage.removeItem(getOwnerPinCacheKey(slug));
       return;
     }
-    sessionStorage.setItem(getOwnerPinCacheKey(slug), safePin);
+    localStorage.setItem(getOwnerPinCacheKey(slug), safePin);
   } catch {
     // ignore
   }
@@ -2831,7 +2831,7 @@ function setOwnerPinCache(slug, pin) {
 
 function getOwnerPinCache(slug) {
   try {
-    return String(sessionStorage.getItem(getOwnerPinCacheKey(slug)) || "").trim();
+    return String(localStorage.getItem(getOwnerPinCacheKey(slug)) || "").trim();
   } catch {
     return "";
   }
@@ -2840,9 +2840,22 @@ function getOwnerPinCache(slug) {
 function getOwnerSlugFromUrl() {
   try {
     const url = new URL(window.location.href);
-    const s = url.searchParams.get("slug") || url.searchParams.get("id") || "";
-    return String(s).trim().toLowerCase();
 
+    // 1) Tenta query string: ?slug=xxx ou ?id=xxx
+    const qs = url.searchParams.get("slug") || url.searchParams.get("id") || "";
+    if (qs.trim()) return String(qs).trim().toLowerCase();
+
+    // 2) Tenta path-based: /admin/owner/:slug
+    const segments = url.pathname.split("/").filter(Boolean);
+    const ownerIdx = segments.findIndex(s => s === "owner");
+    if (ownerIdx >= 0 && segments[ownerIdx + 1]) {
+      const seg = segments[ownerIdx + 1];
+      if (seg !== "index.html" && seg !== "owner.html") {
+        return seg.trim().toLowerCase();
+      }
+    }
+
+    return "";
   } catch {
     return "";
   }

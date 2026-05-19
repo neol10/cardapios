@@ -841,6 +841,9 @@ async function init() {
     
     // Carregar dados salvos
     carregarMesasLocalStorage();
+
+    // Carregar cardápio do Supabase
+    await loadCardapio();
   } finally {
     document.body.classList.remove("is-loading");
   }
