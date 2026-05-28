@@ -1179,6 +1179,7 @@ function renderCardapios() {
           <button class="btn js-manage-cardapio" data-id="${item.id}">${isSelected ? "Gerenciando" : "Gerenciar"}</button>
           <button class="btn js-venda-manual" data-id="${item.id}" title="Lançar venda manual">💰 Venda</button>
           <button class="btn js-edit-cardapio" data-id="${item.id}">Editar</button>
+          <button class="btn js-duplicate-cardapio" data-id="${item.id}" title="Duplicar projeto">Duplicar</button>
           <button class="btn js-delete-cardapio" data-id="${item.id}">Excluir</button>
         </div>
       </article>
@@ -2530,6 +2531,55 @@ async function setupDashboardPage() {
 
       await loadCardapios();
       toast("Concluído.", "success");
+    }
+
+    if (target.classList.contains("js-duplicate-cardapio") && cardapioId) {
+      const cardapio = state.cardapios.find((c) => c.id === cardapioId);
+      if (!cardapio) return;
+
+      const confirmDuplicate = confirm(`Deseja duplicar o projeto "${cardapio.nome}"?`);
+      if (!confirmDuplicate) return;
+
+      toast("Duplicando...", "info");
+
+      try {
+        const { id, created_at, ...cardapioData } = cardapio;
+        cardapioData.nome = `${cardapioData.nome} (Cópia)`;
+        cardapioData.slug = `${cardapioData.slug}-copia-${Math.random().toString(36).slice(2, 6)}`;
+        
+        const { data: novoCardapio, error: errInsert } = await supabase
+          .from("cardapios")
+          .insert(cardapioData)
+          .select()
+          .single();
+
+        if (errInsert) throw errInsert;
+
+        const { data: produtos } = await supabase
+          .from("produtos")
+          .select("*")
+          .eq("cardapio_id", cardapioId);
+
+        if (produtos && produtos.length > 0) {
+          const novosProdutos = produtos.map(p => {
+            const { id: pId, created_at: pCreated, ...prodData } = p;
+            prodData.cardapio_id = novoCardapio.id;
+            return prodData;
+          });
+          
+          const { error: errProd } = await supabase
+            .from("produtos")
+            .insert(novosProdutos);
+
+          if (errProd) throw errProd;
+        }
+
+        await loadCardapios();
+        toast("Projeto duplicado com sucesso!", "success");
+      } catch (err) {
+        console.error("Erro ao duplicar:", err);
+        toast(`Erro ao duplicar: ${err.message}`, "error");
+      }
     }
 
     if (target.classList.contains("js-copy-pedido") && cardapioId) {
