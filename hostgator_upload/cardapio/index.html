@@ -32,6 +32,17 @@
           apple.id = "dynamic-apple-icon";
           apple.setAttribute("href", "/cardapio/pwa/icon-192.png?v=" + bust);
           head.appendChild(apple);
+
+          window.deferredPrompt = null;
+          window.addEventListener('beforeinstallprompt', function(e) {
+            e.preventDefault();
+            window.deferredPrompt = e;
+            var installBtn = document.getElementById("pwa-install-btn");
+            if (installBtn) {
+              installBtn.classList.remove('is-hidden');
+            }
+          });
+
         } catch (e) {}
       })();
     </script>
