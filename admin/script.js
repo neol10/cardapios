@@ -1592,7 +1592,9 @@ function fillCardapioForm(item) {
   if (form.densidade) form.densidade.value = item.densidade || "confortavel";
   if (form.modo) form.modo.value = item.modo || "pedido";
   if (form.modo_garcom_enabled) form.modo_garcom_enabled.checked = Boolean(item.modo_garcom_enabled);
+  if (form.has_garcom_module) form.has_garcom_module.checked = Boolean(item.has_garcom_module);
   if (form.modo_marmita_enabled) form.modo_marmita_enabled.checked = Boolean(item.modo_marmita_enabled);
+  if (form.has_marmita_module) form.has_marmita_module.checked = Boolean(item.has_marmita_module);
   if (form.marmita_agendamento_enabled) form.marmita_agendamento_enabled.checked = Boolean(item.marmita_agendamento_enabled);
   if (form.marmita_horarios_retirada) form.marmita_horarios_retirada.value = item.marmita_horarios_retirada || "";
   if (form.marmita_dias_semana) form.marmita_dias_semana.value = item.marmita_dias_semana || "1,2,3,4,5";
@@ -2989,6 +2991,24 @@ async function initOwnerPage() {
     if (editForm.marmita_dias_semana) editForm.marmita_dias_semana.value = data.marmita_dias_semana || "1,2,3,4,5";
     if (editForm.marmita_instrucoes) editForm.marmita_instrucoes.value = data.marmita_instrucoes || "";
     
+    // Controle de Permissões de Módulos
+    const garcomWrap = document.getElementById("owner-garcom-wrap");
+    if (garcomWrap) {
+      if (!data.has_garcom_module) {
+        garcomWrap.style.display = "none";
+      } else {
+        garcomWrap.style.display = "block";
+      }
+    }
+
+    const marmitaWrap = document.getElementById("owner-marmita-wrap");
+    if (marmitaWrap) {
+      if (!data.has_marmita_module) {
+        marmitaWrap.style.display = "none";
+      } else {
+        marmitaWrap.style.display = "block";
+      }
+    }
     editForm.horario_funcionamento.value = data.horario_funcionamento || "";
     editForm.abre_em.value = data.abre_em ? String(data.abre_em).slice(0, 5) : "";
     editForm.fecha_em.value = data.fecha_em ? String(data.fecha_em).slice(0, 5) : "";
