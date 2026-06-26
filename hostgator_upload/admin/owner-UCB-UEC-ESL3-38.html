@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Editar Cardápio | Proprietário</title>
+    <meta name="theme-color" content="#0f0d0b" />
+    <link rel="manifest" href="/admin/manifest.webmanifest" />
+    <link rel="icon" href="/pwa/icon.svg" type="image/svg+xml" />
+    <link rel="icon" href="/pwa/icon-32.png" type="image/png" sizes="32x32" />
+    <link rel="icon" href="/pwa/icon-16.png" type="image/png" sizes="16x16" />
+    <link rel="apple-touch-icon" href="/pwa/icon-180.png" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&family=Playfair+Display:wght@600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="/admin/style.css?v=9" />
+    <script>
+      window.__SUPABASE_CONFIG__ = {
+        url: "https://uapwitkmxuoepnjlffqy.supabase.co",
+        anonKey:
+          "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVhcHdpdGtteHVvZXBuamxmZnF5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ4OTcxMjUsImV4cCI6MjA5MDQ3MzEyNX0.YTz_EqzK4m0CMM25n3QJC1b3Nj9bikIrDDEEFi5n6ps"
+      };
+    </script>
+  </head>
+  <body class="admin-body">
+    <main class="auth-layout" id="owner-page">
+      <section class="auth-card">
+        <h1>Editar Cardápio</h1>
+        <p id="owner-subtitle">Acesse com o PIN do proprietário para editar cardápio, imagens e produtos.</p>
+
+        <form id="owner-auth-form" class="stack-gap">
+          <label>
+            PIN
+            <input type="password" name="pin" inputmode="numeric" autocomplete="one-time-code" required />
+          </label>
+          <button type="submit" class="btn btn-primary btn-lg">Entrar</button>
+        </form>
+
+        <form id="owner-edit-form" class="stack-gap is-hidden">
+          <input type="hidden" name="slug" />
+
+          <div class="owner-quick-actions" style="background: rgba(200, 148, 91, 0.08); border: 1px solid var(--primary); border-radius: 16px; padding: 16px; margin-bottom: 20px; display: flex; flex-direction: column; gap: 10px; align-items: center; justify-content: center; text-align: center;">
+             <span style="font-weight: 600; font-size: 0.95rem; color: var(--primary);">Divulgue seu Cardápio Digital</span>
+             <button type="button" class="btn btn-primary" id="btn-owner-qrcode" style="font-weight: 800; display: flex; gap: 8px; align-items: center; justify-content: center; width: 100%; max-width: 320px; color: #1a1410;">
+               📱 Imprimir ou Baixar QR Code
+             </button>
+          </div>
+
+          <label>
+            Nome
+            <input type="text" name="nome" required />
+          </label>
+
+          <label>
+            WhatsApp (somente números)
+            <input type="text" name="whatsapp" required />
+          </label>
+
+          <label>
+            Slogan
+            <input type="text" name="slogan" />
+          </label>
+
+          <label>
+            Tipo de cardápio
+            <select name="modo">
+              <option value="pedido">Com sistema de pedidos</option>
+              <option value="catalogo">Apenas catálogo (sem pedidos)</option>
+            </select>
+          </label>
+
+          <label id="modo-garcom-wrap">
+            <input type="checkbox" name="modo_garcom_enabled" />
+            Habilitar modo garçom (funciona em pedido e catálogo)
+          </label>
+
+          <label>
+            Horário (texto)
+            <input type="text" name="horario_funcionamento" placeholder="Ex.: Seg-Sex 18h às 23h" />
+          </label>
+
+          <div class="two-cols">
+            <label>
+              Abre às
+              <input type="time" name="abre_em" />
+            </label>
+            <label>
+              Fecha às
+              <input type="time" name="fecha_em" />
+            </label>
+          </div>
+
+          <label>
+            Endereço
+            <input type="text" name="endereco" />
+          </label>
+
+          <label>
+            Instagram (URL)
+            <input type="url" name="instagram_url" placeholder="https://instagram.com/sua_loja" />
+          </label>
+
+          <details class="details details-sub">
+            <summary>Imagens do cardápio</summary>
+
+            <label>
+              Foto do cardápio (URL)
+              <input type="url" name="foto_url" placeholder="https://..." />
+            </label>
+
+            <label>
+              Banner do cardápio (URL)
+              <input type="url" name="banner_url" placeholder="https://..." />
+            </label>
+          </details>
+
+          <button type="submit" class="btn btn-primary btn-lg">Salvar</button>
+          <button type="button" class="btn" id="owner-logout">Sair</button>
+        </form>
+
+        <details class="details details-sub is-hidden" id="owner-produtos-section" open>
+          <summary>Produtos</summary>
+
+          <div id="owner-produtos-list" class="list">
+            <p class="muted">Nenhum produto carregado ainda.</p>
+          </div>
+
+          <form id="owner-produto-form" class="stack-gap">
+            <input type="hidden" name="id" />
+
+            <label>
+              Nome do produto
+              <input type="text" name="nome" required />
+            </label>
+
+            <div class="two-cols">
+              <label>
+                Categoria
+                <input type="text" name="categoria" />
+              </label>
+
+              <label>
+                Preço
+                <input type="text" name="preco" placeholder="0,00" required />
+              </label>
+            </div>
+
+            <label>
+              Descrição
+              <textarea name="descricao" rows="3"></textarea>
+            </label>
+
+            <label>
+              Imagem do produto (URL)
+              <input type="url" name="imagem_url" placeholder="https://..." />
+            </label>
+
+            <div class="topbar-actions">
+              <button type="submit" class="btn btn-primary btn-lg">Salvar produto</button>
+              <button type="button" class="btn" id="owner-produto-cancel">Cancelar edição</button>
+            </div>
+          </form>
+        </details>
+
+        <p id="owner-message" class="message" aria-live="polite"></p>
+        <div id="toast-container" class="toast-container" aria-live="polite" aria-atomic="true"></div>
+      </section>
+    </main>
+
+    <!-- Modal QR Code -->
+    <div id="qrcode-modal" class="produto-modal is-hidden">
+      <div class="produto-modal-backdrop" id="qr-backdrop"></div>
+      <div class="produto-modal-dialog" style="max-width: 400px; text-align: center; padding: 24px; margin: auto;">
+        <button type="button" class="produto-modal-close" id="btn-close-qr">×</button>
+        <h3 style="margin-bottom: 16px; font-weight: 800;">QR Code da sua Loja</h3>
+        <div id="qr-code-container" style="background: white; padding: 12px; border-radius: 12px; display: inline-block;">
+           <!-- Imagem do QR será inserida aqui -->
+        </div>
+        <p class="muted" style="margin-top: 16px; font-size: 0.9rem;">Seus clientes podem escanear este código para abrir seu cardápio direto no celular.</p>
+        <a id="link-download-qr" download="qrcode-loja.png" class="btn btn-primary" style="margin-top: 20px; text-decoration: none; display: block;">Baixar QR Code</a>
+      </div>
+    </div>
+
+    <script type="module" src="/admin/script.js?v=40"></script>
+  </body>
+</html>
