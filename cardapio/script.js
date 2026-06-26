@@ -7,7 +7,7 @@ import {
 
 if ("serviceWorker" in navigator) {
   window.addEventListener("load", () => {
-    navigator.serviceWorker.register("/sw.js").catch(() => undefined);
+    navigator.serviceWorker.register("/cardapio/sw.js").catch(() => undefined);
   });
 }
 
@@ -1911,6 +1911,58 @@ async function loadCardapio() {
   }
 
   activeCardapio = data;
+
+  // Injetar o Manifest PWA dinamicamente (Compatível com hospedagem estática)
+  try {
+    const manifestData = {
+      name: data.nome,
+      short_name: data.nome.length > 12 ? data.nome.substring(0, 12) : data.nome,
+      start_url: `/cardapio/${data.slug}`,
+      scope: `/cardapio/${data.slug}`,
+      display: "standalone",
+      background_color: "#ffffff",
+      theme_color: data.theme_color || "#ff6a00",
+      icons: [
+        {
+          src: "/cardapio/pwa/icon-192.png",
+          sizes: "192x192",
+          type: "image/png",
+          purpose: "any maskable"
+        },
+        {
+          src: "/cardapio/pwa/icon-512.png",
+          sizes: "512x512",
+          type: "image/png",
+          purpose: "any maskable"
+        },
+        {
+          src: "/cardapio/pwa/icon.svg",
+          sizes: "any",
+          type: "image/svg+xml",
+          purpose: "any maskable"
+        }
+      ]
+    };
+    
+    // Se o restaurante tiver logotipo, podemos usar no manifest (opcional)
+    if (data.logo_url) {
+      manifestData.icons.unshift({
+        src: data.logo_url,
+        sizes: "192x192",
+        type: "image/png",
+        purpose: "any maskable"
+      });
+    }
+
+    const manifestBlob = new Blob([JSON.stringify(manifestData)], { type: 'application/manifest+json' });
+    const manifestURL = URL.createObjectURL(manifestBlob);
+    const existingManifest = document.getElementById("dynamic-manifest");
+    if (existingManifest) {
+      existingManifest.setAttribute("href", manifestURL);
+    }
+  } catch (e) {
+    console.error("Erro ao gerar manifest PWA dinâmico:", e);
+  }
 
   // Dono: botão secreto de edição
   const ownerBtn = document.getElementById("owner-edit-btn");

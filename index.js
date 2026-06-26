@@ -2,7 +2,7 @@ import { assertSupabaseConfig, supabase } from "./shared/supabase.js";
 
 if ("serviceWorker" in navigator) {
   window.addEventListener("load", () => {
-    navigator.serviceWorker.register("/sw.js").catch(() => undefined);
+    navigator.serviceWorker.register("/cardapio/sw.js").catch(() => undefined);
   });
 }
 

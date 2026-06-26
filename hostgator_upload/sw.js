@@ -7,8 +7,8 @@ const CACHE_VERSION = "v8";
 const STATIC_CACHE = `cardapios-static-${CACHE_VERSION}`;
 
 const PRECACHE_URLS = [
-  "/pwa/icon.svg",
-  "/admin/manifest.webmanifest"
+  "/cardapio/pwa/icon.svg",
+  "/cardapio/admin/manifest.webmanifest"
 ];
 
 self.addEventListener("install", (event) => {
@@ -41,7 +41,7 @@ function isCacheableRequest(request) {
   if (!isSameOrigin && !isSupabase && !isExternalImage) return false;
 
   // Evita cache de URLs "sensíveis"
-  if (url.pathname.startsWith("/api")) return false;
+  if (url.pathname.startsWith("/cardapio/api")) return false;
 
   return true;
 }
@@ -94,7 +94,7 @@ self.addEventListener("fetch", (event) => {
 
   // Navegação (HTML) ou dados do Supabase: network-first
   const isNav = request.mode === "navigate";
-  const isData = url.hostname.includes("supabase.co") && !url.pathname.includes("/storage/");
+  const isData = url.hostname.includes("supabase.co") && !url.pathname.includes("/cardapio/storage/");
 
   if (isNav || isData) {
     event.respondWith(networkFirst(request));
@@ -102,7 +102,7 @@ self.addEventListener("fetch", (event) => {
   }
 
   // Assets estáticos e imagens: stale-while-revalidate
-  if (isStaticAsset(url) || url.pathname.includes("/storage/") || !url.hostname.includes(self.location.hostname)) {
+  if (isStaticAsset(url) || url.pathname.includes("/cardapio/storage/") || !url.hostname.includes(self.location.hostname)) {
     event.respondWith(staleWhileRevalidate(request));
   }
 });
