@@ -777,31 +777,37 @@ function attachEvents() {
   // Adicionar produto
   document.body.addEventListener("click", (event) => {
     const target = event.target;
-    if (!(target instanceof HTMLElement)) return;
+    if (!target || !target.closest) return;
 
-    if (target.classList.contains("add-to-cart")) {
-      const produtoId = target.dataset.id;
+    const addBtn = target.closest(".add-to-cart");
+    if (addBtn) {
+      const produtoId = addBtn.dataset.id;
       const produto = activeProdutos.find(p => String(p.id) === String(produtoId));
       if (produto) {
-        adicionarPedidoMesa(produto, target);
+        adicionarPedidoMesa(produto, addBtn);
       }
+      return;
     }
 
-    if (target.classList.contains("remover-pedido")) {
-      const produtoId = target.dataset.id;
+    const removerBtn = target.closest(".remover-pedido");
+    if (removerBtn) {
+      const produtoId = removerBtn.dataset.id;
       removerPedidoMesa(produtoId);
+      return;
     }
 
-    if (target.classList.contains("btn-print")) {
+    if (target.closest(".btn-print")) {
       imprimirPedidoMesa();
+      return;
     }
 
-    if (target.classList.contains("mesa-item") || target.closest(".mesa-item")) {
-      const mesaEl = target.classList.contains("mesa-item") ? target : target.closest(".mesa-item");
-      const numero = parseInt(mesaEl.dataset.mesa);
+    const mesaItem = target.closest(".mesa-item");
+    if (mesaItem) {
+      const numero = parseInt(mesaItem.dataset.mesa);
       if (numero) {
         selecionarMesa(numero);
       }
+      return;
     }
   });
 
