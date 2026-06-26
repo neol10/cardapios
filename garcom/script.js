@@ -156,6 +156,8 @@ function carregarMesasLocalStorage() {
       numeroMesaInput.value = mesaAtual;
       mesaAtualEl.textContent = mesaAtual;
       document.body.classList.add("mesa-selecionada");
+      document.getElementById("mesa-detalhes")?.classList.remove("is-hidden");
+      document.body.classList.add("mesa-selecionada");
       renderPedidosMesa();
     }
   } catch (error) {
@@ -285,6 +287,7 @@ function selecionarMesa(numero) {
   mesaAtual = numero;
   numeroMesaInput.value = numero;
   mesaAtualEl.textContent = numero;
+  document.getElementById("mesa-detalhes")?.classList.remove("is-hidden");
   
   document.body.classList.add("mesa-selecionada");
   
@@ -407,6 +410,7 @@ function finalizarMesa() {
     mesaAtual = null;
     numeroMesaInput.value = "";
     mesaAtualEl.textContent = "-";
+    document.getElementById("mesa-detalhes")?.classList.add("is-hidden");
     document.body.classList.remove("mesa-selecionada");
     renderPedidosMesa();
     atualizarListaMesas();
@@ -431,6 +435,7 @@ function resetTodasMesas() {
   mesaAtual = null;
   numeroMesaInput.value = "";
   mesaAtualEl.textContent = "-";
+  document.getElementById("mesa-detalhes")?.classList.add("is-hidden");
   document.body.classList.remove("mesa-selecionada");
   renderPedidosMesa();
   atualizarListaMesas();
@@ -746,6 +751,17 @@ function attachEvents() {
   // Finalizar mesa
   finalizarMesaBtn.addEventListener("click", finalizarMesa);
 
+  // Voltar / Fechar detalhes
+  document.getElementById("fechar-detalhes")?.addEventListener("click", () => {
+    mesaAtual = null;
+    numeroMesaInput.value = "";
+    if (mesaAtualEl) mesaAtualEl.textContent = "-";
+    document.body.classList.remove("mesa-selecionada");
+    document.getElementById("mesa-detalhes")?.classList.add("is-hidden");
+    renderPedidosMesa();
+    atualizarListaMesas();
+  });
+
   // Resetar todas as mesas
   resetMesasBtn?.addEventListener("click", resetTodasMesas);
 
@@ -814,21 +830,26 @@ function attachEvents() {
   document.addEventListener("keydown", (event) => {
     if (event.ctrlKey || event.metaKey) return;
 
-    const numero = parseInt(event.key);
-    if (numero >= 1 && numero <= 9) {
-      event.preventDefault();
-      const mesaNumero = parseInt(numeroMesaInput.value + numero);
-      if (mesaNumero <= 999) {
-        numeroMesaInput.value = mesaNumero;
-      }
-    }
-
     if (event.key === "Enter" && numeroMesaInput.value) {
       novaMesaBtn.click();
+      return;
     }
 
     if (event.key === "Escape" && mesaAtual) {
       finalizarMesa();
+      return;
+    }
+
+    // Não interceptar se o usuário estiver digitando em um campo
+    if (event.target.tagName === "INPUT" || event.target.tagName === "TEXTAREA") return;
+
+    if (/^[0-9]$/.test(event.key)) {
+      event.preventDefault();
+      const currentVal = numeroMesaInput.value || "";
+      const mesaNumero = parseInt(currentVal + event.key, 10);
+      if (mesaNumero && mesaNumero <= 999) {
+        numeroMesaInput.value = mesaNumero;
+      }
     }
   });
 }
