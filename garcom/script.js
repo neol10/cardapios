@@ -534,9 +534,26 @@ function renderProdutos() {
     .join("");
 }
 
+let calcTotalValue = 0;
+function updateCalculatorTotal(valor = 0) {
+  calcTotalValue = valor;
+  const elTotal = document.getElementById("calc-total");
+  const elResult = document.getElementById("calc-resultado");
+  const pessoasInput = document.getElementById("calc-pessoas");
+  
+  if (elTotal) elTotal.value = formatPriceBRL(valor);
+  
+  if (pessoasInput && elResult) {
+    let pessoas = parseInt(pessoasInput.value, 10);
+    if (isNaN(pessoas) || pessoas < 1) pessoas = 1;
+    elResult.textContent = formatPriceBRL(valor / pessoas);
+  }
+}
+
 function renderPedidosMesa() {
   if (!mesaAtual || !mesasAbertas.has(mesaAtual)) {
     pedidosMesaContainer.innerHTML = '<p class="muted">Selecione uma mesa ou adicione produtos.</p>';
+    updateCalculatorTotal(0);
     return;
   }
 
@@ -544,6 +561,7 @@ function renderPedidosMesa() {
   
   if (!mesa.pedidos.length) {
     pedidosMesaContainer.innerHTML = '<p class="muted">Nenhum pedido nesta mesa ainda.</p>';
+    updateCalculatorTotal(0);
     return;
   }
 
@@ -772,6 +790,12 @@ function attachEvents() {
   mesaSearchInput?.addEventListener("input", () => {
     mesaSearchTerm = String(mesaSearchInput.value || "").trim();
     atualizarListaMesas();
+  });
+
+  // Calculadora
+  const calcPessoasInput = document.getElementById("calc-pessoas");
+  calcPessoasInput?.addEventListener("input", () => {
+    updateCalculatorTotal(calcTotalValue);
   });
 
   // Adicionar produto
