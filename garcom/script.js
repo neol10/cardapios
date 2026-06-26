@@ -17,11 +17,6 @@ const cardapioFoto = document.querySelector("#cardapio-foto");
 const mesaAtualEl = document.querySelector("#mesa-atual");
 const countMesasEl = document.querySelector("#count-mesas");
 const listaMesasEl = document.querySelector("#lista-mesas");
-const mesaSearchInput = document.querySelector("#mesa-search");
-const resetMesasBtn = document.querySelector("#reset-mesas-btn");
-const totalMesasAbertasEl = document.querySelector("#total-mesas-abertas");
-const totalPedidosEl = document.querySelector("#total-pedidos-abertos");
-const totalValorEl = document.querySelector("#total-aberto-valor");
 const fullscreenBtn = document.querySelector("#fullscreen-btn");
 
 let activeCardapio = null;
@@ -32,86 +27,6 @@ let mesaSearchTerm = "";
 let backupInterval = null;
 
 // Persistência de dados
-// Histórico de fechamentos de mesas (para contador de dinheiro)
-function salvarHistoricoDinheiroLocalStorage(historico) {
-  try {
-    localStorage.setItem("garcom-dinheiro-historico", JSON.stringify(historico));
-  } catch (e) { console.warn("Erro ao salvar histórico de dinheiro", e); }
-}
-
-function carregarHistoricoDinheiroLocalStorage() {
-  try {
-    return JSON.parse(localStorage.getItem("garcom-dinheiro-historico")) || [];
-  } catch (e) { return []; }
-}
-
-let dinheiroHistorico = carregarHistoricoDinheiroLocalStorage();
-let filtroDinheiro = "tudo"; // "hoje", "mes", "tudo"
-
-function adicionarFechamentoDinheiro(valor) {
-  dinheiroHistorico.push({
-    valor,
-    data: new Date().toISOString()
-  });
-  salvarHistoricoDinheiroLocalStorage(dinheiroHistorico);
-}
-
-function resetarDinheiroHistorico() {
-  dinheiroHistorico = [];
-  salvarHistoricoDinheiroLocalStorage(dinheiroHistorico);
-  renderizarDinheiroPanel();
-}
-
-function filtrarHistoricoPorPeriodo(periodo) {
-  const agora = new Date();
-  if (periodo === "hoje") {
-    return dinheiroHistorico.filter(item => {
-      const d = new Date(item.data);
-      return d.toDateString() === agora.toDateString();
-    });
-  } else if (periodo === "mes") {
-    return dinheiroHistorico.filter(item => {
-      const d = new Date(item.data);
-      return d.getMonth() === agora.getMonth() && d.getFullYear() === agora.getFullYear();
-    });
-  }
-  return dinheiroHistorico;
-}
-
-function calcularTotalFechado(periodo) {
-  return filtrarHistoricoPorPeriodo(periodo).reduce((s, i) => s + i.valor, 0);
-}
-
-function renderizarDinheiroPanel() {
-  const total = calcularTotalFechado(filtroDinheiro);
-  const elTotal = document.getElementById("dinheiro-total-fechado");
-  if (elTotal) elTotal.textContent = formatPriceBRL(total);
-
-  // Lista de fechamentos
-  const lista = document.getElementById("dinheiro-historico-lista");
-  if (lista) {
-    const historicoFiltrado = filtrarHistoricoPorPeriodo(filtroDinheiro).slice(-10).reverse();
-    lista.innerHTML = historicoFiltrado.map(item => {
-      const d = new Date(item.data);
-      return `<li>${d.toLocaleString("pt-BR")} — <b>${formatPriceBRL(item.valor)}</b></li>`;
-    }).join("") || '<li style="color:#aaa;">Nenhum fechamento registrado.</li>';
-  }
-}
-
-// Inicializar painel ao carregar
-window.addEventListener("DOMContentLoaded", renderizarDinheiroPanel);
-
-// Eventos dos botões do painel
-window.addEventListener("DOMContentLoaded", () => {
-  document.getElementById("btn-filtrar-hoje")?.addEventListener("click", () => { filtroDinheiro = "hoje"; renderizarDinheiroPanel(); });
-  document.getElementById("btn-filtrar-mes")?.addEventListener("click", () => { filtroDinheiro = "mes"; renderizarDinheiroPanel(); });
-  document.getElementById("btn-filtrar-tudo")?.addEventListener("click", () => { filtroDinheiro = "tudo"; renderizarDinheiroPanel(); });
-  document.getElementById("btn-resetar-dinheiro")?.addEventListener("click", () => {
-    if (confirm("Deseja realmente reiniciar o contador de dinheiro? Isso apagará o histórico.")) {
-      resetarDinheiroHistorico();
-    }
-  });
-});
 function salvarMesasLocalStorage() {
   try {
     const data = {
@@ -341,7 +256,7 @@ function adicionarPedidoMesa(produto, triggerEl = null) {
   renderPedidosMesa();
   atualizarListaMesas();
   salvarMesasLocalStorage();
-  syncMesaToSupabase(mesaAtual, mesa.pedidos);
+  salvarMesasLocalStorage();
   
   if (triggerEl instanceof HTMLElement) {
     triggerEl.classList.add("pulse");
@@ -367,7 +282,7 @@ function removerPedidoMesa(produtoId) {
   renderPedidosMesa();
   atualizarListaMesas();
   salvarMesasLocalStorage();
-  syncMesaToSupabase(mesaAtual, mesa.pedidos);
+  salvarMesasLocalStorage();
 }
 
 function limparMesa() {
@@ -380,7 +295,7 @@ function limparMesa() {
       renderPedidosMesa();
       atualizarListaMesas();
       salvarMesasLocalStorage();
-      syncMesaToSupabase(mesaAtual, []);
+      atualizarListaMesas();
     }
   }
 }
@@ -395,18 +310,11 @@ function finalizarMesa() {
   }
 
   const total = calcularTotalMesa(mesa);
-  const confirmar = confirm(`Finalizar mesa ${mesaAtual}?\n\nTotal: ${formatPriceBRL(total)}\n\nA mesa será removida da lista de mesas abertas e o valor será somado ao contador de dinheiro.`);
+  const confirmar = confirm(`Finalizar mesa ${mesaAtual}?\n\nTotal: ${formatPriceBRL(total)}\n\nA mesa será removida da lista de mesas abertas.`);
   
   if (confirmar) {
-    adicionarFechamentoDinheiro(total);
     mesasAbertas.delete(mesaAtual);
     
-    // Atualiza status no Supabase
-    supabase.from("mesas_garcom")
-      .update({ status: 'fechada' })
-      .eq("cardapio_id", activeCardapio.id)
-      .eq("numero_mesa", mesaAtual);
-
     mesaAtual = null;
     numeroMesaInput.value = "";
     mesaAtualEl.textContent = "-";
@@ -415,7 +323,6 @@ function finalizarMesa() {
     renderPedidosMesa();
     atualizarListaMesas();
     salvarMesasLocalStorage();
-    renderizarDinheiroPanel();
   }
 }
 
@@ -618,19 +525,6 @@ function getMesasFiltradas() {
 }
 
 function atualizarResumoMesas() {
-  const totalMesas = mesasAbertas.size;
-  const totalItens = Array.from(mesasAbertas.values()).reduce(
-    (sum, mesa) => sum + mesa.pedidos.reduce((count, pedido) => count + pedido.quantidade, 0),
-    0
-  );
-  const totalValor = Array.from(mesasAbertas.values()).reduce(
-    (sum, mesa) => sum + calcularTotalMesa(mesa),
-    0
-  );
-
-  if (totalMesasAbertasEl) totalMesasAbertasEl.textContent = totalMesas;
-  if (totalPedidosEl) totalPedidosEl.textContent = totalItens;
-  if (totalValorEl) totalValorEl.textContent = formatPriceBRL(totalValor);
 }
 
 function atualizarListaMesas() {
@@ -780,17 +674,8 @@ function attachEvents() {
     atualizarListaMesas();
   });
 
-  // Resetar todas as mesas
-  resetMesasBtn?.addEventListener("click", resetTodasMesas);
-
   // Tela cheia
   fullscreenBtn?.addEventListener("click", toggleFullscreen);
-
-  // Buscar mesas / pedidos
-  mesaSearchInput?.addEventListener("input", () => {
-    mesaSearchTerm = String(mesaSearchInput.value || "").trim();
-    atualizarListaMesas();
-  });
 
   // Calculadora
   const calcPessoasInput = document.getElementById("calc-pessoas");

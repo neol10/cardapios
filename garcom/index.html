@@ -70,45 +70,6 @@
 
       <!-- Pedidos da mesa atual -->
       <aside class="pedidos-box">
-        <div class="garcom-summary">
-          <div class="summary-card">
-            <span>Mesas abertas</span>
-            <strong id="total-mesas-abertas">0</strong>
-          </div>
-          <div class="summary-card">
-            <span>Itens em aberto</span>
-            <strong id="total-pedidos-abertos">0</strong>
-          </div>
-          <div class="summary-card">
-            <span>Total em aberto</span>
-            <strong id="total-aberto-valor">R$ 0,00</strong>
-          </div>
-        </div>
-        <!-- Painel de contador de dinheiro (Escondido num accordion para não poluir) -->
-        <details class="details" id="caixa-details" style="margin-bottom: 12px;">
-          <summary>💰 Caixa e Fechamentos</summary>
-          <div class="dinheiro-panel" style="padding: 12px;">
-            <div class="summary-card">
-              <span>Total Fechado (acumulado)</span>
-              <strong id="dinheiro-total-fechado">R$ 0,00</strong>
-              <div style="margin-top:8px;">
-                <button id="btn-filtrar-hoje" class="btn btn-ghost btn-xs">Hoje</button>
-                <button id="btn-filtrar-mes" class="btn btn-ghost btn-xs">Mês</button>
-                <button id="btn-filtrar-tudo" class="btn btn-ghost btn-xs">Tudo</button>
-              </div>
-              <button id="btn-resetar-dinheiro" class="btn btn-secondary btn-xs" style="margin-top:8px;">Reiniciar contador</button>
-            </div>
-            <div class="dinheiro-historico">
-              <span style="font-size:0.9em;color:#666;">Últimos fechamentos:</span>
-              <ul id="dinheiro-historico-lista" style="margin:0;padding:0;list-style:none;font-size:0.95em;"></ul>
-            </div>
-          </div>
-        </details>
-
-        <label class="mesa-search">
-          <span>Pesquisar mesas / pedidos</span>
-          <input type="search" id="mesa-search" placeholder="Número ou produto..." />
-        </label>
 
         <section id="mesa-detalhes" class="panel is-hidden">
           <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
@@ -146,19 +107,10 @@
           <button id="finalizar-mesa-btn" class="btn btn-primary">Finalizar Mesa</button>
         </div>
 
-        <!-- Lista de mesas -->
-        <details class="details" id="mesas-abertas">
+        <details class="details" id="mesas-abertas" open>
           <summary>Mesas Abertas (<span id="count-mesas">0</span>)</summary>
           <div id="lista-mesas" class="mesas-list">
             <p class="muted">Nenhuma mesa aberta.</p>
-          </div>
-        </details>
-
-        <details class="details" style="margin-top: 12px;">
-          <summary>⚙️ Opções Avançadas</summary>
-          <div style="padding: 12px;">
-            <p class="muted" style="font-size: 0.85rem; margin-bottom: 8px;">Área de perigo. Apenas use se for fechar o expediente.</p>
-            <button id="reset-mesas-btn" class="btn btn-ghost btn-full">Resetar Todas as Mesas</button>
           </div>
         </details>
       </aside>
