@@ -209,6 +209,13 @@ function selecionarMesa(numero) {
   renderPedidosMesa();
   atualizarListaMesas();
   salvarMesasLocalStorage();
+
+  // No mobile, rolar a tela até os detalhes da mesa para o usuário ver
+  if (window.innerWidth <= 900) {
+    setTimeout(() => {
+      document.getElementById("mesa-detalhes")?.scrollIntoView({ behavior: "smooth", block: "start" });
+    }, 100);
+  }
 }
 
 function confirmarCriarMesaParaPedido(produto) {
