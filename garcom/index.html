@@ -84,23 +84,26 @@
             <strong id="total-aberto-valor">R$ 0,00</strong>
           </div>
         </div>
-        <!-- Painel de contador de dinheiro -->
-        <div class="dinheiro-panel">
-          <div class="summary-card">
-            <span>Total Fechado (acumulado)</span>
-            <strong id="dinheiro-total-fechado">R$ 0,00</strong>
-            <div style="margin-top:8px;">
-              <button id="btn-filtrar-hoje" class="btn btn-ghost btn-xs">Hoje</button>
-              <button id="btn-filtrar-mes" class="btn btn-ghost btn-xs">Mês</button>
-              <button id="btn-filtrar-tudo" class="btn btn-ghost btn-xs">Tudo</button>
+        <!-- Painel de contador de dinheiro (Escondido num accordion para não poluir) -->
+        <details class="details" id="caixa-details" style="margin-bottom: 12px;">
+          <summary>💰 Caixa e Fechamentos</summary>
+          <div class="dinheiro-panel" style="padding: 12px;">
+            <div class="summary-card">
+              <span>Total Fechado (acumulado)</span>
+              <strong id="dinheiro-total-fechado">R$ 0,00</strong>
+              <div style="margin-top:8px;">
+                <button id="btn-filtrar-hoje" class="btn btn-ghost btn-xs">Hoje</button>
+                <button id="btn-filtrar-mes" class="btn btn-ghost btn-xs">Mês</button>
+                <button id="btn-filtrar-tudo" class="btn btn-ghost btn-xs">Tudo</button>
+              </div>
+              <button id="btn-resetar-dinheiro" class="btn btn-secondary btn-xs" style="margin-top:8px;">Reiniciar contador</button>
             </div>
-            <button id="btn-resetar-dinheiro" class="btn btn-secondary btn-xs" style="margin-top:8px;">Reiniciar contador</button>
+            <div class="dinheiro-historico">
+              <span style="font-size:0.9em;color:#666;">Últimos fechamentos:</span>
+              <ul id="dinheiro-historico-lista" style="margin:0;padding:0;list-style:none;font-size:0.95em;"></ul>
+            </div>
           </div>
-          <div class="dinheiro-historico">
-            <span style="font-size:0.9em;color:#666;">Últimos fechamentos:</span>
-            <ul id="dinheiro-historico-lista" style="margin:0;padding:0;list-style:none;font-size:0.95em;"></ul>
-          </div>
-        </div>
+        </details>
 
         <label class="mesa-search">
           <span>Pesquisar mesas / pedidos</span>
@@ -113,23 +116,25 @@
             <button class="btn btn-ghost" id="fechar-detalhes">Voltar</button>
           </div>
 
-          <div class="calculator-card">
-            <h3>🧮 Dividir Conta</h3>
-            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:12px; margin-top:8px;">
-              <label>
-                <span class="muted" style="font-size:0.75rem;">Total</span>
-                <input type="text" id="calc-total" readonly style="background:rgba(255,255,255,0.05); font-weight:800;">
-              </label>
-              <label>
-                <span class="muted" style="font-size:0.75rem;">Pessoas</span>
-                <input type="number" id="calc-pessoas" value="1" min="1" step="1">
-              </label>
+          <details class="details" style="margin-bottom: 12px; background: rgba(0,0,0,0.2);">
+            <summary>🧮 Dividir Conta</summary>
+            <div class="calculator-card" style="padding: 12px;">
+              <div style="display:grid; grid-template-columns: 1fr 1fr; gap:12px;">
+                <label>
+                  <span class="muted" style="font-size:0.75rem;">Total</span>
+                  <input type="text" id="calc-total" readonly style="background:rgba(255,255,255,0.05); font-weight:800;">
+                </label>
+                <label>
+                  <span class="muted" style="font-size:0.75rem;">Pessoas</span>
+                  <input type="number" id="calc-pessoas" value="1" min="1" step="1">
+                </label>
+              </div>
+              <div style="margin-top:12px; padding:12px; background:rgba(128,128,128,0.1); border-radius:12px; text-align:center;">
+                <span class="muted">Valor por pessoa:</span>
+                <strong id="calc-resultado" style="display:block; font-size:1.5rem; color:var(--primary);">R$ 0,00</strong>
+              </div>
             </div>
-            <div style="margin-top:12px; padding:12px; background:rgba(128,128,128,0.1); border-radius:12px; text-align:center;">
-              <span class="muted">Valor por pessoa:</span>
-              <strong id="calc-resultado" style="display:block; font-size:1.5rem; color:var(--primary);">R$ 0,00</strong>
-            </div>
-          </div>
+          </details>
 
           <div id="pedidos-mesa" class="pedidos-mesa">
             <p class="muted">Selecione uma mesa ou adicione produtos.</p>
@@ -149,7 +154,13 @@
           </div>
         </details>
 
-        <button id="reset-mesas-btn" class="btn btn-ghost btn-full">Resetar Todas as Mesas</button>
+        <details class="details" style="margin-top: 12px;">
+          <summary>⚙️ Opções Avançadas</summary>
+          <div style="padding: 12px;">
+            <p class="muted" style="font-size: 0.85rem; margin-bottom: 8px;">Área de perigo. Apenas use se for fechar o expediente.</p>
+            <button id="reset-mesas-btn" class="btn btn-ghost btn-full">Resetar Todas as Mesas</button>
+          </div>
+        </details>
       </aside>
     </main>
 
