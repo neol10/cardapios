@@ -277,6 +277,19 @@ body.bg-radial {
   box-shadow: 0 4px 10px rgba(234, 67, 53, 0.15);
 }
 
+.link-pwa {
+  color: var(--theme, #ff7b00);
+  border: 1px solid rgba(255, 123, 0, 0.2);
+  background: rgba(255, 123, 0, 0.05);
+}
+
+.link-pwa:hover {
+  background: rgba(255, 123, 0, 0.1);
+  border-color: rgba(255, 123, 0, 0.35);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 10px rgba(255, 123, 0, 0.15);
+}
+
 .link-whatsapp {
   color: #25d366;
   border: 1px solid rgba(37, 211, 102, 0.2);

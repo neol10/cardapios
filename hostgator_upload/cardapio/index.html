@@ -86,14 +86,6 @@
           <h1 id="cardapio-nome">Carregando cardápio...</h1>
           <button id="owner-edit-btn" class="btn btn-owner-edit is-hidden" type="button">Editar cardápio</button>
           <p id="cardapio-subtitle">Escolha seus itens e finalize em poucos passos.</p>
-          <button id="pwa-install-btn" class="is-hidden" style="margin-top: 12px; display: inline-flex; align-items: center; gap: 6px; border-radius: 12px; padding: 6px 12px; font-weight: 500; font-size: 0.8rem; background: var(--bg-card); color: var(--text-muted); border: 1px solid var(--border-color); cursor: pointer; box-shadow: 0 2px 4px rgba(0,0,0,0.02);">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-              <polyline points="7 10 12 15 17 10"></polyline>
-              <line x1="12" y1="15" x2="12" y2="3"></line>
-            </svg>
-            Adicionar à Tela Inicial
-          </button>
         </div>
         <div class="hero-media">
           <img id="cardapio-foto" class="is-hidden" alt="" />
@@ -125,6 +117,14 @@
                 </svg>
                 <span>WhatsApp</span>
               </a>
+              <button id="pwa-install-btn" class="link link-pwa is-hidden" type="button">
+                <svg class="link-icon" viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                  <polyline points="7 10 12 15 17 10"></polyline>
+                  <line x1="12" y1="15" x2="12" y2="3"></line>
+                </svg>
+                <span>Instalar App</span>
+              </button>
             </div>
             <div id="galeria-wrap" class="galeria-wrap is-hidden" aria-label="Imagens do estabelecimento">
               <div id="galeria" class="galeria-grid"></div>
