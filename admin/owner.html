@@ -53,65 +53,86 @@
              </button>
           </div>
 
-          <label>
-            Nome
-            <input type="text" name="nome" required />
-          </label>
+          <details class="details details-sub" open>
+            <summary>📋 Informações Básicas</summary>
+            <div class="stack-gap" style="padding: 12px 0;">
+              <label>
+                Nome
+                <input type="text" name="nome" required />
+              </label>
 
-          <label>
-            WhatsApp (somente números)
-            <input type="text" name="whatsapp" required />
-          </label>
+              <label>
+                Slogan
+                <div style="display:flex; gap:8px;">
+                  <input type="text" name="slogan" style="flex:1;" />
+                  <button type="button" class="btn js-open-templates" title="Modelos de texto">📝</button>
+                </div>
+                <input type="hidden" name="templates_json" />
+              </label>
 
-          <label>
-            Slogan
-            <div style="display:flex; gap:8px;">
-              <input type="text" name="slogan" style="flex:1;" />
-              <button type="button" class="btn js-open-templates" title="Modelos de texto">📝</button>
+              <label>
+                Tipo de cardápio
+                <select name="modo">
+                  <option value="pedido">Com sistema de pedidos</option>
+                  <option value="marmita">Modo Marmita</option>
+                  <option value="agendamento">Agendamento (Serviços)</option>
+                  <option value="catalogo">Apenas catálogo (sem pedidos)</option>
+                </select>
+              </label>
             </div>
-            <input type="hidden" name="templates_json" />
-          </label>
+          </details>
 
-          <label>
-            Tipo de cardápio
-            <select name="modo">
-              <option value="pedido">Com sistema de pedidos</option>
-              <option value="marmita">Modo Marmita</option>
-              <option value="agendamento">Agendamento (Serviços)</option>
-              <option value="catalogo">Apenas catálogo (sem pedidos)</option>
-            </select>
-          </label>
+          <details class="details details-sub">
+            <summary>📞 Contato e Endereço</summary>
+            <div class="stack-gap" style="padding: 12px 0;">
+              <label>
+                WhatsApp (somente números)
+                <input type="text" name="whatsapp" required />
+              </label>
 
-          <label id="modo-garcom-wrap">
-            <input type="checkbox" name="modo_garcom_enabled" />
-            Habilitar modo garçom (funciona em pedido e catálogo)
-          </label>
+              <label>
+                Instagram (URL)
+                <input type="url" name="instagram_url" placeholder="https://instagram.com/sua_loja" />
+              </label>
 
-          <label>
-            Horário (texto)
-            <input type="text" name="horario_funcionamento" placeholder="Ex.: Seg-Sex 18h às 23h" />
-          </label>
+              <label>
+                Endereço
+                <input type="text" name="endereco" />
+              </label>
+            </div>
+          </details>
 
-          <div class="two-cols">
-            <label>
-              Abre às
-              <input type="time" name="abre_em" />
-            </label>
-            <label>
-              Fecha às
-              <input type="time" name="fecha_em" />
-            </label>
-          </div>
+          <details class="details details-sub">
+            <summary>⏰ Horários de Funcionamento</summary>
+            <div class="stack-gap" style="padding: 12px 0;">
+              <label>
+                Horário (texto)
+                <input type="text" name="horario_funcionamento" placeholder="Ex.: Seg-Sex 18h às 23h" />
+              </label>
 
-          <label>
-            Endereço
-            <input type="text" name="endereco" />
-          </label>
+              <div class="two-cols">
+                <label>
+                  Abre às
+                  <input type="time" name="abre_em" />
+                </label>
+                <label>
+                  Fecha às
+                  <input type="time" name="fecha_em" />
+                </label>
+              </div>
+            </div>
+          </details>
 
-          <label>
-            Instagram (URL)
-            <input type="url" name="instagram_url" placeholder="https://instagram.com/sua_loja" />
-          </label>
+          <details class="details details-sub">
+            <summary>⚙️ Configurações Avançadas</summary>
+            <div class="stack-gap" style="padding: 12px 0;">
+              <label id="modo-garcom-wrap" class="switch-label">
+                <input type="checkbox" name="modo_garcom_enabled" />
+                <span class="switch-slider"></span>
+                Habilitar modo garçom
+              </label>
+            </div>
+          </details>
 
           <details class="details details-sub">
             <summary>Imagens do cardápio</summary>
