@@ -2408,15 +2408,15 @@ async function init() {
 init();
 
 // PWA Install Logic
-let deferredPrompt;
 const installBtn = document.getElementById("pwa-install-btn");
 
+if (window.deferredPrompt && installBtn) {
+  installBtn.classList.remove('is-hidden');
+}
+
 window.addEventListener('beforeinstallprompt', (e) => {
-  // Impede o mini-infobar automático no mobile
   e.preventDefault();
-  // Guarda o evento para usar quando o usuário clicar no botão
-  deferredPrompt = e;
-  // Exibe o botão de instalação
+  window.deferredPrompt = e;
   if (installBtn) {
     installBtn.classList.remove('is-hidden');
   }
@@ -2424,26 +2424,21 @@ window.addEventListener('beforeinstallprompt', (e) => {
 
 if (installBtn) {
   installBtn.addEventListener('click', async () => {
-    if (deferredPrompt) {
-      // Exibe o prompt nativo de instalação
-      deferredPrompt.prompt();
-      // Aguarda a resposta do usuário
-      const { outcome } = await deferredPrompt.userChoice;
+    if (window.deferredPrompt) {
+      window.deferredPrompt.prompt();
+      const { outcome } = await window.deferredPrompt.userChoice;
       if (outcome === 'accepted') {
-        // Usuário aceitou, podemos esconder o botão
         installBtn.classList.add('is-hidden');
       }
-      // O prompt só pode ser usado uma vez, então limpamos a variável
-      deferredPrompt = null;
+      window.deferredPrompt = null;
     }
   });
 }
 
 window.addEventListener('appinstalled', () => {
-  // Esconde o botão após a instalação ser concluída
   if (installBtn) {
     installBtn.classList.add('is-hidden');
   }
-  deferredPrompt = null;
+  window.deferredPrompt = null;
   console.log('PWA foi instalado com sucesso');
 });
