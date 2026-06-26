@@ -1,15 +1,15 @@
 :root {
-  --bg: #14110f;
-  --card: #1d1916;
-  --text: #f3ede7;
-  --muted: #b7aca3;
-  --primary: #c8945b;
-  --primary-contrast: #14110f;
-  --border: #2f2722;
-  --success: #4fb38b;
-  --danger: #e0705a;
-  --shadow: 0 18px 40px rgba(8, 6, 5, 0.6);
-  --accent: #6f4e37;
+  --bg: #09090b;
+  --card: rgba(24, 24, 27, 0.4);
+  --text: #fafafa;
+  --muted: #a1a1aa;
+  --primary: #ff7b00;
+  --primary-contrast: #ffffff;
+  --border: #27272a;
+  --success: #10b981;
+  --danger: #ef4444;
+  --shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7);
+  --accent: #ff9900;
 }
 
 * {
@@ -20,9 +20,10 @@ body {
   margin: 0;
   font-family: "Manrope", sans-serif;
   background:
-    radial-gradient(circle at 10% 10%, rgba(111, 78, 55, 0.3) 0%, transparent 45%),
-    radial-gradient(circle at 90% 0%, rgba(200, 148, 91, 0.18) 0%, transparent 50%),
-    #0f0d0b;
+    radial-gradient(circle at 10% 0%, rgba(255, 123, 0, 0.15) 0%, transparent 45%),
+    radial-gradient(circle at 90% 100%, rgba(200, 148, 91, 0.12) 0%, transparent 45%),
+    radial-gradient(circle at 50% 50%, rgba(255, 123, 0, 0.05) 0%, transparent 60%),
+    var(--bg);
   color: var(--text);
   min-height: 100vh;
 }
@@ -115,7 +116,7 @@ select {
   border: 1px solid var(--border);
   border-radius: 14px;
   padding: 13px 16px;
-  background: rgba(18, 16, 14, 0.95);
+  background: rgba(24, 24, 27, 0.6);
   color: var(--text);
   font-size: 0.95rem;
   transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
@@ -126,7 +127,7 @@ input:hover,
 textarea:hover,
 select:hover {
   border-color: color-mix(in srgb, var(--primary) 35%, var(--border));
-  background: rgba(24, 21, 18, 0.98);
+  background: rgba(39, 39, 42, 0.8);
 }
 
 input:focus,
@@ -148,13 +149,13 @@ select:disabled {
 
 .btn {
   border: 1px solid var(--border);
-  background: #1b1714;
+  background: rgba(39, 39, 42, 0.6);
   color: var(--text);
   border-radius: 12px;
   padding: 11px 14px;
   cursor: pointer;
   font-weight: 700;
-  transition: transform 140ms ease, filter 140ms ease, border-color 140ms ease;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .btn:disabled {
@@ -165,8 +166,9 @@ select:disabled {
 }
 
 .btn:hover {
-  transform: translateY(-1px);
-  filter: brightness(1.03);
+  transform: translateY(-2px);
+  background: rgba(39, 39, 42, 0.9);
+  border-color: rgba(255, 255, 255, 0.1);
 }
 
 .btn:active {
@@ -175,12 +177,14 @@ select:disabled {
 
 .btn-primary {
   border-color: transparent;
-  background: linear-gradient(
-    135deg,
-    color-mix(in srgb, var(--primary) 92%, white),
-    color-mix(in srgb, var(--accent) 92%, black)
-  );
-  color: #1a1410;
+  background: linear-gradient(135deg, var(--primary), var(--accent));
+  color: #fff;
+  box-shadow: 0 4px 12px rgba(255, 123, 0, 0.3);
+}
+
+.btn-primary:hover {
+  background: linear-gradient(135deg, var(--accent), var(--primary));
+  box-shadow: 0 8px 16px rgba(255, 123, 0, 0.4);
 }
 
 .btn-lg {
@@ -217,9 +221,11 @@ select:disabled {
   gap: 10px;
   margin-bottom: 14px;
   padding: 12px 16px;
-  border: 1px solid var(--border);
+  border: 1px solid rgba(255, 255, 255, 0.06);
   border-radius: 18px;
-  background: rgba(22, 18, 15, 0.9);
+  background: rgba(24, 24, 27, 0.4);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
   box-shadow: var(--shadow);
 }
 
@@ -266,8 +272,10 @@ select:disabled {
 }
 
 .panel {
-  background: linear-gradient(165deg, rgba(32, 28, 25, 0.98), rgba(20, 18, 16, 1));
-  border: 1px solid var(--border);
+  background: var(--card);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.06);
   border-radius: 24px;
   padding: 24px;
   box-shadow: var(--shadow);
@@ -279,9 +287,14 @@ select:disabled {
 .panel::before {
   content: '';
   position: absolute;
-  top: 0; left: 0; right: 0;
-  height: 1px;
-  background: linear-gradient(90deg, transparent, rgba(200, 148, 91, 0.15), transparent);
+  top: 0; left: 0; right: 0; bottom: 0;
+  border-radius: 24px;
+  padding: 2px;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.12), rgba(255, 255, 255, 0));
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
 }
 
 .panel-full {

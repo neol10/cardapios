@@ -28,162 +28,239 @@
         visibility: hidden;
       }
 
-      /* Tema dark somente na vitrine (não altera /cardapio nem /admin) */
+      /* Tema dark premium para a vitrine */
       :root {
-        --bg: #0f0d0b;
-        --surface: #171311;
-        --text: #f3ede7;
-        --muted: #b7aca3;
-        --border: #2f2722;
-        --shadow: 0 18px 50px rgba(0, 0, 0, 0.55);
+        --bg: #09090b; /* Zinc 950 */
+        --surface: #18181b; /* Zinc 900 */
+        --text: #fafafa;
+        --muted: #a1a1aa;
+        --border: #27272a;
+        --theme-vitrine: #ff7b00;
+        --shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7);
       }
 
       body {
         background:
-          radial-gradient(circle at 12% 12%, rgba(200, 148, 91, 0.14) 0%, transparent 48%),
-          radial-gradient(circle at 92% 0%, rgba(111, 78, 55, 0.16) 0%, transparent 54%),
+          radial-gradient(circle at 10% 0%, rgba(255, 123, 0, 0.15) 0%, transparent 45%),
+          radial-gradient(circle at 90% 100%, rgba(200, 148, 91, 0.12) 0%, transparent 45%),
+          radial-gradient(circle at 50% 50%, rgba(255, 123, 0, 0.05) 0%, transparent 60%),
           var(--bg);
         color: var(--text);
+        font-family: 'Sora', sans-serif;
       }
 
       .hero {
-        background:
-          linear-gradient(180deg, rgba(255, 255, 255, 0.06) 0%, transparent 70%);
+        background: transparent;
+        padding-bottom: 40px;
+        position: relative;
       }
 
-      .hero {
-        padding-bottom: 22px;
+      .hero::after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        height: 1px;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+      }
+
+      .hero-content {
+        max-width: 1100px;
+        margin: 0 auto;
+        padding: 40px 16px 20px;
+        text-align: left;
+      }
+
+      .chip {
+        display: inline-block;
+        background: rgba(255, 123, 0, 0.1);
+        border: 1px solid rgba(255, 123, 0, 0.2);
+        color: var(--theme-vitrine);
+        box-shadow: 0 0 20px rgba(255, 123, 0, 0.15);
+        backdrop-filter: blur(10px);
+        padding: 6px 14px;
+        border-radius: 999px;
+        font-weight: 700;
+        font-size: 0.85rem;
+        letter-spacing: 0.05em;
+        text-transform: uppercase;
+        margin-bottom: 16px;
+      }
+
+      .hero h1 {
+        font-size: clamp(2.5rem, 6vw, 3.8rem);
+        font-weight: 800;
+        background: linear-gradient(135deg, #ffffff 0%, #a1a1aa 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        margin: 0 0 16px 0;
+        letter-spacing: -0.03em;
+        line-height: 1.1;
+      }
+
+      #vitrine-subtitle {
+        font-size: 1.15rem;
+        color: var(--muted);
+        max-width: 50ch;
+        line-height: 1.6;
       }
 
       .vitrine {
         max-width: 1100px;
         margin: 0 auto;
-        padding: 0 16px 22px;
+        padding: 40px 16px;
       }
 
       .vitrine-head {
         display: flex;
         flex-wrap: wrap;
-        gap: 10px;
-        align-items: baseline;
+        gap: 12px;
+        align-items: center;
         justify-content: space-between;
-        margin: 8px auto 0;
+        margin-bottom: 24px;
       }
 
       .vitrine-head h2 {
         margin: 0;
-        font-size: 1.35rem;
+        font-size: 1.8rem;
         letter-spacing: -0.02em;
-        font-weight: var(--heading-weight);
+        font-weight: 800;
       }
 
       .vitrine-head p {
         margin: 0;
-        color: color-mix(in srgb, var(--text) 72%, var(--muted));
+        color: var(--theme-vitrine);
+        font-weight: 600;
+        background: rgba(255, 123, 0, 0.1);
+        padding: 4px 12px;
+        border-radius: 999px;
       }
 
       .vitrine-message {
         margin: 14px 0 0;
-        font-weight: 700;
-        color: color-mix(in srgb, var(--text) 78%, var(--muted));
+        font-weight: 600;
+        color: var(--muted);
       }
 
       .vitrine-message.error {
-        color: color-mix(in srgb, var(--text) 92%, white);
-        border: 1px solid color-mix(in srgb, var(--theme2) 18%, var(--border));
-        background: rgba(255, 255, 255, 0.06);
-        padding: 10px 12px;
-        border-radius: 14px;
+        color: #f87171;
+        border: 1px solid rgba(248, 113, 113, 0.2);
+        background: rgba(248, 113, 113, 0.05);
+        padding: 12px 16px;
+        border-radius: 12px;
       }
 
       .vitrine-grid {
         display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-        gap: 14px;
-        margin-top: 14px;
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+        gap: 24px;
       }
 
       .vitrine-card {
-        display: grid;
-        gap: 10px;
-        padding: 14px;
-        border-radius: 18px;
-        border: 1px solid color-mix(in srgb, var(--border) 92%, transparent);
-        background: rgba(255, 255, 255, 0.05);
-        box-shadow:
-          0 18px 46px rgba(0, 0, 0, 0.45),
-          0 0 0 1px rgba(255, 255, 255, 0.04);
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+        padding: 16px;
+        border-radius: 24px;
+        border: 1px solid rgba(255, 255, 255, 0.06);
+        background: rgba(24, 24, 27, 0.4);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        box-shadow: var(--shadow);
         text-decoration: none;
         color: inherit;
-        transition: transform 140ms ease, filter 140ms ease, border-color 140ms ease;
+        transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        position: relative;
         overflow: hidden;
       }
 
-      .vitrine-card:hover {
-        transform: translateY(-1px);
-        filter: brightness(1.01);
-        border-color: color-mix(in srgb, var(--theme2) 26%, var(--border));
+      .vitrine-card::before {
+        content: '';
+        position: absolute;
+        top: 0; left: 0; right: 0; bottom: 0;
+        border-radius: 24px;
+        padding: 2px;
+        background: linear-gradient(135deg, rgba(255, 255, 255, 0.12), rgba(255, 255, 255, 0));
+        -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+        -webkit-mask-composite: xor;
+        mask-composite: exclude;
+        pointer-events: none;
       }
 
-      .vitrine-card:focus-visible {
-        outline: 3px solid color-mix(in srgb, var(--theme) 26%, transparent);
-        outline-offset: 3px;
+      .vitrine-card:hover {
+        transform: translateY(-8px);
+        background: rgba(24, 24, 27, 0.7);
+        border-color: rgba(255, 123, 0, 0.3);
+        box-shadow: 0 35px 60px -15px rgba(0, 0, 0, 0.8), 0 0 30px rgba(255, 123, 0, 0.15);
       }
 
       .vitrine-media {
         width: 100%;
         aspect-ratio: 16 / 10;
-        max-height: 120px;
-        border-radius: 14px;
-        border: 1px solid color-mix(in srgb, var(--border) 95%, transparent);
-        background:
-          radial-gradient(circle at 18% 18%, rgba(200, 148, 91, 0.16) 0%, transparent 55%),
-          radial-gradient(circle at 88% 0%, rgba(111, 78, 55, 0.16) 0%, transparent 58%),
-          linear-gradient(135deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.02));
+        border-radius: 16px;
+        border: none;
+        background: rgba(255,255,255,0.02);
         object-fit: cover;
         display: block;
+        transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+      }
+      
+      .vitrine-card:hover .vitrine-media {
+        transform: scale(1.05);
       }
 
       .vitrine-card h3 {
         margin: 0;
-        font-size: 1.16rem;
-        line-height: 1.15;
+        font-size: 1.35rem;
+        line-height: 1.2;
         letter-spacing: -0.015em;
-        font-weight: var(--heading-weight);
+        font-weight: 800;
+        color: var(--text);
       }
 
       .vitrine-card .muted {
         margin: 0;
-        color: color-mix(in srgb, var(--text) 72%, var(--muted));
-        line-height: 1.45;
+        color: var(--muted);
+        line-height: 1.5;
+        font-size: 0.95rem;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
       }
 
       .vitrine-actions {
-        margin-top: 4px;
+        margin-top: auto;
+        padding-top: 4px;
       }
 
       .vitrine-actions .btn {
-        width: auto;
-        display: inline-flex;
+        width: 100%;
+        display: flex;
         align-items: center;
         justify-content: center;
-        padding: 11px 14px;
+        padding: 14px;
         border-radius: 14px;
+        background: rgba(255, 123, 0, 0.1);
+        color: var(--theme-vitrine);
+        border: 1px solid rgba(255, 123, 0, 0.2);
+        font-weight: 800;
+        font-size: 1rem;
+        transition: all 0.3s ease;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
       }
 
-      @media (min-width: 980px) {
-        .vitrine {
-          padding-bottom: 34px;
-        }
-
-        .vitrine-grid {
-          gap: 16px;
-          margin-top: 16px;
-        }
+      .vitrine-card:hover .vitrine-actions .btn {
+        background: linear-gradient(135deg, var(--theme-vitrine), #ff9900);
+        color: #fff;
+        border: 1px solid transparent;
+        box-shadow: 0 10px 20px rgba(255, 123, 0, 0.3);
       }
 
       @media (prefers-reduced-motion: reduce) {
-        .vitrine-card {
+        .vitrine-card, .vitrine-media, .vitrine-actions .btn {
           transition: none;
         }
       }
@@ -337,7 +414,7 @@
         <!-- Catalogo -->
         <div class="pricing-card">
           <div class="plan-name">Catálogo Digital</div>
-          <div class="plan-price">R$ 75<span>,99/mês</span></div>
+          <div class="plan-price">R$ 64<span>,99/mês</span></div>
           <p class="plan-desc">Perfeito para quem quer apenas expor os produtos com elegância e profissionalismo.</p>
           <ul class="plan-features">
             <li>✨ Design Premium</li>
@@ -345,14 +422,14 @@
             <li>🔍 Busca Inteligente</li>
             <li>❌ Sem Pedidos WA</li>
           </ul>
-          <a href="https://wa.me/5519998130586?text=Olá! Quero assinar o *Plano Catálogo* (R$ 75,99/mês) para o meu negócio." target="_blank" class="btn btn-ghost">Contratar Plano</a>
+          <a href="https://pay.kiwify.com.br/nqA1b4R" target="_blank" class="btn btn-ghost">Contratar Plano</a>
         </div>
 
         <!-- Pedidos (Featured) -->
         <div class="pricing-card featured">
           <div class="plan-badge">O MELHOR CUSTO-BENEFÍCIO</div>
           <div class="plan-name">Delivery Pro</div>
-          <div class="plan-price">R$ 119<span>,99/mês</span></div>
+          <div class="plan-price">R$ 74<span>,99/mês</span></div>
           <p class="plan-desc">Sistema completo de pedidos via WhatsApp para delivery, balcão e mesas.</p>
           <ul class="plan-features">
             <li>✅ Pedidos no WhatsApp</li>
@@ -360,14 +437,16 @@
             <li>📱 Gerador de QR Code</li>
             <li>📊 Relatório de Vendas</li>
             <li>🚀 Alta Conversão</li>
-          </ul>
-          <a href="https://wa.me/5519998130586?text=Olá! Quero assinar o *Plano Delivery Pro* (R$ 119,99/mês) para o meu negócio." target="_blank" class="btn btn-primary">Contratar Pro</a>
+          <div style="display: grid; gap: 8px; margin-top: auto;">
+            <a href="https://pay.kiwify.com.br/mE05vxJ" target="_blank" class="btn btn-primary" style="padding: 12px;">Plano Mensal (R$ 74,99)</a>
+            <a href="https://pay.kiwify.com.br/s806flM" target="_blank" class="btn btn-ghost" style="padding: 10px; font-size: 0.85rem; border: 1px dashed var(--theme-vitrine); color: var(--theme-vitrine);">Plano Bimestral (R$ 89,99 / 2 meses)</a>
+          </div>
         </div>
 
         <!-- Agendamento -->
         <div class="pricing-card">
           <div class="plan-name">Agendamento de Serviços</div>
-          <div class="plan-price">R$ 90<span>,00/mês</span></div>
+          <div class="plan-price">R$ 69<span>,99/mês</span></div>
           <p class="plan-desc">Ideal para barbearias, petshops, clínicas e profissionais autônomos.</p>
           <ul class="plan-features">
             <li>📅 Gestão de Horários</li>
@@ -376,13 +455,13 @@
             <li>🔗 Link de Agendamento</li>
             <li>❌ Sem Pedidos de Delivery</li>
           </ul>
-          <a href="https://wa.me/5519998130586?text=Olá! Quero assinar o *Plano Agendamento* (R$ 90/mês) para o meu negócio." target="_blank" class="btn btn-ghost">Contratar Agendamento</a>
+          <a href="https://pay.kiwify.com.br/jgJDBTR" target="_blank" class="btn btn-ghost">Contratar Agendamento</a>
         </div>
 
         <!-- Marmita -->
         <div class="pricing-card">
           <div class="plan-name">Marmita Express</div>
-          <div class="plan-price">R$ 119<span>,00/mês</span></div>
+          <div class="plan-price">R$ 72<span>,99/mês</span></div>
           <p class="plan-desc">Especialista em Marmitarias com agendamento, prazos e controle de estoque.</p>
           <ul class="plan-features">
             <li>📅 Agendamento de Pedidos</li>
@@ -390,8 +469,10 @@
             <li>⏰ Horários de Retirada</li>
             <li>📦 Controle de Estoque</li>
             <li>🛑 Horário Limite (Hoje)</li>
-          </ul>
-          <a href="https://wa.me/5519998130586?text=Olá! Quero assinar o *Plano Marmita* (R$ 119/mês) para o meu negócio." target="_blank" class="btn btn-ghost">Contratar Marmita</a>
+          <div style="display: grid; gap: 8px; margin-top: auto;">
+            <a href="https://pay.kiwify.com.br/pjtsQrc" target="_blank" class="btn btn-ghost" style="padding: 12px;">Plano Mensal (R$ 72,99)</a>
+            <a href="https://pay.kiwify.com.br/JuB8OJO" target="_blank" class="btn btn-ghost" style="padding: 10px; font-size: 0.85rem; border: 1px dashed var(--muted);">Plano Bimestral (R$ 89,99 / 2 meses)</a>
+          </div>
         </div>
       </div>
 
