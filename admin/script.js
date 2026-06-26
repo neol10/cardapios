@@ -3236,9 +3236,29 @@ async function initOwnerPage() {
       return;
     }
 
-    const patch = getOwnerCardapioEditPayload(editForm);
-
     setOwnerMessage("Salvando...");
+
+    // Upload de imagens, se houver novas
+    if (ownerCardapio && ownerCardapio.id) {
+      try {
+        const fotoInput = editForm.foto_file;
+        if (fotoInput && fotoInput.files.length > 0) {
+          const newUrl = await uploadCardapioImage(ownerCardapio.id, fotoInput.files[0]);
+          editForm.foto_url.value = newUrl;
+        }
+
+        const bannerInput = editForm.banner_file;
+        if (bannerInput && bannerInput.files.length > 0) {
+          const newUrl = await uploadCardapioImage(ownerCardapio.id, bannerInput.files[0]);
+          editForm.banner_url.value = newUrl;
+        }
+      } catch (err) {
+        setOwnerMessage("Erro no upload de imagens: " + err.message, "error");
+        return;
+      }
+    }
+
+    const patch = getOwnerCardapioEditPayload(editForm);
     const { data, error } = await supabase.rpc("owner_update_cardapio", {
       p_slug: slug,
       p_pin: pin,

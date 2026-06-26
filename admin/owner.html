@@ -138,13 +138,15 @@
             <summary>Imagens do cardápio</summary>
 
             <label>
-              Foto do cardápio (URL)
-              <input type="url" name="foto_url" placeholder="https://..." />
+              Foto do cardápio (Imagem atual mantida se vazio)
+              <input type="hidden" name="foto_url" />
+              <input type="file" name="foto_file" accept="image/*" />
             </label>
 
             <label>
-              Banner do cardápio (URL)
-              <input type="url" name="banner_url" placeholder="https://..." />
+              Banner do cardápio (Imagem atual mantida se vazio)
+              <input type="hidden" name="banner_url" />
+              <input type="file" name="banner_file" accept="image/*" />
             </label>
           </details>
 
