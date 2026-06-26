@@ -355,7 +355,7 @@ function removerPedidoMesa(produtoId) {
   const mesa = mesasAbertas.get(mesaAtual);
   if (!mesa) return;
 
-  const index = mesa.pedidos.findIndex(p => p.id === produtoId);
+  const index = mesa.pedidos.findIndex(p => String(p.id) === String(produtoId));
   if (index < 0) return;
 
   if (mesa.pedidos[index].quantidade > 1) {
@@ -781,7 +781,7 @@ function attachEvents() {
 
     if (target.classList.contains("add-to-cart")) {
       const produtoId = target.dataset.id;
-      const produto = activeProdutos.find(p => p.id === produtoId);
+      const produto = activeProdutos.find(p => String(p.id) === String(produtoId));
       if (produto) {
         adicionarPedidoMesa(produto, target);
       }
@@ -818,7 +818,7 @@ function attachEvents() {
       const mesa = mesasAbertas.get(mesaAtual);
       if (!mesa) return;
 
-      const pedido = mesa.pedidos.find(p => p.id === produtoId);
+      const pedido = mesa.pedidos.find(p => String(p.id) === String(produtoId));
       if (pedido) {
         pedido.comentario = target.value.trim();
         salvarMesasLocalStorage();
