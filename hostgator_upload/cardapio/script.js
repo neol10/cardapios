@@ -1908,30 +1908,6 @@ async function loadCardapio() {
 
   activeCardapio = data;
 
-  // Injetar o Manifest PWA dinamicamente (Compatível com hospedagem estática via PHP)
-  try {
-    const absoluteStartUrl = new URL(`/cardapio/${data.slug}/`, window.location.origin).href;
-    const params = new URLSearchParams();
-    params.set("name", data.nome);
-    params.set("start_url", absoluteStartUrl);
-    params.set("color", data.cor_tema || "#ff6a00");
-    if (data.logo_url) {
-      params.set("logo", new URL(data.logo_url, window.location.origin).href);
-    }
-    const manifestURL = `/cardapio/cardapio/manifest.php?${params.toString()}`;
-
-    let manifestEl = document.getElementById("dynamic-manifest");
-    if (!manifestEl) {
-      manifestEl = document.createElement("link");
-      manifestEl.setAttribute("rel", "manifest");
-      manifestEl.id = "dynamic-manifest";
-      document.head.appendChild(manifestEl);
-    }
-    manifestEl.setAttribute("href", manifestURL);
-  } catch (e) {
-    console.error("Erro ao gerar manifest PWA dinâmico:", e);
-  }
-
   // Dono: botão secreto de edição
   const ownerBtn = document.getElementById("owner-edit-btn");
   let ownerBtnPin = null;
