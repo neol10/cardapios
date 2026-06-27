@@ -1910,31 +1910,28 @@ async function loadCardapio() {
 
   // Injetar o Manifest PWA dinamicamente (Compatível com hospedagem estática)
   try {
+    const absoluteStartUrl = new URL(`/cardapio/${data.slug}/`, window.location.origin).href;
+    const absoluteScope = new URL(`/cardapio/${data.slug}/`, window.location.origin).href;
+
     const manifestData = {
       name: data.nome,
       short_name: data.nome.length > 12 ? data.nome.substring(0, 12) : data.nome,
-      start_url: `/cardapio/${data.slug}`,
-      scope: `/cardapio/${data.slug}`,
+      start_url: absoluteStartUrl,
+      scope: absoluteScope,
       display: "standalone",
       background_color: "#ffffff",
       theme_color: data.theme_color || "#ff6a00",
       icons: [
         {
-          src: "/cardapio/pwa/icon-192.png",
+          src: new URL("/cardapio/pwa/icon-192.png", window.location.origin).href,
           sizes: "192x192",
           type: "image/png",
           purpose: "any maskable"
         },
         {
-          src: "/cardapio/pwa/icon-512.png",
+          src: new URL("/cardapio/pwa/icon-512.png", window.location.origin).href,
           sizes: "512x512",
           type: "image/png",
-          purpose: "any maskable"
-        },
-        {
-          src: "/cardapio/pwa/icon.svg",
-          sizes: "any",
-          type: "image/svg+xml",
           purpose: "any maskable"
         }
       ]
@@ -1948,15 +1945,17 @@ async function loadCardapio() {
       else if (lowerUrl.includes(".svg")) mimeType = "image/svg+xml";
       else if (lowerUrl.includes(".webp")) mimeType = "image/webp";
 
+      const absoluteLogo = new URL(data.logo_url, window.location.origin).href;
+
       manifestData.icons = [
         {
-          src: data.logo_url,
+          src: absoluteLogo,
           sizes: "192x192",
           type: mimeType,
           purpose: "any maskable"
         },
         {
-          src: data.logo_url,
+          src: absoluteLogo,
           sizes: "512x512",
           type: mimeType,
           purpose: "any maskable"
