@@ -1,0 +1,23 @@
+<IfModule mod_rewrite.c>
+RewriteEngine On
+RewriteBase /cardapio/
+
+# Ignora apenas arquivos reais (não ignora diretórios para que possamos roteá-los)
+RewriteCond %{REQUEST_FILENAME} -f
+RewriteRule ^ - [L]
+
+# Rota Principal (Landing Page) se não digitar nada
+RewriteRule ^$ index.html [L]
+
+# Rotas do Painel Administrativo
+RewriteRule ^admin/dashboard/?$ admin/dashboard.html [L]
+RewriteRule ^admin/owner/?$ admin/owner.html [L]
+RewriteRule ^admin/?$ admin/index.html [L]
+
+# Rotas do Garçom
+RewriteRule ^garcom/?$ garcom/index.html [L]
+RewriteRule ^garcom/(.*)$ garcom/index.html [L]
+
+# Tudo que sobrar (ex: /cardapio/meu-restaurante) vai para o aplicativo do cardápio
+RewriteRule ^(.*)$ cardapio/index.html [L]
+</IfModule>

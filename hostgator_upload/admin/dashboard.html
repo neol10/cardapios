@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Dashboard | Cardápio Digital</title>
+    <meta name="theme-color" content="#0f0d0b" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <link rel="manifest" href="/cardapio/admin/manifest.webmanifest" />
+    <link rel="icon" href="/cardapio/pwa/icon.svg" type="image/svg+xml" />
+    <link rel="icon" href="/cardapio/pwa/icon-32.png" type="image/png" sizes="32x32" />
+    <link rel="icon" href="/cardapio/pwa/icon-16.png" type="image/png" sizes="16x16" />
+    <link rel="apple-touch-icon" href="/cardapio/pwa/icon-180.png" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&family=Playfair+Display:wght@600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
+    <link rel="stylesheet" href="/cardapio/admin/style.css?v=38" />
+    <script>
+      window.__SUPABASE_CONFIG__ = {
+        url: "https://uapwitkmxuoepnjlffqy.supabase.co",
+        anonKey:
+          "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVhcHdpdGtteHVvZXBuamxmZnF5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ4OTcxMjUsImV4cCI6MjA5MDQ3MzEyNX0.YTz_EqzK4m0CMM25n3QJC1b3Nj9bikIrDDEEFi5n6ps"
+      };
+    </script>
+  </head>
+  <body class="admin-body">
+    <header class="topbar">
+      <h1>Cardápio Digital</h1>
+      <div class="topbar-actions">
+        <span id="session-email" class="pill"></span>
+        <button id="logout-btn" class="btn">Sair</button>
+      </div>
+    </header>
+
+    <div id="toast-container" class="toast-container" aria-live="polite" aria-atomic="true"></div>
+
+    <main class="dashboard-grid">
+      <section class="panel panel-full" id="analytics-panel">
+        <div class="panel-header">
+          <h2>📊 Visão Geral</h2>
+          <div class="header-actions">
+            <select id="analytics-period">
+              <option value="7">Últimos 7 dias</option>
+              <option value="30">Últimos 30 dias</option>
+              <option value="90">Últimos 90 dias</option>
+            </select>
+          </div>
+        </div>
+        <div class="stats-grid">
+          <div class="stat-card">
+            <span class="stat-label">Vendas Totais</span>
+            <strong class="stat-value" id="stat-total-vendas">R$ 0,00</strong>
+          </div>
+          <div class="stat-card">
+            <span class="stat-label">Total de Pedidos</span>
+            <strong class="stat-value" id="stat-total-pedidos">0</strong>
+          </div>
+          <div class="stat-card">
+            <span class="stat-label">Ticket Médio</span>
+            <strong class="stat-value" id="stat-ticket-medio">R$ 0,00</strong>
+          </div>
+          <div class="stat-card">
+            <span class="stat-label">Produto Top</span>
+            <strong class="stat-value" id="stat-top-produto">-</strong>
+          </div>
+        </div>
+        <div class="charts-grid">
+          <div class="chart-container">
+            <h3>Vendas por Dia</h3>
+            <div id="chart-sales" class="chart-placeholder">Carregando gráfico...</div>
+          </div>
+          <div class="chart-container">
+            <h3>Top 5 Produtos</h3>
+            <div id="chart-products" class="chart-placeholder">Carregando gráfico...</div>
+          </div>
+        </div>
+      </section>
+
+      <section class="panel" id="cardapios-panel">
+        <div class="panel-header">
+          <h2>Gerenciar Loja</h2>
+        </div>
+
+        <div class="form-tabs" id="cardapio-tabs">
+          <button type="button" class="tab-btn is-active" data-tab="essencial">📌 Essencial</button>
+          <button type="button" class="tab-btn" data-tab="visual">🎨 Estilo</button>
+          <button type="button" class="tab-btn" data-tab="operacao">⏰ Horários</button>
+          <button type="button" class="tab-btn" data-tab="midia">🖼️ Fotos</button>
+          <button type="button" class="tab-btn" data-tab="entrega">🛵 Pedidos</button>
+        </div>
+
+        <form id="cardapio-form" class="stack-gap compact">
+          <input type="hidden" name="id" />
+
+          <!-- ABA: ESSENCIAL -->
+          <div class="form-section is-active" data-section="essencial">
+            <div class="section-card">
+              <div class="section-title">Informações Básicas</div>
+              <p class="section-desc">Identificação principal da sua loja.</p>
+              <label>Nome da Loja <input type="text" name="nome" placeholder="Pizzaria do João" required /></label>
+              <label>Slug (Link) <input type="text" name="slug" placeholder="pizzaria-do-joao" required /></label>
+              <label>WhatsApp <input type="text" name="whatsapp" placeholder="5511999999999" required /></label>
+              <label>Instagram URL <input type="url" name="instagram_url" placeholder="https://instagram.com/sua_loja" /></label>
+              <label>Slogan
+                <div style="display:flex; gap:8px;">
+                  <input type="text" name="slogan" placeholder="O melhor da região..." style="flex:1;" />
+                  <button type="button" class="btn js-open-templates">📝</button>
+                </div>
+              </label>
+            </div>
+          </div>
+
+          <!-- ABA: VISUAL -->
+          <div class="form-section" data-section="visual">
+            <div class="section-card">
+              <div class="section-title">Visual e Cores</div>
+              <label>Cor do Tema
+                <div class="color-row">
+                  <input type="color" name="cor_tema" value="#ff6a00" />
+                  <span class="color-swatch"></span>
+                  <input class="color-hex color-hex-input" value="#FF6A00" maxlength="7" />
+                </div>
+              </label>
+
+              <details class="details details-sub" open>
+                <summary>Temas Rápidos</summary>
+                <p class="section-desc">Escolha uma combinação curada para mudar tudo instantaneamente.</p>
+                <div class="theme-presets">
+                  <button type="button" class="btn preset-btn" data-theme="dark-gold" style="background: #14110f; color: #c8945b; border-color: #c8945b;">Dark Gold</button>
+                  <button type="button" class="btn preset-btn" data-theme="midnight-blue" style="background: #0f172a; color: #38bdf8; border-color: #38bdf8;">Midnight</button>
+                  <button type="button" class="btn preset-btn" data-theme="emerald-forest" style="background: #064e3b; color: #34d399; border-color: #34d399;">Emerald</button>
+                  <button type="button" class="btn preset-btn" data-theme="soft-rose" style="background: #fff5f5; color: #ec4899; border-color: #ec4899;">Rose</button>
+                  <button type="button" class="btn preset-btn" data-theme="modern-white" style="background: #ffffff; color: #0f172a; border-color: #e2e8f0;">Modern</button>
+                  <button type="button" class="btn preset-btn" data-theme="sunset-vibes" style="background: #fffaf3; color: #ff6a00; border-color: #ff6a00;">Sunset</button>
+                </div>
+              </details>
+
+              <details class="details details-sub">
+                <summary>Personalização do Fundo</summary>
+                <label>Estilo do Fundo
+                  <select name="fundo_estilo">
+                    <option value="padrao" selected>Padrão</option>
+                    <option value="solido">Cor sólida</option>
+                    <option value="degrade_linear">Degradê linear</option>
+                    <option value="degrade_radial">Degradê radial</option>
+                  </select>
+                </label>
+                <div class="two-cols js-fundo-solido">
+                  <label>Cor Fundo
+                    <div class="color-row">
+                      <input type="color" name="cor_fundo" value="#fffaf3" />
+                      <span class="color-swatch"></span>
+                      <input class="color-hex color-hex-input" value="#FFFAF3" maxlength="7" />
+                    </div>
+                  </label>
+                  <label class="js-fundo-angulo">Ângulo <input type="number" name="fundo_angulo" value="135" /></label>
+                </div>
+                <div class="two-cols js-fundo-degrade is-hidden">
+                  <label>Cor 1
+                    <div class="color-row">
+                      <input type="color" name="fundo_cor_1" value="#ff6a00" />
+                      <span class="color-swatch"></span>
+                      <input class="color-hex color-hex-input" value="#FF6A00" maxlength="7" />
+                    </div>
+                  </label>
+                  <label>Cor 2
+                    <div class="color-row">
+                      <input type="color" name="fundo_cor_2" value="#ffe6ce" />
+                      <span class="color-swatch"></span>
+                      <input class="color-hex color-hex-input" value="#FFE6CE" maxlength="7" />
+                    </div>
+                  </label>
+                </div>
+              </details>
+
+              <details class="details details-sub">
+                <summary>Cores Avançadas (Texto e Cards)</summary>
+                <label>Paleta Rápida (Cole HEX)
+                  <div class="palette-row" style="display:flex; gap:8px;">
+                    <input type="text" id="palette-input" placeholder="#FF6A00 #C8945B #FFFAF3 #2A211D" style="flex:1;" autocomplete="off" spellcheck="false" />
+                    <button type="button" class="btn js-apply-palette">Aplicar</button>
+                  </div>
+                  <div id="palette-preview-container" class="palette-preview-container" style="display:flex; gap:10px; margin-top:10px; flex-wrap:wrap; min-height:38px; align-items:center;"></div>
+                </label>
+
+                <label style="margin-top: 14px;">Gerar Cores de Imagem (Logo, Fachada, Prato...)
+                  <div class="image-palette-row" style="display:flex; gap:8px; align-items:center; margin-top:6px;">
+                    <label class="btn btn-secondary" style="margin:0; cursor:pointer; display:flex; align-items:center; gap:8px; background:var(--primary); color:var(--primary-contrast); border:none; padding:8px 16px; border-radius:8px; font-size:0.9rem; font-weight:600;">
+                      📸 Carregar Imagem
+                      <input type="file" id="palette-image-input" accept="image/*" style="display:none;" />
+                    </label>
+                    <span id="palette-image-status" class="muted" style="font-size:0.9rem;">Nenhuma imagem selecionada</span>
+                  </div>
+                </label>
+
+                <div class="two-cols">
+                  <label>Cor Secundária
+                    <div class="color-row">
+                      <input type="color" name="cor_secundaria" value="#c8945b" />
+                      <span class="color-swatch"></span>
+                      <input class="color-hex color-hex-input" value="#C8945B" maxlength="7" />
+                    </div>
+                  </label>
+                  <label>Cor dos Cards
+                    <div class="color-row">
+                      <input type="color" name="cor_surface" value="#ffffff" />
+                      <span class="color-swatch"></span>
+                      <input class="color-hex color-hex-input" value="#FFFFFF" maxlength="7" />
+                    </div>
+                  </label>
+                </div>
+                
+                <div class="two-cols">
+                  <label>Cor do Texto
+                    <div class="color-row">
+                      <input type="color" name="cor_texto" value="#2a211d" />
+                      <span class="color-swatch"></span>
+                      <input class="color-hex color-hex-input" value="#2A211D" maxlength="7" />
+                    </div>
+                  </label>
+                  <label>Texto Secundário
+                    <div class="color-row">
+                      <input type="color" name="cor_muted" value="#756960" />
+                      <span class="color-swatch"></span>
+                      <input class="color-hex color-hex-input" value="#756960" maxlength="7" />
+                    </div>
+                  </label>
+                </div>
+
+                <label>Cor da Borda
+                  <div class="color-row">
+                    <input type="color" name="cor_borda" value="#f0dfd1" />
+                    <span class="color-swatch"></span>
+                    <input class="color-hex color-hex-input" value="#F0DFD1" maxlength="7" />
+                  </div>
+                </label>
+              </details>
+
+              <details class="details details-sub">
+                <summary>Tipografia</summary>
+                <label>Fonte Principal
+                  <select name="fonte_key">
+                    <option value="sora" selected>Sora (Padrão)</option>
+                    <option value="inter">Inter (Moderna)</option>
+                    <option value="poppins">Poppins (Arredondada)</option>
+                    <option value="montserrat">Montserrat (Forte)</option>
+                    <option value="nunito">Nunito (Suave)</option>
+                    <option value="rubik">Rubik</option>
+                    <option value="system">Sistema</option>
+                  </select>
+                </label>
+                <div class="two-cols">
+                  <label>Peso Texto Principal
+                    <select name="fonte_peso_texto">
+                      <option value="400" selected>Normal</option>
+                      <option value="500">Médio</option>
+                      <option value="600">Semi-negrito</option>
+                    </select>
+                  </label>
+                  <label>Peso Títulos
+                    <select name="fonte_peso_titulo">
+                      <option value="600">600</option>
+                      <option value="700">700</option>
+                      <option value="800" selected>800</option>
+                    </select>
+                  </label>
+                </div>
+              </details>
+
+              <div id="theme-preview" class="theme-preview">
+                <div class="theme-preview-surface">
+                  <div class="theme-preview-card">
+                    <div class="theme-preview-title">Prévia</div>
+                    <div class="theme-preview-text">Texto Principal</div>
+                    <div class="theme-preview-btn">Botão</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- ABA: OPERACAO -->
+          <div class="form-section" data-section="operacao">
+            <div class="section-card">
+              <div class="section-title">Funcionamento e Acesso</div>
+              <div class="two-cols">
+                <label>Abre às <input type="time" name="abre_em" /></label>
+                <label>Fecha às <input type="time" name="fecha_em" /></label>
+              </div>
+              <label>Horário (Texto) <input type="text" name="horario_funcionamento" /></label>
+              <label>Endereço <input type="text" name="endereco" /></label>
+              
+              <details class="details details-sub" open>
+                <summary>Acesso e Garçom</summary>
+                
+                <div class="checkbox-group stack-gap">
+                  <label class="checkbox-label" style="display: flex; flex-direction: row; align-items: center; gap: 8px;">
+                    <input type="checkbox" name="owner_edit_enabled" /> 
+                    <span>Permitir edição pelo proprietário</span>
+                  </label>
+                  
+                  <div id="owner-link-area" class="is-hidden" style="margin-left: 24px; margin-bottom: 12px;">
+                    <p class="muted" style="margin-bottom: 8px; font-size: 0.9rem;">Link para o proprietário gerenciar os produtos e pedidos:</p>
+                    <div style="display: flex; gap: 8px;">
+                      <input type="text" id="owner-link-input" readonly style="flex: 1;" />
+                      <button type="button" class="btn btn-primary" onclick="copyToClipboard(document.getElementById('owner-link-input').value)">Copiar</button>
+                      <button type="button" class="btn" onclick="window.open(document.getElementById('owner-link-input').value, '_blank')">Abrir</button>
+                    </div>
+                  </div>
+
+                  <label class="checkbox-label" style="display: flex; flex-direction: row; align-items: center; gap: 8px;">
+                    <input type="checkbox" name="has_garcom_module" /> 
+                    <span>🔑 Permissão: Módulo Garçom</span>
+                  </label>
+                  <label class="checkbox-label" style="display: flex; flex-direction: row; align-items: center; gap: 8px;">
+                    <input type="checkbox" name="has_marmita_module" /> 
+                    <span>🔑 Permissão: Módulo Marmita</span>
+                  </label>
+
+                  <label class="checkbox-label" style="display: flex; flex-direction: row; align-items: center; gap: 8px; margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--border);">
+                    <input type="checkbox" name="modo_garcom_enabled" /> 
+                    <span>Ativar Modo Garçom agora</span>
+                  </label>
+                </div>
+
+                <label style="margin-top: 16px;">PIN do proprietário (Senha) <input type="password" name="owner_pin" placeholder="Defina um PIN" /></label>
+              </details>
+            </div>
+          </div>
+
+          <!-- ABA: MIDIA -->
+          <div class="form-section" data-section="midia">
+            <div class="section-card">
+              <div class="section-title">Fotos e Banner</div>
+              
+              <!-- Campos ocultos para armazenar URLs existentes -->
+              <input type="hidden" name="foto_url" />
+              <input type="hidden" name="banner_url" />
+              <input type="hidden" name="galeria_urls" />
+              
+              <label>Foto de Perfil <input type="file" name="foto" accept="image/*" /></label>
+              <label>Banner <input type="file" name="banner" accept="image/*" /></label>
+              <label>Galeria (Imagens) <input type="file" name="galeria" multiple /></label>
+              <div id="galeria-preview" class="gallery-preview is-hidden"></div>
+            </div>
+          </div>
+
+          <!-- ABA: ENTREGA -->
+          <div class="form-section" data-section="entrega">
+            <div class="section-card">
+              <div class="section-title">Regras de Pedido</div>
+              <div class="two-cols">
+                <label>Taxa Entrega <input type="text" name="taxa_entrega" /></label>
+                <label>Pedido Mínimo <input type="text" name="pedido_minimo" /></label>
+              </div>
+              <label>Pagamentos <input type="text" name="formas_pagamento" /></label>
+              <label>Modo de Cardápio
+                <select name="modo">
+                  <option value="pedido">Carrinho de Compras</option>
+                  <option value="marmita">Marmita (Agendamento)</option>
+                  <option value="agendamento">Agendamento (Serviços: Banho, Corte, etc)</option>
+                  <option value="catalogo">Apenas Catálogo</option>
+                </select>
+              </label>
+
+              <label>Botão do WhatsApp
+                <select name="whatsapp_botao">
+                  <option value="flutuante" selected>Flutuante (Canto inferior direito)</option>
+                  <option value="topo">No topo (Junto ao Instagram)</option>
+                  <option value="nenhum">Ocultar</option>
+                </select>
+              </label>
+
+              <details class="details details-sub" id="agendamento-config" style="display:none;">
+                <summary>Configurações de Agendamento</summary>
+                <div class="two-cols">
+                  <label>Intervalo (minutos) <input type="number" name="agendamento_intervalo" value="30" /></label>
+                  <label>Dias da Semana (0-6) <input type="text" name="agendamento_dias_semana" value="1,2,3,4,5,6" placeholder="Ex: 1,2,3,4,5" /></label>
+                </div>
+                <div class="two-cols">
+                  <label>Início <input type="time" name="agendamento_horario_inicio" value="08:00" /></label>
+                  <label>Fim <input type="time" name="agendamento_horario_fim" value="18:00" /></label>
+                </div>
+              </details>
+
+              <details class="details details-sub">
+                <summary>Avançado (Marmita/WhatsApp)</summary>
+                <label><input type="checkbox" name="modo_marmita_enabled" /> Ativar Marmita</label>
+                <label><input type="checkbox" name="marmita_agendamento_enabled" /> Agendamento</label>
+                <label>WhatsApp Template <textarea name="mensagem_whatsapp_template" rows="4"></textarea></label>
+              </details>
+            </div>
+          </div>
+
+          <div class="topbar-actions" style="margin-top:20px;">
+            <button class="btn btn-primary btn-lg" type="submit" style="flex:1;">Salvar Tudo</button>
+            <button class="btn" type="button" id="cancel-cardapio-edit">Cancelar</button>
+          </div>
+        </form>
+      </section>
+
+      <section class="panel" id="cardapios-criados-panel">
+        <h2>Lojas Criadas</h2>
+        <div id="cardapios-list" class="list"></div>
+      </section>
+
+      <section class="panel is-hidden" id="produtos-panel">
+        <div class="panel-header">
+          <h2>Gerenciar Produtos</h2>
+          <button class="btn" id="cancel-produto-edit">Voltar</button>
+        </div>
+        <p id="produto-contexto" class="muted">Gerenciando itens para a loja selecionada.</p>
+
+        <form id="produto-form" class="stack-gap compact" enctype="multipart/form-data">
+          <input type="hidden" name="id" />
+          <div class="section-card">
+            <label>Nome do Produto <input type="text" name="nome" required /></label>
+            <div class="two-cols">
+              <label>Categoria <input type="text" name="categoria" /></label>
+              <label>Preço <input type="text" name="preco" required /></label>
+            </div>
+            <label>Descrição <textarea name="descricao" rows="2"></textarea></label>
+            
+            <details class="details details-sub">
+              <summary>Tamanhos e Estoque</summary>
+              <div class="two-cols">
+                <label>Preço M <input type="text" name="preco_m" /></label>
+                <label>Preço G <input type="text" name="preco_g" /></label>
+              </div>
+              <label>Estoque Diário <input type="number" name="estoque_diario" /></label>
+            </details>
+
+            <div class="field">
+              <label>Acompanhamentos / Personalização</label>
+              <div id="product-options-container" class="stack-gap" style="margin-top: 8px;"></div>
+              <div class="presets-container">
+                <button type="button" class="btn btn-marmita-template" id="add-marmita-template-btn">🍽️ Template Marmita</button>
+                <button type="button" class="btn btn-preset" data-preset-group="Arroz">+ Arroz</button>
+                <button type="button" class="btn btn-preset" data-preset-group="Feijão">+ Feijão</button>
+                <button type="button" class="btn btn-preset" data-preset-group="Mistura">+ Mistura</button>
+                <button type="button" class="btn btn-ghost" id="add-option-group-btn">+ Novo Grupo</button>
+              </div>
+              <input type="hidden" name="opcoes_json" />
+            </div>
+
+            <label>Imagem do produto <input type="file" name="imagem" accept="image/*" /></label>
+            <button class="btn btn-primary btn-lg" type="submit">Salvar Produto</button>
+          </div>
+        </form>
+
+        <div id="produtos-list" class="list" style="margin-top:20px;"></div>
+      </section>
+
+      <section class="panel panel-full is-hidden" id="pedidos-panel">
+        <div class="panel-header">
+          <h2>Pedidos</h2>
+          <button type="button" class="btn js-open-cozinha" style="background: var(--primary); color: var(--primary-contrast);">🍱 Cozinha</button>
+        </div>
+        <div id="pedidos-list" class="list"></div>
+      </section>
+
+      <section class="panel panel-full is-hidden" id="cozinha-panel">
+        <div class="panel-header">
+          <h2>🍱 Resumo de Produção</h2>
+          <button type="button" class="btn js-close-cozinha">Sair</button>
+        </div>
+        <div id="cozinha-summary" class="stack-gap" style="margin-top: 20px;"></div>
+      </section>
+    </main>
+
+    <script type="module" src="/cardapio/admin/script.js?v=40"></script>
+  </body>
+</html>

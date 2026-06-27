@@ -1,0 +1,29 @@
+{
+  "name": "Cardápios - Admin",
+  "short_name": "Admin",
+  "start_url": "/cardapio/admin/",
+  "scope": "/cardapio/admin/",
+  "display": "standalone",
+  "background_color": "#0f0d0b",
+  "theme_color": "#0f0d0b",
+  "icons": [
+    {
+      "src": "/cardapio/pwa/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/cardapio/pwa/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/cardapio/pwa/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

@@ -1,0 +1,481 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Cardápios</title>
+    <meta name="theme-color" content="#ff6a00" />
+
+    <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />
+    <link rel="preconnect" href="https://esm.sh" crossorigin />
+    <link rel="preconnect" href="https://uapwitkmxuoepnjlffqy.supabase.co" crossorigin />
+    <link rel="modulepreload" href="/cardapio/shared/supabase.js" />
+    <link rel="modulepreload" href="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm" crossorigin />
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Sora:wght@200;300;400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+
+    <!-- Reaproveita o design/tokens do cardápio público -->
+    <link rel="preload" as="style" href="/cardapio/cardapio/style.css?v=22" />
+    <link rel="stylesheet" href="/cardapio/cardapio/style.css?v=22" />
+
+    <style>
+      body.is-loading main {
+        visibility: hidden;
+      }
+
+      /* Tema dark premium para a vitrine */
+      :root {
+        --bg: #09090b; /* Zinc 950 */
+        --surface: #18181b; /* Zinc 900 */
+        --text: #fafafa;
+        --muted: #a1a1aa;
+        --border: #27272a;
+        --theme-vitrine: #ff7b00;
+        --shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7);
+      }
+
+      body {
+        background:
+          radial-gradient(circle at 10% 0%, rgba(255, 123, 0, 0.15) 0%, transparent 45%),
+          radial-gradient(circle at 90% 100%, rgba(200, 148, 91, 0.12) 0%, transparent 45%),
+          radial-gradient(circle at 50% 50%, rgba(255, 123, 0, 0.05) 0%, transparent 60%),
+          var(--bg);
+        color: var(--text);
+        font-family: 'Sora', sans-serif;
+      }
+
+      .hero {
+        background: transparent;
+        padding-bottom: 40px;
+        position: relative;
+      }
+
+      .hero::after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        height: 1px;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+      }
+
+      .hero-content {
+        max-width: 1100px;
+        margin: 0 auto;
+        padding: 40px 16px 20px;
+        text-align: left;
+      }
+
+      .chip {
+        display: inline-block;
+        background: rgba(255, 123, 0, 0.1);
+        border: 1px solid rgba(255, 123, 0, 0.2);
+        color: var(--theme-vitrine);
+        box-shadow: 0 0 20px rgba(255, 123, 0, 0.15);
+        backdrop-filter: blur(10px);
+        padding: 6px 14px;
+        border-radius: 999px;
+        font-weight: 700;
+        font-size: 0.85rem;
+        letter-spacing: 0.05em;
+        text-transform: uppercase;
+        margin-bottom: 16px;
+      }
+
+      .hero h1 {
+        font-size: clamp(2.5rem, 6vw, 3.8rem);
+        font-weight: 800;
+        background: linear-gradient(135deg, #ffffff 0%, #a1a1aa 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        margin: 0 0 16px 0;
+        letter-spacing: -0.03em;
+        line-height: 1.1;
+      }
+
+      #vitrine-subtitle {
+        font-size: 1.15rem;
+        color: var(--muted);
+        max-width: 50ch;
+        line-height: 1.6;
+      }
+
+      .vitrine {
+        max-width: 1100px;
+        margin: 0 auto;
+        padding: 40px 16px;
+      }
+
+      .vitrine-head {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 24px;
+      }
+
+      .vitrine-head h2 {
+        margin: 0;
+        font-size: 1.8rem;
+        letter-spacing: -0.02em;
+        font-weight: 800;
+      }
+
+      .vitrine-head p {
+        margin: 0;
+        color: var(--theme-vitrine);
+        font-weight: 600;
+        background: rgba(255, 123, 0, 0.1);
+        padding: 4px 12px;
+        border-radius: 999px;
+      }
+
+      .vitrine-message {
+        margin: 14px 0 0;
+        font-weight: 600;
+        color: var(--muted);
+      }
+
+      .vitrine-message.error {
+        color: #f87171;
+        border: 1px solid rgba(248, 113, 113, 0.2);
+        background: rgba(248, 113, 113, 0.05);
+        padding: 12px 16px;
+        border-radius: 12px;
+      }
+
+      .vitrine-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+        gap: 24px;
+      }
+
+      .vitrine-card {
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+        padding: 16px;
+        border-radius: 24px;
+        border: 1px solid rgba(255, 255, 255, 0.06);
+        background: rgba(24, 24, 27, 0.4);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        box-shadow: var(--shadow);
+        text-decoration: none;
+        color: inherit;
+        transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        position: relative;
+        overflow: hidden;
+      }
+
+      .vitrine-card::before {
+        content: '';
+        position: absolute;
+        top: 0; left: 0; right: 0; bottom: 0;
+        border-radius: 24px;
+        padding: 2px;
+        background: linear-gradient(135deg, rgba(255, 255, 255, 0.12), rgba(255, 255, 255, 0));
+        -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+        -webkit-mask-composite: xor;
+        mask-composite: exclude;
+        pointer-events: none;
+      }
+
+      .vitrine-card:hover {
+        transform: translateY(-8px);
+        background: rgba(24, 24, 27, 0.7);
+        border-color: rgba(255, 123, 0, 0.3);
+        box-shadow: 0 35px 60px -15px rgba(0, 0, 0, 0.8), 0 0 30px rgba(255, 123, 0, 0.15);
+      }
+
+      .vitrine-media {
+        width: 100%;
+        aspect-ratio: 16 / 10;
+        border-radius: 16px;
+        border: none;
+        background: rgba(255,255,255,0.02);
+        object-fit: cover;
+        display: block;
+        transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+      }
+      
+      .vitrine-card:hover .vitrine-media {
+        transform: scale(1.05);
+      }
+
+      .vitrine-card h3 {
+        margin: 0;
+        font-size: 1.35rem;
+        line-height: 1.2;
+        letter-spacing: -0.015em;
+        font-weight: 800;
+        color: var(--text);
+      }
+
+      .vitrine-card .muted {
+        margin: 0;
+        color: var(--muted);
+        line-height: 1.5;
+        font-size: 0.95rem;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+      }
+
+      .vitrine-actions {
+        margin-top: auto;
+        padding-top: 4px;
+      }
+
+      .vitrine-actions .btn {
+        width: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 14px;
+        border-radius: 14px;
+        background: rgba(255, 123, 0, 0.1);
+        color: var(--theme-vitrine);
+        border: 1px solid rgba(255, 123, 0, 0.2);
+        font-weight: 800;
+        font-size: 1rem;
+        transition: all 0.3s ease;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+      }
+
+      .vitrine-card:hover .vitrine-actions .btn {
+        background: linear-gradient(135deg, var(--theme-vitrine), #ff9900);
+        color: #fff;
+        border: 1px solid transparent;
+        box-shadow: 0 10px 20px rgba(255, 123, 0, 0.3);
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        .vitrine-card, .vitrine-media, .vitrine-actions .btn {
+          transition: none;
+        }
+      }
+
+      /* Estilos de Precificação */
+      .pricing-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 20px;
+        margin-top: 24px;
+      }
+
+      .pricing-card {
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid var(--border);
+        border-radius: 24px;
+        padding: 32px 24px;
+        display: flex;
+        flex-direction: column;
+        position: relative;
+        transition: transform 0.3s ease, border-color 0.3s ease;
+      }
+
+      .pricing-card:hover {
+        transform: translateY(-5px);
+        border-color: var(--theme2);
+      }
+
+      .pricing-card.featured {
+        background: linear-gradient(135deg, rgba(255, 106, 0, 0.1) 0%, rgba(200, 148, 91, 0.05) 100%);
+        border: 2px solid var(--theme);
+        transform: scale(1.02);
+      }
+
+      .plan-badge {
+        position: absolute;
+        top: -12px;
+        right: 24px;
+        background: var(--theme);
+        color: white;
+        padding: 4px 12px;
+        border-radius: 99px;
+        font-size: 0.75rem;
+        font-weight: 800;
+        text-transform: uppercase;
+      }
+
+      .plan-name {
+        font-size: 1.25rem;
+        font-weight: 800;
+        margin-bottom: 8px;
+        color: var(--theme2);
+      }
+
+      .plan-price {
+        font-size: 2.5rem;
+        font-weight: 900;
+        margin-bottom: 16px;
+      }
+
+      .plan-price span {
+        font-size: 1rem;
+        font-weight: 400;
+        color: var(--muted);
+      }
+
+      .plan-desc {
+        font-size: 0.9rem;
+        color: var(--muted);
+        margin-bottom: 24px;
+        line-height: 1.5;
+      }
+
+      .plan-features {
+        list-style: none;
+        padding: 0;
+        margin: 0 0 32px;
+        flex-grow: 1;
+        display: grid;
+        gap: 12px;
+      }
+
+      .plan-features li {
+        font-size: 0.95rem;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      .pricing-card .btn {
+        width: 100%;
+        text-decoration: none;
+        font-weight: 800;
+      }
+    </style>
+
+    <script>
+      window.__SUPABASE_CONFIG__ = {
+        url: "https://uapwitkmxuoepnjlffqy.supabase.co",
+        anonKey:
+          "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVhcHdpdGtteHVvZXBuamxmZnF5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ4OTcxMjUsImV4cCI6MjA5MDQ3MzEyNX0.YTz_EqzK4m0CMM25n3QJC1b3Nj9bikIrDDEEFi5n6ps"
+      };
+    </script>
+  </head>
+
+  <body class="is-loading">
+    <header class="hero">
+      <div class="hero-content" style="text-align: center; padding-top: 60px; padding-bottom: 40px;">
+        <div>
+          <h1 style="font-size: clamp(3rem, 8vw, 4.5rem); margin-bottom: 8px;">Conheça Nossos Parceiros</h1>
+          <p id="vitrine-subtitle" class="muted" style="max-width: 60ch; margin: 0 auto; font-size: 1.1rem;">
+            Explore os melhores cardápios digitais e faça seu pedido de forma rápida e prática.
+          </p>
+        </div>
+      </div>
+    </header>
+
+    <main class="vitrine" style="margin-top: -20px;">
+      <p id="vitrine-message" class="vitrine-message" aria-live="polite"></p>
+      <section id="cardapios" class="vitrine-grid" aria-label="Lista de cardápios"></section>
+
+      <!-- Modal QR Code -->
+      <div id="qrcode-modal" class="produto-modal is-hidden">
+        <div class="produto-modal-backdrop"></div>
+        <div class="produto-modal-dialog" style="max-width: 400px; text-align: center; padding: 24px;">
+          <button type="button" class="produto-modal-close" id="btn-close-qr">×</button>
+          <h3 style="margin-bottom: 16px;">QR Code da sua Loja</h3>
+          <div id="qr-code-container" style="background: white; padding: 12px; border-radius: 12px; display: inline-block;">
+             <!-- Imagem do QR será inserida aqui -->
+          </div>
+          <p class="muted" style="margin-top: 16px; font-size: 0.9rem;">Seus clientes podem escanear este código para abrir seu cardápio direto no celular.</p>
+          <a id="link-download-qr" download="qrcode-loja.png" class="btn btn-primary" style="margin-top: 20px; text-decoration: none; display: block;">Baixar QR Code</a>
+        </div>
+      </div>
+
+      <hr style="border: 0; border-top: 1px solid var(--border); margin: 60px 0 40px;">
+
+      <div class="vitrine-head" style="margin-bottom: 32px; text-align: center; display: block;">
+        <div class="chip" style="margin: 0 auto 12px; background: rgba(255, 106, 0, 0.15); color: var(--theme); border: 1px solid var(--theme);">🚀 OPORTUNIDADE</div>
+        <h2 style="font-size: 1.8rem; margin-bottom: 8px;">Quer um cardápio só seu?</h2>
+        <p style="font-size: 1.1rem;">Tenha sua própria loja digital e venda muito mais com nossos planos exclusivos.</p>
+      </div>
+
+      <div class="pricing-grid">
+        <!-- Catalogo -->
+        <div class="pricing-card">
+          <div class="plan-name">Catálogo Digital</div>
+          <div class="plan-price">R$ 64<span>,99/mês</span></div>
+          <p class="plan-desc">Perfeito para quem quer apenas expor os produtos com elegância e profissionalismo.</p>
+          <ul class="plan-features">
+            <li>✨ Design Premium</li>
+            <li>📱 Funciona Offline (PWA)</li>
+            <li>🔍 Busca Inteligente</li>
+            <li>❌ Sem Pedidos WA</li>
+          </ul>
+          <a href="https://pay.kiwify.com.br/nqA1b4R" target="_blank" class="btn btn-ghost">Contratar Plano</a>
+        </div>
+
+        <!-- Pedidos (Featured) -->
+        <div class="pricing-card featured">
+          <div class="plan-badge">O MELHOR CUSTO-BENEFÍCIO</div>
+          <div class="plan-name">Delivery Pro</div>
+          <div class="plan-price">R$ 74<span>,99/mês</span></div>
+          <p class="plan-desc">Sistema completo de pedidos via WhatsApp para delivery, balcão e mesas.</p>
+          <ul class="plan-features">
+            <li>✅ Pedidos no WhatsApp</li>
+            <li>🤵 Modo Garçom / Mesa</li>
+            <li>📱 Gerador de QR Code</li>
+            <li>📊 Relatório de Vendas</li>
+            <li>🚀 Alta Conversão</li>
+          <div style="display: grid; gap: 8px; margin-top: auto;">
+            <a href="https://pay.kiwify.com.br/mE05vxJ" target="_blank" class="btn btn-primary" style="padding: 12px;">Plano Mensal (R$ 74,99)</a>
+            <a href="https://pay.kiwify.com.br/s806flM" target="_blank" class="btn btn-ghost" style="padding: 10px; font-size: 0.85rem; border: 1px dashed var(--theme-vitrine); color: var(--theme-vitrine);">Plano Bimestral (R$ 89,99 / 2 meses)</a>
+          </div>
+        </div>
+
+        <!-- Agendamento -->
+        <div class="pricing-card">
+          <div class="plan-name">Agendamento de Serviços</div>
+          <div class="plan-price">R$ 69<span>,99/mês</span></div>
+          <p class="plan-desc">Ideal para barbearias, petshops, clínicas e profissionais autônomos.</p>
+          <ul class="plan-features">
+            <li>📅 Gestão de Horários</li>
+            <li>✂️ Cadastro de Serviços</li>
+            <li>📱 Gerador de QR Code</li>
+            <li>🔗 Link de Agendamento</li>
+            <li>❌ Sem Pedidos de Delivery</li>
+          </ul>
+          <a href="https://pay.kiwify.com.br/jgJDBTR" target="_blank" class="btn btn-ghost">Contratar Agendamento</a>
+        </div>
+
+        <!-- Marmita -->
+        <div class="pricing-card">
+          <div class="plan-name">Marmita Express</div>
+          <div class="plan-price">R$ 72<span>,99/mês</span></div>
+          <p class="plan-desc">Especialista em Marmitarias com agendamento, prazos e controle de estoque.</p>
+          <ul class="plan-features">
+            <li>📅 Agendamento de Pedidos</li>
+            <li>📱 Gerador de QR Code</li>
+            <li>⏰ Horários de Retirada</li>
+            <li>📦 Controle de Estoque</li>
+            <li>🛑 Horário Limite (Hoje)</li>
+          <div style="display: grid; gap: 8px; margin-top: auto;">
+            <a href="https://pay.kiwify.com.br/pjtsQrc" target="_blank" class="btn btn-ghost" style="padding: 12px;">Plano Mensal (R$ 72,99)</a>
+            <a href="https://pay.kiwify.com.br/JuB8OJO" target="_blank" class="btn btn-ghost" style="padding: 10px; font-size: 0.85rem; border: 1px dashed var(--muted);">Plano Bimestral (R$ 89,99 / 2 meses)</a>
+          </div>
+        </div>
+      </div>
+
+      <div style="margin-top: 40px; text-align: center; padding: 24px; background: rgba(255,255,255,0.03); border-radius: 20px; border: 1px dashed var(--border);">
+        <p style="margin: 0; font-weight: 700; color: var(--theme2);">🛠️ NÃO TEM TEMPO? EU MONTO TUDO PARA VOCÊ!</p>
+        <p style="margin: 8px 0 0; font-size: 0.9rem; color: var(--muted);">Fale comigo no WhatsApp e consulte a taxa de montagem e configuração personalizada.</p>
+      </div>
+    </main>
+
+    <script type="module" src="/cardapio/index.js?v=5"></script>
+  </body>
+</html>
