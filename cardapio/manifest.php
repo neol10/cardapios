@@ -39,20 +39,18 @@ if (!empty($logo)) {
     else if (strpos($lower, ".svg") !== false) $mimeType = "image/svg+xml";
     else if (strpos($lower, ".webp") !== false) $mimeType = "image/webp";
 
-    $manifest['icons'] = [
-        [
-            "src" => $logo,
-            "sizes" => "192x192",
-            "type" => $mimeType,
-            "purpose" => "any maskable"
-        ],
-        [
-            "src" => $logo,
-            "sizes" => "512x512",
-            "type" => $mimeType,
-            "purpose" => "any maskable"
-        ]
-    ];
+    array_unshift($manifest['icons'], [
+        "src" => $logo,
+        "sizes" => "192x192",
+        "type" => $mimeType,
+        "purpose" => "any maskable"
+    ]);
+    array_unshift($manifest['icons'], [
+        "src" => $logo,
+        "sizes" => "512x512",
+        "type" => $mimeType,
+        "purpose" => "any maskable"
+    ]);
 }
 
 echo json_encode($manifest, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
