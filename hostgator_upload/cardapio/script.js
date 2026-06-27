@@ -475,14 +475,10 @@ function setHeadIcons(iconHref, appleHref) {
   if (safeApple) upsertHeadLink("apple-touch-icon", safeApple);
 }
 
-function applyBrandIcons(slug) {
-  const safeSlug = safeText(slug).toLowerCase();
-  if (!safeSlug) return;
-
-  const cacheBust = Date.now();
-  const iconUrl = `/api/icon?slug=${encodeURIComponent(safeSlug)}&format=svg&v=${cacheBust}`;
-  const appleUrl = `/api/icon?slug=${encodeURIComponent(safeSlug)}&v=${cacheBust}`;
-  setHeadIcons(new URL(iconUrl, window.location.origin).toString(), new URL(appleUrl, window.location.origin).toString());
+function applyBrandIcons(logoUrl) {
+  if (!logoUrl) return;
+  const safeUrl = safeHttpUrl(logoUrl) || logoUrl;
+  setHeadIcons(safeUrl, safeUrl);
 }
 
 function parseGaleriaUrls(value) {
@@ -2016,7 +2012,7 @@ async function loadCardapio() {
 
   renderSkeletons();
 
-  applyBrandIcons(getSlugFromUrl());
+  applyBrandIcons(data.logo_url);
   renderGaleria(parseGaleriaUrls(data.galeria_urls));
 
   document.querySelector("#cardapio-nome").textContent = data.nome;
