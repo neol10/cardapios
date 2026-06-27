@@ -22,5 +22,5 @@ RewriteRule ^garcom/(.*)$ garcom/index.html [L]
 RewriteRule ^([^/]+)/manifest\.json$ cardapio/manifest.php?slug=$1 [L]
 
 # Tudo que sobrar (ex: /cardapio/meu-restaurante) vai para o aplicativo do cardápio
-RewriteRule ^(.*)$ cardapio/index.html [L]
+RewriteRule ^(.*)$ cardapio/index.php [L]
 </IfModule>

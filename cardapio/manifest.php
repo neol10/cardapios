@@ -16,11 +16,22 @@ $endpoint = $supabase_url . "/rest/v1/cardapios?slug=eq." . urlencode($slug) . "
 
 $ch = curl_init($endpoint);
 curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
 curl_setopt($ch, CURLOPT_HTTPHEADER, [
     "apikey: " . $supabase_key,
     "Authorization: Bearer " . $supabase_key
 ]);
 $response = curl_exec($ch);
+if ($response === false) {
+    // Fallback to file_get_contents
+    $options = [
+        "http" => [
+            "header" => "apikey: " . $supabase_key . "\r\nAuthorization: Bearer " . $supabase_key
+        ]
+    ];
+    $context = stream_context_create($options);
+    $response = @file_get_contents($endpoint, false, $context);
+}
 curl_close($ch);
 
 $data = json_decode($response, true);
