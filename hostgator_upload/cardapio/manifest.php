@@ -43,10 +43,14 @@ curl_close($ch);
 
 $data = json_decode($response, true);
 if (empty($data) || !isset($data[0])) {
-    header("HTTP/1.0 404 Not Found");
-    exit;
+    // Fallback gracefully instead of throwing 404, because HostGator might block cURL
+    $store = [
+        'nome' => ucfirst($slug) . ' Delivery',
+        'cor_tema' => '#ff6a00'
+    ];
+} else {
+    $store = $data[0];
 }
-$store = $data[0];
 
 $name = isset($store['nome']) ? $store['nome'] : 'Cardápio Digital';
 $short_name = mb_substr($name, 0, 12);
