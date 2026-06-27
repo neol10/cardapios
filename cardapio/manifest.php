@@ -33,24 +33,27 @@ $manifest = [
 ];
 
 if (!empty($logo)) {
-    $mimeType = "image/png";
-    $lower = strtolower($logo);
-    if (strpos($lower, ".jpg") !== false || strpos($lower, ".jpeg") !== false) $mimeType = "image/jpeg";
-    else if (strpos($lower, ".svg") !== false) $mimeType = "image/svg+xml";
-    else if (strpos($lower, ".webp") !== false) $mimeType = "image/webp";
+    $protocol = isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 'https' : 'http';
+    $host = $_SERVER['HTTP_HOST'];
+    $basePath = rtrim(dirname($_SERVER['PHP_SELF']), '/');
+    
+    $icon192 = $protocol . '://' . $host . $basePath . '/icon.php?size=192&url=' . urlencode($logo);
+    $icon512 = $protocol . '://' . $host . $basePath . '/icon.php?size=512&url=' . urlencode($logo);
 
-    array_unshift($manifest['icons'], [
-        "src" => $logo,
-        "sizes" => "192x192",
-        "type" => $mimeType,
-        "purpose" => "any maskable"
-    ]);
-    array_unshift($manifest['icons'], [
-        "src" => $logo,
-        "sizes" => "512x512",
-        "type" => $mimeType,
-        "purpose" => "any maskable"
-    ]);
+    $manifest['icons'] = [
+        [
+            "src" => $icon192,
+            "sizes" => "192x192",
+            "type" => "image/png",
+            "purpose" => "any maskable"
+        ],
+        [
+            "src" => $icon512,
+            "sizes" => "512x512",
+            "type" => "image/png",
+            "purpose" => "any maskable"
+        ]
+    ];
 }
 
 echo json_encode($manifest, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
