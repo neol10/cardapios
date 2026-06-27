@@ -1942,15 +1942,23 @@ async function loadCardapio() {
     
     // Se o restaurante tiver logotipo, vamos usá-lo como o ícone oficial do App
     if (data.logo_url) {
+      let mimeType = "image/png";
+      const lowerUrl = data.logo_url.toLowerCase();
+      if (lowerUrl.includes(".jpg") || lowerUrl.includes(".jpeg")) mimeType = "image/jpeg";
+      else if (lowerUrl.includes(".svg")) mimeType = "image/svg+xml";
+      else if (lowerUrl.includes(".webp")) mimeType = "image/webp";
+
       manifestData.icons = [
         {
           src: data.logo_url,
           sizes: "192x192",
+          type: mimeType,
           purpose: "any maskable"
         },
         {
           src: data.logo_url,
           sizes: "512x512",
+          type: mimeType,
           purpose: "any maskable"
         }
       ];
