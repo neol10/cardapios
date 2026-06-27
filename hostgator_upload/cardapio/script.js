@@ -1964,8 +1964,8 @@ async function loadCardapio() {
       ];
     }
 
-    const manifestBlob = new Blob([JSON.stringify(manifestData)], { type: 'application/manifest+json' });
-    const manifestURL = URL.createObjectURL(manifestBlob);
+    const manifestString = JSON.stringify(manifestData);
+    const manifestURL = "data:application/manifest+json;charset=utf-8," + encodeURIComponent(manifestString);
     const existingManifest = document.getElementById("dynamic-manifest");
     if (existingManifest) {
       existingManifest.setAttribute("href", manifestURL);
