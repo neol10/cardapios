@@ -5,10 +5,12 @@ import {
   supabase
 } from "../shared/supabase.js";
 
-if ("serviceWorker" in navigator) {
-  window.addEventListener("load", () => {
-    navigator.serviceWorker.register("/cardapio/sw.js").catch(() => undefined);
-  });
+// PWA Service Worker Registration
+if ('serviceWorker' in navigator) {
+  const swPath = (window.BASE_PATH || '') + '/sw.js';
+  navigator.serviceWorker.register(swPath)
+    .then(reg => console.log('SW Registrado:', reg.scope))
+    .catch(err => console.error('SW Falhou:', err));
 }
 
 const cart = [];

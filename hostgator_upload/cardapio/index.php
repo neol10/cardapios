@@ -12,8 +12,13 @@
       $path = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
       $path = rtrim($path, '/');
       if (empty($path)) $path = '/default';
+      $basePath = rtrim(dirname($_SERVER['SCRIPT_NAME']), '/');
+      if ($basePath === '\\') $basePath = '';
     ?>
     <link rel="manifest" href="<?php echo htmlspecialchars($path); ?>/manifest.json" id="dynamic-manifest" />
+    <script>
+      window.BASE_PATH = "<?php echo addslashes($basePath); ?>";
+    </script>
     <script>
       (function () {
         try {
