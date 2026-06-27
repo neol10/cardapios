@@ -10,13 +10,10 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <?php
       $path = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
-      $segments = explode('/', trim($path, '/'));
-      $slug = end($segments);
-      if (empty($slug) || $slug === 'cardapio') $slug = 'default';
-      $basePath = rtrim(dirname($_SERVER['SCRIPT_NAME']), '/');
-      if ($basePath === '\\') $basePath = '';
+      $path = rtrim($path, '/');
+      if (empty($path)) $path = '/default';
     ?>
-    <link rel="manifest" href="<?php echo $basePath; ?>/<?php echo htmlspecialchars($slug); ?>/manifest.json" id="dynamic-manifest" />
+    <link rel="manifest" href="<?php echo htmlspecialchars($path); ?>/manifest.json" id="dynamic-manifest" />
     <script>
       (function () {
         try {

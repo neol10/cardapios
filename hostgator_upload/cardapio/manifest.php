@@ -3,8 +3,15 @@ error_reporting(0);
 header('Content-Type: application/manifest+json; charset=utf-8');
 header('Access-Control-Allow-Origin: *');
 
-$slug = isset($_GET['slug']) ? $_GET['slug'] : '';
-if (empty($slug)) {
+$request_uri = isset($_GET['path']) ? $_GET['path'] : '';
+$path = parse_url($request_uri, PHP_URL_PATH);
+$path = str_replace('/manifest.json', '', $path);
+$path = rtrim($path, '/');
+
+$segments = explode('/', trim($path, '/'));
+$slug = end($segments);
+
+if (empty($slug) || $slug === 'cardapio') {
     header("HTTP/1.0 400 Bad Request");
     exit;
 }
@@ -46,10 +53,10 @@ $short_name = mb_substr($name, 0, 12);
 $theme_color = isset($store['cor_tema']) && !empty($store['cor_tema']) ? $store['cor_tema'] : '#ff6a00';
 $logo = isset($store['logo_url']) ? $store['logo_url'] : '';
 
+$start_url = empty($path) ? '/' : $path;
+
 $basePath = rtrim(dirname($_SERVER['SCRIPT_NAME']), '/');
 if ($basePath === '\\') $basePath = '';
-
-$start_url = $basePath . '/' . $slug;
 
 $manifest = [
     "name" => $name,
