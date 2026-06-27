@@ -1908,63 +1908,18 @@ async function loadCardapio() {
 
   activeCardapio = data;
 
-  // Injetar o Manifest PWA dinamicamente (Compatível com hospedagem estática)
+  // Injetar o Manifest PWA dinamicamente (Compatível com hospedagem estática via PHP)
   try {
     const absoluteStartUrl = new URL(`/cardapio/${data.slug}/`, window.location.origin).href;
-    const absoluteScope = new URL(`/cardapio/${data.slug}/`, window.location.origin).href;
-
-    const manifestData = {
-      name: data.nome,
-      short_name: data.nome.length > 12 ? data.nome.substring(0, 12) : data.nome,
-      start_url: absoluteStartUrl,
-      scope: absoluteScope,
-      display: "standalone",
-      background_color: "#ffffff",
-      theme_color: data.theme_color || "#ff6a00",
-      icons: [
-        {
-          src: new URL("/cardapio/pwa/icon-192.png", window.location.origin).href,
-          sizes: "192x192",
-          type: "image/png",
-          purpose: "any maskable"
-        },
-        {
-          src: new URL("/cardapio/pwa/icon-512.png", window.location.origin).href,
-          sizes: "512x512",
-          type: "image/png",
-          purpose: "any maskable"
-        }
-      ]
-    };
-    
-    // Se o restaurante tiver logotipo, vamos usá-lo como o ícone oficial do App
+    const params = new URLSearchParams();
+    params.set("name", data.nome);
+    params.set("start_url", absoluteStartUrl);
+    params.set("color", data.cor_tema || "#ff6a00");
     if (data.logo_url) {
-      let mimeType = "image/png";
-      const lowerUrl = data.logo_url.toLowerCase();
-      if (lowerUrl.includes(".jpg") || lowerUrl.includes(".jpeg")) mimeType = "image/jpeg";
-      else if (lowerUrl.includes(".svg")) mimeType = "image/svg+xml";
-      else if (lowerUrl.includes(".webp")) mimeType = "image/webp";
-
-      const absoluteLogo = new URL(data.logo_url, window.location.origin).href;
-
-      manifestData.icons = [
-        {
-          src: absoluteLogo,
-          sizes: "192x192",
-          type: mimeType,
-          purpose: "any maskable"
-        },
-        {
-          src: absoluteLogo,
-          sizes: "512x512",
-          type: mimeType,
-          purpose: "any maskable"
-        }
-      ];
+      params.set("logo", new URL(data.logo_url, window.location.origin).href);
     }
+    const manifestURL = `/cardapio/manifest.php?${params.toString()}`;
 
-    const manifestString = JSON.stringify(manifestData);
-    const manifestURL = "data:application/manifest+json;charset=utf-8," + encodeURIComponent(manifestString);
     let manifestEl = document.getElementById("dynamic-manifest");
     if (!manifestEl) {
       manifestEl = document.createElement("link");
