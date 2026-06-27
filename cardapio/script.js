@@ -459,7 +459,7 @@ function setHeadIcons(iconHref, appleHref) {
   iconNodes.forEach((node) => {
     if (!safeIcon) return;
     node.setAttribute("href", safeIcon);
-    node.setAttribute("type", "image/svg+xml");
+    node.removeAttribute("type");
     node.removeAttribute("sizes");
   });
 
@@ -471,7 +471,7 @@ function setHeadIcons(iconHref, appleHref) {
     node.removeAttribute("sizes");
   });
 
-  if (safeIcon) upsertHeadLink("icon", safeIcon, { type: "image/svg+xml" });
+  if (safeIcon) upsertHeadLink("icon", safeIcon);
   if (safeApple) upsertHeadLink("apple-touch-icon", safeApple);
 }
 
