@@ -136,55 +136,6 @@
               <h2 class="section-title">Galeria</h2>
               <div id="cardapio-galeria" class="galeria-grid"></div>
             </div>
-
-            <!-- PWA DIAGNOSTICS -->
-            <div id="pwa-diagnostics" style="background: #222; color: #0f0; font-family: monospace; padding: 15px; margin-top: 20px; border-radius: 8px; font-size: 12px; text-align: left; overflow-wrap: break-word;">
-              <strong>PWA DIAGNOSTICS:</strong><br>
-              <div id="diag-manifest">Manifest: Testing...</div>
-              <div id="diag-sw">ServiceWorker: Testing...</div>
-              <div id="diag-prompt">Install Prompt: Waiting...</div>
-            </div>
-            <script>
-              window.addEventListener('load', async () => {
-                const manifestUrl = document.getElementById('dynamic-manifest').href;
-                const diagManifest = document.getElementById('diag-manifest');
-                const diagSw = document.getElementById('diag-sw');
-                const diagPrompt = document.getElementById('diag-prompt');
-
-                // Test Manifest
-                try {
-                  const res = await fetch(manifestUrl);
-                  if (res.ok) {
-                    const json = await res.json();
-                    diagManifest.innerHTML = `Manifest: OK (${res.status})<br>Name: ${json.name}<br>Start URL: ${json.start_url}`;
-                  } else {
-                    diagManifest.innerHTML = `Manifest: FAIL (HTTP ${res.status})`;
-                  }
-                } catch (e) {
-                  diagManifest.innerHTML = `Manifest: NETWORK ERROR (${e.message})`;
-                }
-
-                // Test Service Worker
-                if ('serviceWorker' in navigator) {
-                  navigator.serviceWorker.getRegistration().then(reg => {
-                    if (reg) {
-                      diagSw.innerHTML = `ServiceWorker: REGISTERED (Scope: ${reg.scope})`;
-                    } else {
-                      diagSw.innerHTML = `ServiceWorker: NOT FOUND`;
-                    }
-                  }).catch(e => {
-                    diagSw.innerHTML = `ServiceWorker: ERROR (${e.message})`;
-                  });
-                } else {
-                  diagSw.innerHTML = `ServiceWorker: UNSUPPORTED`;
-                }
-
-                window.addEventListener('beforeinstallprompt', (e) => {
-                  diagPrompt.innerHTML = `Install Prompt: FIRED!`;
-                });
-              });
-            </script>
-            <!-- END PWA DIAGNOSTICS -->
           </div>
         </div>
       </div>
