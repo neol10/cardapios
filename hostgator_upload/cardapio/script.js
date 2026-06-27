@@ -1918,7 +1918,7 @@ async function loadCardapio() {
     if (data.logo_url) {
       params.set("logo", new URL(data.logo_url, window.location.origin).href);
     }
-    const manifestURL = `/cardapio/manifest.php?${params.toString()}`;
+    const manifestURL = `/cardapio/cardapio/manifest.php?${params.toString()}`;
 
     let manifestEl = document.getElementById("dynamic-manifest");
     if (!manifestEl) {
