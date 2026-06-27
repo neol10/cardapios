@@ -18,10 +18,7 @@ RewriteRule ^admin/?$ admin/index.html [L]
 RewriteRule ^garcom/?$ garcom/index.html [L]
 RewriteRule ^garcom/(.*)$ garcom/index.html [L]
 
-# Rota para o Web Manifest dinâmico do PWA
-RewriteRule ^([^/]+)/manifest\.json$ cardapio/manifest.php?slug=$1 [L]
-
-# Se for arquivo PHP (como o manifest.php e icon.php), não faça mais nenhum redirecionamento
+# Se for arquivo PHP, ignora roteamento e roda direto
 RewriteRule \.php$ - [L]
 
 # Tudo que sobrar (ex: /cardapio/meu-restaurante) vai para o aplicativo do cardápio

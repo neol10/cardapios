@@ -14,7 +14,7 @@
       $slug = end($segments);
       if (empty($slug) || $slug === 'cardapio') $slug = 'default';
     ?>
-    <link rel="manifest" href="/cardapio/<?php echo htmlspecialchars($slug); ?>/manifest.json" id="dynamic-manifest" />
+    <link rel="manifest" href="/cardapio/cardapio/manifest.php?slug=<?php echo htmlspecialchars($slug); ?>" id="dynamic-manifest" />
     <script>
       (function () {
         try {
