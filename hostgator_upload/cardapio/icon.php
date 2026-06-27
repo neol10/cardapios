@@ -3,9 +3,14 @@ error_reporting(0);
 $url = isset($_GET['url']) ? $_GET['url'] : '';
 $size = isset($_GET['size']) ? (int)$_GET['size'] : 192;
 
-if (empty($url) || !filter_var($url, FILTER_VALIDATE_URL)) {
-    header("HTTP/1.0 404 Not Found");
+function fallback($size) {
+    $fallbackUrl = '/cardapio/pwa/icon-' . ($size == 512 ? '512' : '192') . '.png';
+    header("Location: " . $fallbackUrl);
     exit;
+}
+
+if (empty($url) || !filter_var($url, FILTER_VALIDATE_URL)) {
+    fallback($size);
 }
 
 if ($size !== 192 && $size !== 512) {
@@ -23,14 +28,12 @@ if ($imgData === false && function_exists('curl_version')) {
 }
 
 if ($imgData === false || empty($imgData)) {
-    header("HTTP/1.0 404 Not Found");
-    exit;
+    fallback($size);
 }
 
 $source = @imagecreatefromstring($imgData);
 if ($source === false) {
-    header("HTTP/1.0 404 Not Found");
-    exit;
+    fallback($size);
 }
 
 $width = imagesx($source);

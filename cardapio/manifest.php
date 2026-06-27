@@ -46,7 +46,7 @@ $short_name = mb_substr($name, 0, 12);
 $theme_color = isset($store['cor_tema']) && !empty($store['cor_tema']) ? $store['cor_tema'] : '#ff6a00';
 $logo = isset($store['logo_url']) ? $store['logo_url'] : '';
 
-$start_url = '/cardapio/' . $slug . '/';
+$start_url = '/cardapio/' . $slug;
 
 $manifest = [
     "name" => $name,
