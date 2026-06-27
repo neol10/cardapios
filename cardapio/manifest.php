@@ -46,7 +46,10 @@ $short_name = mb_substr($name, 0, 12);
 $theme_color = isset($store['cor_tema']) && !empty($store['cor_tema']) ? $store['cor_tema'] : '#ff6a00';
 $logo = isset($store['logo_url']) ? $store['logo_url'] : '';
 
-$start_url = '/cardapio/' . $slug;
+$basePath = rtrim(dirname($_SERVER['SCRIPT_NAME']), '/');
+if ($basePath === '\\') $basePath = '';
+
+$start_url = $basePath . '/' . $slug;
 
 $manifest = [
     "name" => $name,
@@ -58,13 +61,13 @@ $manifest = [
     "theme_color" => $theme_color,
     "icons" => [
         [
-            "src" => "/cardapio/pwa/icon-192.png",
+            "src" => $basePath . "/../pwa/icon-192.png",
             "sizes" => "192x192",
             "type" => "image/png",
             "purpose" => "any maskable"
         ],
         [
-            "src" => "/cardapio/pwa/icon-512.png",
+            "src" => $basePath . "/../pwa/icon-512.png",
             "sizes" => "512x512",
             "type" => "image/png",
             "purpose" => "any maskable"
@@ -75,7 +78,6 @@ $manifest = [
 if (!empty($logo)) {
     $protocol = isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 'https' : 'http';
     $host = $_SERVER['HTTP_HOST'];
-    $basePath = rtrim(dirname($_SERVER['PHP_SELF']), '/');
     
     $icon192 = $protocol . '://' . $host . $basePath . '/icon.php?size=192&url=' . urlencode($logo);
     $icon512 = $protocol . '://' . $host . $basePath . '/icon.php?size=512&url=' . urlencode($logo);

@@ -13,8 +13,10 @@
       $segments = explode('/', trim($path, '/'));
       $slug = end($segments);
       if (empty($slug) || $slug === 'cardapio') $slug = 'default';
+      $basePath = rtrim(dirname($_SERVER['SCRIPT_NAME']), '/');
+      if ($basePath === '\\') $basePath = '';
     ?>
-    <link rel="manifest" href="/cardapio/cardapio/manifest.php?slug=<?php echo htmlspecialchars($slug); ?>" id="dynamic-manifest" />
+    <link rel="manifest" href="<?php echo $basePath; ?>/<?php echo htmlspecialchars($slug); ?>/manifest.json" id="dynamic-manifest" />
     <script>
       (function () {
         try {

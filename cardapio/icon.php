@@ -4,7 +4,9 @@ $url = isset($_GET['url']) ? $_GET['url'] : '';
 $size = isset($_GET['size']) ? (int)$_GET['size'] : 192;
 
 function fallback($size) {
-    $fallbackUrl = '/cardapio/pwa/icon-' . ($size == 512 ? '512' : '192') . '.png';
+    $basePath = rtrim(dirname($_SERVER['SCRIPT_NAME']), '/');
+    if ($basePath === '\\') $basePath = '';
+    $fallbackUrl = $basePath . '/../pwa/icon-' . ($size == 512 ? '512' : '192') . '.png';
     header("Location: " . $fallbackUrl);
     exit;
 }
