@@ -1944,14 +1944,20 @@ async function loadCardapio() {
       ]
     };
     
-    // Se o restaurante tiver logotipo, podemos usar no manifest (opcional)
+    // Se o restaurante tiver logotipo, vamos usá-lo como o ícone oficial do App
     if (data.logo_url) {
-      manifestData.icons.unshift({
-        src: data.logo_url,
-        sizes: "192x192",
-        type: "image/png",
-        purpose: "any maskable"
-      });
+      manifestData.icons = [
+        {
+          src: data.logo_url,
+          sizes: "192x192",
+          purpose: "any maskable"
+        },
+        {
+          src: data.logo_url,
+          sizes: "512x512",
+          purpose: "any maskable"
+        }
+      ];
     }
 
     const manifestBlob = new Blob([JSON.stringify(manifestData)], { type: 'application/manifest+json' });
