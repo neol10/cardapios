@@ -265,6 +265,89 @@
         }
       }
 
+      /* Estilos VSL / Sales Page */
+      .vsl-section {
+        max-width: 860px;
+        margin: 0 auto;
+        padding: 20px 16px 60px;
+      }
+      .vsl-content {
+        font-size: 1.15rem;
+        line-height: 1.8;
+        color: #d4d4d8;
+      }
+      .vsl-content p {
+        margin-bottom: 24px;
+      }
+      .vsl-title {
+        font-size: 2.2rem;
+        font-weight: 800;
+        margin-bottom: 24px;
+        color: #fff;
+        line-height: 1.2;
+      }
+      .vsl-box {
+        background: rgba(255, 123, 0, 0.05);
+        border: 1px solid rgba(255, 123, 0, 0.2);
+        border-radius: 20px;
+        padding: 40px;
+        margin: 50px 0;
+      }
+      .vsl-box h3 {
+        color: var(--theme-vitrine);
+        margin-top: 0;
+        font-size: 1.6rem;
+        margin-bottom: 20px;
+        font-weight: 800;
+      }
+      .vsl-features {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+        display: grid;
+        gap: 16px;
+      }
+      .vsl-features li {
+        display: flex;
+        align-items: flex-start;
+        gap: 12px;
+      }
+      .vsl-features li::before {
+        content: "✅";
+        font-size: 1.2rem;
+      }
+      .vsl-negative li::before {
+        content: "❌";
+      }
+      .cta-button {
+        display: block;
+        width: 100%;
+        max-width: 420px;
+        margin: 50px auto;
+        text-align: center;
+        background: linear-gradient(135deg, var(--theme-vitrine), #ff9900);
+        color: #fff;
+        padding: 20px 24px;
+        border-radius: 16px;
+        font-size: 1.2rem;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        text-decoration: none;
+        box-shadow: 0 10px 30px rgba(255, 123, 0, 0.3);
+        transition: transform 0.2s, box-shadow 0.2s;
+      }
+      .cta-button:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 15px 40px rgba(255, 123, 0, 0.4);
+      }
+      .text-center { text-align: center; }
+
+      @media (max-width: 600px) {
+        .vsl-box { padding: 24px; }
+        .vsl-split { grid-template-columns: 1fr !important; }
+      }
+
       /* Estilos de Precificação */
       .pricing-grid {
         display: grid;
@@ -368,19 +451,79 @@
 
   <body class="is-loading">
     <header class="hero">
-      <div class="hero-content" style="text-align: center; padding-top: 60px; padding-bottom: 40px;">
+      <div class="hero-content" style="text-align: center; padding-top: 80px; padding-bottom: 20px;">
         <div>
-          <h1 style="font-size: clamp(3rem, 8vw, 4.5rem); margin-bottom: 8px;">Conheça Nossos Parceiros</h1>
-          <p id="vitrine-subtitle" class="muted" style="max-width: 60ch; margin: 0 auto; font-size: 1.1rem;">
-            Explore os melhores cardápios digitais e faça seu pedido de forma rápida e prática.
+          <div class="chip">Atenção Donos de Delivery e Restaurantes</div>
+          <h1 style="font-size: clamp(2.2rem, 5.5vw, 4rem); margin-bottom: 24px; line-height: 1.15;">
+            O mundo mudou e o consumo online explodiu. O seu delivery acompanhou ou você ainda perde tempo anotando pedidos na mão?
+          </h1>
+          <p id="vitrine-subtitle" class="muted" style="max-width: 70ch; margin: 0 auto; font-size: 1.25rem;">
+            Descubra como automatizar seus pedidos pelo WhatsApp, eliminar erros e dobrar seu faturamento sem pagar taxas abusivas de aplicativos.
           </p>
         </div>
       </div>
     </header>
 
-    <main class="vitrine" style="margin-top: -20px;">
-      <p id="vitrine-message" class="vitrine-message" aria-live="polite"></p>
-      <section id="cardapios" class="vitrine-grid" aria-label="Lista de cardápios"></section>
+    <main class="vitrine" style="margin-top: 0; padding-top: 0;">
+      
+      <!-- SESSÃO VSL / COPY -->
+      <section class="vsl-section">
+        <div class="vsl-content">
+          <p>Muita coisa mudou nos últimos anos. Com o avanço da internet e das novas tecnologias, <strong>novas formas de consumo foram estabelecidas.</strong></p>
+          <p>De acordo com pesquisas recentes, comprar online tem ficado cada vez mais comum na vida dos brasileiros, representando um <strong>aumento de 486%</strong> na oferta dessa modalidade.</p>
+          <p>Ou seja, os consumidores estão preferindo cada vez mais pedir comida, agendar serviços e comprar produtos de forma rápida, diretamente pelo celular, sem complicações e sem ligações demoradas.</p>
+          
+          <h2 class="vsl-title" style="margin-top: 60px; text-align: center;">Mas o que você tem a ver com isso?</h2>
+          <p style="text-align: center;">Se o seu cliente precisa esperar 15 minutos para você responder mandando um PDF no WhatsApp, ou se você ainda corre o risco de anotar um pedido errado no balcão de um restaurante lotado... <strong>Você está perdendo dinheiro para a concorrência.</strong></p>
+          
+          <div class="vsl-box">
+            <h3>Apresentando: A Revolução do seu Delivery</h3>
+            <p>Um sistema completo projetado para automatizar as suas vendas. Seu cliente acessa um link exclusivo (ou escaneia um QR Code na mesa), escolhe os produtos e você recebe o pedido formatado e calculado diretamente no seu WhatsApp.</p>
+            <ul class="vsl-features">
+              <li><strong>Gestão Completa:</strong> Painel administrativo para cadastrar produtos, alterar preços e categorias em tempo real.</li>
+              <li><strong>Zero Taxas Abusivas:</strong> Pare de deixar 20% do seu lucro nos grandes aplicativos de delivery. O lucro é 100% seu.</li>
+              <li><strong>Modo Garçom:</strong> Atendimento otimizado para as mesas do seu salão, agilizando a cozinha.</li>
+              <li><strong>Gerador de QR Code:</strong> Imprima o código e coloque nas mesas, panfletos ou na porta do estabelecimento.</li>
+            </ul>
+          </div>
+          
+          <div class="vsl-split" style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin: 40px 0;">
+            <div style="background: rgba(255,255,255,0.03); padding: 32px 24px; border-radius: 20px;">
+              <h4 style="color: #fff; margin-top: 0; font-size: 1.2rem; margin-bottom: 20px;">🎯 Para quem É</h4>
+              <ul class="vsl-features" style="font-size: 0.95rem;">
+                <li>Restaurantes e Delivery</li>
+                <li>Lanchonetes e Docerias</li>
+                <li>Barbearias e Petshops</li>
+                <li>Qualquer negócio que atende no WhatsApp</li>
+              </ul>
+            </div>
+            <div style="background: rgba(255,255,255,0.03); padding: 32px 24px; border-radius: 20px;">
+              <h4 style="color: #fff; margin-top: 0; font-size: 1.2rem; margin-bottom: 20px;">⚠️ Para quem NÃO é</h4>
+              <ul class="vsl-features vsl-negative" style="font-size: 0.95rem;">
+                <li>Quem gosta de perder tempo na mão.</li>
+                <li>Quem não liga de errar o pedido do cliente.</li>
+                <li>Quem ama pagar comissão alta pra apps.</li>
+              </ul>
+            </div>
+          </div>
+          
+          <p class="text-center" style="font-size: 1.3rem;"><strong>Quanto custa não modernizar seu negócio?</strong><br>Quanto custa perder clientes todo dia porque seu atendimento demorou?</p>
+          
+          <a href="#planos" class="cta-button">Ver Planos e Começar Agora</a>
+        </div>
+      </section>
+
+      <!-- PROVA SOCIAL / PARCEIROS -->
+      <div class="vitrine-head" style="margin-top: 20px; margin-bottom: 40px; text-align: center; display: block;">
+        <div class="chip" style="margin: 0 auto 16px; background: rgba(34, 197, 94, 0.15); color: #4ade80; border: 1px solid #4ade80;">Resultados Comprovados</div>
+        <h2 style="font-size: 2.4rem; margin-bottom: 12px; font-weight: 800;">Quem já entendeu o novo mercado e está lucrando:</h2>
+        <p style="font-size: 1.15rem; color: var(--muted); font-weight: normal; margin: 0 auto; max-width: 600px;">
+          Confira abaixo alguns dos nossos parceiros de sucesso e veja como fica o resultado final da nossa tecnologia na prática.
+        </p>
+      </div>
+
+      <p id="vitrine-message" class="vitrine-message" aria-live="polite" style="text-align: center;"></p>
+      <section id="cardapios" class="vitrine-grid" aria-label="Casos de sucesso"></section>
 
       <!-- Modal QR Code -->
       <div id="qrcode-modal" class="produto-modal is-hidden">
@@ -398,10 +541,10 @@
 
       <hr style="border: 0; border-top: 1px solid var(--border); margin: 60px 0 40px;">
 
-      <div class="vitrine-head" style="margin-bottom: 32px; text-align: center; display: block;">
-        <div class="chip" style="margin: 0 auto 12px; background: rgba(255, 106, 0, 0.15); color: var(--theme); border: 1px solid var(--theme);">🚀 OPORTUNIDADE</div>
-        <h2 style="font-size: 1.8rem; margin-bottom: 8px;">Quer um cardápio só seu?</h2>
-        <p style="font-size: 1.1rem;">Tenha sua própria loja digital e venda muito mais com nossos planos exclusivos.</p>
+      <div id="planos" class="vitrine-head" style="margin-bottom: 32px; text-align: center; display: block;">
+        <div class="chip" style="margin: 0 auto 12px; background: rgba(255, 106, 0, 0.15); color: var(--theme); border: 1px solid var(--theme);">🚀 ESCOLHA O SEU PLANO</div>
+        <h2 style="font-size: 2.4rem; margin-bottom: 12px;">Pronto para transformar seu atendimento?</h2>
+        <p style="font-size: 1.15rem; color: var(--muted);">Tenha sua própria loja digital e venda muito mais com nossos planos exclusivos.</p>
       </div>
 
       <div class="pricing-grid">
@@ -426,9 +569,9 @@
           <div class="plan-price">R$ 74<span>,99/mês</span></div>
           <p class="plan-desc">Sistema completo de pedidos via WhatsApp para delivery, balcão e mesas.</p>
           <ul class="plan-features">
-            <li>✅ Pedidos no WhatsApp</li>
+            <li>✅ Pedidos no WhatsApp formatados</li>
             <li>🤵 Modo Garçom / Mesa</li>
-            <li>📱 Gerador de QR Code</li>
+            <li>📱 Painel Admin Completo</li>
             <li>📊 Relatório de Vendas</li>
             <li>🚀 Alta Conversão</li>
           <div style="display: grid; gap: 8px; margin-top: auto;">
@@ -445,7 +588,7 @@
           <ul class="plan-features">
             <li>📅 Gestão de Horários</li>
             <li>✂️ Cadastro de Serviços</li>
-            <li>📱 Gerador de QR Code</li>
+            <li>📱 Painel Admin Completo</li>
             <li>🔗 Link de Agendamento</li>
             <li>❌ Sem Pedidos de Delivery</li>
           </ul>
@@ -459,7 +602,7 @@
           <p class="plan-desc">Especialista em Marmitarias com agendamento, prazos e controle de estoque.</p>
           <ul class="plan-features">
             <li>📅 Agendamento de Pedidos</li>
-            <li>📱 Gerador de QR Code</li>
+            <li>📱 Painel Admin Completo</li>
             <li>⏰ Horários de Retirada</li>
             <li>📦 Controle de Estoque</li>
             <li>🛑 Horário Limite (Hoje)</li>
@@ -470,9 +613,20 @@
         </div>
       </div>
 
-      <div style="margin-top: 40px; text-align: center; padding: 24px; background: rgba(255,255,255,0.03); border-radius: 20px; border: 1px dashed var(--border);">
-        <p style="margin: 0; font-weight: 700; color: var(--theme2);">🛠️ NÃO TEM TEMPO? EU MONTO TUDO PARA VOCÊ!</p>
-        <p style="margin: 8px 0 0; font-size: 0.9rem; color: var(--muted);">Fale comigo no WhatsApp e consulte a taxa de montagem e configuração personalizada.</p>
+      <!-- Garantia -->
+      <div style="margin-top: 60px; max-width: 800px; margin-left: auto; margin-right: auto; padding: 32px; background: rgba(34, 197, 94, 0.05); border-radius: 20px; border: 1px solid rgba(34, 197, 94, 0.2); display: flex; align-items: center; gap: 24px; flex-wrap: wrap;">
+        <div style="font-size: 3.5rem;">🛡️</div>
+        <div style="flex-grow: 1; min-width: 250px;">
+          <h3 style="margin: 0 0 8px; font-size: 1.4rem; color: #4ade80;">Risco Zero: 7 Dias de Garantia</h3>
+          <p style="margin: 0; color: var(--muted); line-height: 1.5; font-size: 1rem;">Nós confiamos tanto na nossa tecnologia que, se você assinar e por qualquer motivo achar que não serviu para o seu negócio dentro de 7 dias, devolvemos 100% do seu dinheiro. Sem letras miúdas.</p>
+        </div>
+      </div>
+
+      <!-- Suporte CTA -->
+      <div style="margin-top: 40px; margin-bottom: 60px; text-align: center; padding: 40px 24px; background: rgba(255,255,255,0.02); border-radius: 24px; border: 1px dashed rgba(255,255,255,0.1);">
+        <p style="margin: 0; font-weight: 800; font-size: 1.4rem; color: var(--theme2);">🛠️ NÃO TEM TEMPO? EU MONTO TUDO PARA VOCÊ!</p>
+        <p style="margin: 12px auto 24px; max-width: 500px; font-size: 1.05rem; color: var(--muted);">Fale comigo diretamente no WhatsApp e consulte a taxa de montagem, cadastro de produtos e configuração personalizada da sua loja.</p>
+        <a href="https://wa.me/5567998634892?text=Oi,%20gostaria%20de%20saber%20mais%20sobre%20a%20montagem%20do%20cardápio%20digital" target="_blank" class="btn btn-ghost" style="display: inline-block; padding: 14px 28px; background: rgba(255, 255, 255, 0.1); border-radius: 12px; text-decoration: none; font-weight: 700; color: #fff;">Falar no WhatsApp</a>
       </div>
     </main>
 
