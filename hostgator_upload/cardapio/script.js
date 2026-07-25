@@ -1919,7 +1919,7 @@ async function loadCardapio() {
       const pin = window.prompt("Digite o PIN do proprietário para editar:");
       if (!pin) return;
       // Redireciona para a tela de edição do proprietário
-      window.location.href = `/cardapio/admin/owner?slug=${encodeURIComponent(slug)}&pin=${encodeURIComponent(pin)}`;
+      window.location.href = `/admin/owner?slug=${encodeURIComponent(slug)}&pin=${encodeURIComponent(pin)}`;
     };
     // Só mostra se habilitado
     if (data.owner_edit_enabled) {

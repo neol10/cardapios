@@ -9,7 +9,7 @@ import {
 
 if ("serviceWorker" in navigator) {
   window.addEventListener("load", () => {
-    navigator.serviceWorker.register("/cardapio/sw.js").catch(() => undefined);
+    navigator.serviceWorker.register("/sw.js").catch(() => undefined);
   });
 }
 
@@ -1069,7 +1069,7 @@ async function initLoginPage() {
 
   const { data } = await supabase.auth.getSession();
   if (data.session) {
-    window.location.href = "/cardapio/admin/dashboard";
+    window.location.href = "/admin/dashboard";
     return;
   }
 
@@ -1089,7 +1089,7 @@ async function initLoginPage() {
     }
 
     setMessage(authMessage, "Login realizado com sucesso.", "success");
-    window.location.href = "/cardapio/admin/dashboard";
+    window.location.href = "/admin/dashboard";
   });
 }
 
@@ -1170,12 +1170,12 @@ function renderCardapios() {
 
         <div style="margin: 10px 0 6px; padding: 10px 12px; background: rgba(200, 148, 91, 0.07); border: 1px solid rgba(200, 148, 91, 0.18); border-radius: 10px; display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
           <span style="font-size: 0.75rem; font-weight: 700; color: var(--primary); text-transform: uppercase; letter-spacing: 0.04em; margin-right: 4px;">📢 Divulgar</span>
-          <a class="btn" href="/cardapio/cardapio/${slugHref}" target="_blank" rel="noopener" style="font-size: 0.82rem; padding: 7px 12px;">🔗 Abrir</a>
+          <a class="btn" href="/cardapio/${slugHref}" target="_blank" rel="noopener" style="font-size: 0.82rem; padding: 7px 12px;">🔗 Abrir</a>
           <button class="btn btn-primary js-qrcode-cardapio" data-id="${item.id}" data-slug="${slugText}" data-nome="${nome}" style="font-size: 0.82rem; padding: 7px 12px; color: #1a1410;">📱 QR Code</button>
         </div>
 
         <div class="list-actions">
-          <a class="btn" href="/cardapio/garcom/${slugHref}" target="_blank" rel="noopener">🍱 Garçom</a>
+          <a class="btn" href="/garcom/${slugHref}" target="_blank" rel="noopener">🍱 Garçom</a>
           <button class="btn js-manage-cardapio" data-id="${item.id}">${isSelected ? "Gerenciando" : "Gerenciar"}</button>
           <button class="btn js-venda-manual" data-id="${item.id}" title="Lançar venda manual">💰 Venda</button>
           <button class="btn js-edit-cardapio" data-id="${item.id}">Editar</button>
@@ -1633,7 +1633,7 @@ function fillCardapioForm(item) {
       if (isEnabled) {
         ownerLinkArea.classList.remove("is-hidden");
         const origin = window.location.origin;
-        ownerLinkInput.value = `${origin}/cardapio/admin/owner.html?slug=${item.slug}`;
+        ownerLinkInput.value = `${origin}/admin/owner.html?slug=${item.slug}`;
       }
  else {
         ownerLinkArea.classList.add("is-hidden");
@@ -1726,13 +1726,13 @@ function getOwnerPinValue() {
 function getOwnerEditLink(slug) {
   const safe = String(slug || "").trim();
   if (!safe) return "";
-  return `${window.location.origin}/cardapio/cardapio/admin/owner?slug=${encodeURIComponent(safe)}`;
+  return `${window.location.origin}/cardapio/admin/owner?slug=${encodeURIComponent(safe)}`;
 }
 
 function getGarcomLink(slug) {
   const safe = String(slug || "").trim();
   if (!safe) return "";
-  return `${window.location.origin}/cardapio/cardapio/garcom/${encodeURIComponent(safe)}`;
+  return `${window.location.origin}/cardapio/garcom/${encodeURIComponent(safe)}`;
 }
 
 function updateModoGarcomAvailability(form) {
@@ -3100,7 +3100,7 @@ async function initOwnerPage() {
     if (qrBtn && qrModal && qrContainer) {
       qrBtn.onclick = () => {
         if (!ownerCardapio?.slug) return;
-        const url = `${window.location.origin}/cardapio/cardapio/${ownerCardapio.slug}`;
+        const url = `${window.location.origin}/cardapio/${ownerCardapio.slug}`;
         // Aumentado para 500x500 para leitura super nítida
         const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=500x500&margin=20&data=${encodeURIComponent(url)}`;
         
@@ -3821,7 +3821,7 @@ function setupOwnerLinkHandlers() {
           const slugField = form?.querySelector('input[name="slug"]');
           const slug = slugField?.value || "";
           const origin = window.location.origin;
-          ownerLinkInput.value = `${origin}/cardapio/admin/owner.html?slug=${slug}`;
+          ownerLinkInput.value = `${origin}/admin/owner.html?slug=${slug}`;
 
         } else {
           ownerLinkArea.classList.add("is-hidden");
@@ -3919,7 +3919,7 @@ function setupRealtimePedidos(cardapioId) {
 }
 
 function showQrCodeModal(slug, nome) {
-  const fullUrl = `${window.location.origin}/cardapio/cardapio/${slug}`;
+  const fullUrl = `${window.location.origin}/cardapio/${slug}`;
   
   let modal = document.getElementById("qrcode-modal");
   if (!modal) {
