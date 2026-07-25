@@ -174,10 +174,6 @@
             <span class="total-label" data-label>Subtotal</span>
             <span class="total-value" data-value>R$ 0,00</span>
           </p>
-          <p id="cart-taxa" class="muted total-line is-hidden">
-            <span class="total-label" data-label>Taxa de entrega</span>
-            <span class="total-value" data-value>R$ 0,00</span>
-          </p>
           <p id="cart-total" class="cart-total total-line">
             <span class="total-label" data-label>Total</span>
             <span class="total-value" data-value>R$ 0,00</span>
@@ -187,14 +183,6 @@
 
         <form id="checkout-form" class="checkout-form">
           <div class="form-row">
-            <label id="tipo-pedido-wrap" class="is-hidden">
-              Tipo de pedido
-              <select name="tipo_pedido" id="tipo_pedido">
-                <option value="entrega">Entrega</option>
-                <option value="retirada">Retirada</option>
-              </select>
-            </label>
-
             <label id="pagamento-wrap" class="is-hidden">
               Forma de pagamento
               <select name="pagamento" id="pagamento"></select>
@@ -237,16 +225,7 @@
             </label>
           </div>
 
-          <label id="endereco-wrap">
-            Endereço completo
-            <textarea
-              name="endereco"
-              rows="3"
-              placeholder="Rua, número, bairro, complemento"
-              autocomplete="street-address"
-              required
-            ></textarea>
-          </label>
+
 
           <button class="btn btn-primary" type="submit">Finalizar pedido</button>
         </form>

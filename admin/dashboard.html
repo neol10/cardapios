@@ -92,7 +92,7 @@
           <button type="button" class="tab-btn" data-tab="visual">🎨 Estilo</button>
           <button type="button" class="tab-btn" data-tab="operacao">⏰ Horários</button>
           <button type="button" class="tab-btn" data-tab="midia">🖼️ Fotos</button>
-          <button type="button" class="tab-btn" data-tab="entrega">🛵 Pedidos</button>
+          <button type="button" class="tab-btn" data-tab="entrega">⚙️ Configurações</button>
         </div>
 
         <form id="cardapio-form" class="stack-gap compact">
@@ -315,18 +315,11 @@
                   </div>
 
                   <label class="checkbox-label" style="display: flex; flex-direction: row; align-items: center; gap: 8px;">
-                    <input type="checkbox" name="has_garcom_module" /> 
-                    <span>🔑 Permissão: Módulo Garçom</span>
-                  </label>
-                  <label class="checkbox-label" style="display: flex; flex-direction: row; align-items: center; gap: 8px;">
-                    <input type="checkbox" name="has_marmita_module" /> 
-                    <span>🔑 Permissão: Módulo Marmita</span>
+                    <input type="checkbox" name="owner_edit_enabled" /> 
+                    <span>Permitir edição pelo proprietário</span>
                   </label>
 
-                  <label class="checkbox-label" style="display: flex; flex-direction: row; align-items: center; gap: 8px; margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--border);">
-                    <input type="checkbox" name="modo_garcom_enabled" /> 
-                    <span>Ativar Modo Garçom agora</span>
-                  </label>
+
                 </div>
 
                 <label style="margin-top: 16px;">PIN do proprietário (Senha) <input type="password" name="owner_pin" placeholder="Defina um PIN" /></label>
@@ -362,10 +355,8 @@
               <label>Pagamentos <input type="text" name="formas_pagamento" /></label>
               <label>Modo de Cardápio
                 <select name="modo">
-                  <option value="pedido">Carrinho de Compras</option>
-                  <option value="marmita">Marmita (Agendamento)</option>
-                  <option value="agendamento">Agendamento (Serviços: Banho, Corte, etc)</option>
                   <option value="catalogo">Apenas Catálogo</option>
+                  <option value="agendamento">Agendamento (Serviços: Banho, Corte, etc)</option>
                 </select>
               </label>
 
@@ -389,12 +380,7 @@
                 </div>
               </details>
 
-              <details class="details details-sub">
-                <summary>Avançado (Marmita/WhatsApp)</summary>
-                <label><input type="checkbox" name="modo_marmita_enabled" /> Ativar Marmita</label>
-                <label><input type="checkbox" name="marmita_agendamento_enabled" /> Agendamento</label>
-                <label>WhatsApp Template <textarea name="mensagem_whatsapp_template" rows="4"></textarea></label>
-              </details>
+
             </div>
           </div>
 
@@ -440,7 +426,6 @@
               <label>Acompanhamentos / Personalização</label>
               <div id="product-options-container" class="stack-gap" style="margin-top: 8px;"></div>
               <div class="presets-container">
-                <button type="button" class="btn btn-marmita-template" id="add-marmita-template-btn">🍽️ Template Marmita</button>
                 <button type="button" class="btn btn-preset" data-preset-group="Arroz">+ Arroz</button>
                 <button type="button" class="btn btn-preset" data-preset-group="Feijão">+ Feijão</button>
                 <button type="button" class="btn btn-preset" data-preset-group="Mistura">+ Mistura</button>

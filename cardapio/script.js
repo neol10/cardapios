@@ -2212,18 +2212,6 @@ function attachEvents() {
     openProdutoModal(modalTrigger.dataset.id);
   });
 
-  tipoPedidoSelect?.addEventListener("change", () => {
-    const tipo = getTipoPedido();
-    const enderecoTextarea = checkoutForm?.querySelector('textarea[name="endereco"]');
-    if (enderecoWrap) enderecoWrap.classList.toggle("is-hidden", tipo === "retirada");
-    if (enderecoTextarea instanceof HTMLTextAreaElement) {
-      enderecoTextarea.required = tipo !== "retirada";
-      if (tipo === "retirada") enderecoTextarea.value = "";
-    }
-    renderCart();
-    scheduleSaveCheckoutDraft();
-  });
-
   checkoutForm?.addEventListener("submit", async (event) => {
     event.preventDefault();
     setCheckoutMessage("");
@@ -2246,14 +2234,14 @@ function attachEvents() {
     const formData = new FormData(checkoutForm);
     const nome = String(formData.get("nome") || "").trim();
     const telefone = String(formData.get("telefone") || "").trim();
-    const endereco = String(formData.get("endereco") || "").trim();
+    const endereco = "";
 
     // Persistimos os dados do cliente antes de qualquer reset.
     writeCheckoutDraft({
       nome,
       telefone,
-      endereco,
-      tipo_pedido: String(formData.get("tipo_pedido") || "").trim(),
+      endereco: "",
+      tipo_pedido: "agendamento",
       pagamento: String(formData.get("pagamento") || "").trim()
     });
 
@@ -2274,13 +2262,6 @@ function attachEvents() {
     if (onlyDigits(telefone).length < 10) {
       setCheckoutMessage("Informe um telefone válido no formato brasileiro.", true);
       return;
-    }
-
-    if (tipoPedido !== "retirada") {
-      if (endereco.length < 8) {
-        setCheckoutMessage("Informe um endereço completo.", true);
-        return;
-      }
     }
 
     if (isServiceAgendamentoMode(activeCardapio)) {

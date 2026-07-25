@@ -73,10 +73,8 @@
               <label>
                 Tipo de cardápio
                 <select name="modo">
-                  <option value="pedido">Com sistema de pedidos</option>
-                  <option value="marmita">Modo Marmita</option>
-                  <option value="agendamento">Agendamento (Serviços)</option>
                   <option value="catalogo">Apenas catálogo (sem pedidos)</option>
+                  <option value="agendamento">Agendamento (Serviços)</option>
                 </select>
               </label>
             </div>
@@ -120,17 +118,6 @@
                   <input type="time" name="fecha_em" />
                 </label>
               </div>
-            </div>
-          </details>
-
-          <details class="details details-sub" id="owner-garcom-wrap">
-            <summary>⚙️ Configurações Avançadas</summary>
-            <div class="stack-gap" style="padding: 12px 0;">
-              <label id="modo-garcom-wrap" class="switch-label">
-                <input type="checkbox" name="modo_garcom_enabled" />
-                <span class="switch-slider"></span>
-                Habilitar modo garçom
-              </label>
             </div>
           </details>
 
@@ -182,34 +169,6 @@
                 </div>
               </div>
             </div>
-          </details>
-
-          <details class="details details-sub" id="owner-marmita-wrap">
-            <summary>Configurações de Marmita</summary>
-            <div class="stack-gap" style="gap: 16px; padding: 12px 0;">
-              <label class="switch-label">
-                <input type="checkbox" name="modo_marmita_enabled" />
-                <span class="switch-slider"></span>
-                Ativar Modo Marmita
-              </label>
-              <label class="switch-label">
-                <input type="checkbox" name="marmita_agendamento_enabled" />
-                <span class="switch-slider"></span>
-                Habilitar agendamento
-              </label>
-            </div>
-            <label>
-              Horário limite (Hoje)
-              <input type="time" name="marmita_deadline" />
-            </label>
-            <label>
-              Dias da semana (1-7)
-              <input type="text" name="marmita_dias_semana" placeholder="1,2,3,4,5" />
-            </label>
-            <label>
-              Horários de retirada
-              <input type="text" name="marmita_horarios_retirada" placeholder="11:30, 12:00, 12:30" />
-            </label>
           </details>
 
           <details class="details details-sub">
@@ -302,7 +261,6 @@
                 <div id="product-options-container" class="stack-gap" style="margin-top: 8px;"></div>
                 
                 <div class="presets-container">
-                  <button type="button" class="btn btn-marmita-template" id="add-marmita-template-btn">🍽️ Template Marmita</button>
                   <button type="button" class="btn btn-preset" data-preset-group="Arroz">+ Arroz</button>
                   <button type="button" class="btn btn-preset" data-preset-group="Feijão">+ Feijão</button>
                   <button type="button" class="btn btn-preset" data-preset-group="Mistura">+ Mistura</button>
