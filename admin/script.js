@@ -1714,7 +1714,7 @@ function resetOwnerProdutoForm(form) {
 }
 
 function getOwnerPinInput() {
-  const form = document.querySelector("#owner-auth-form");
+  const form = document.querySelector("#owner-auth-form-legacy");
   const pinInput = form?.querySelector('input[name="pin"]');
   return pinInput instanceof HTMLInputElement ? pinInput : null;
 }
@@ -2931,7 +2931,7 @@ async function initOwnerPage() {
   const subtitle = ownerPage.querySelector("#owner-subtitle");
   if (subtitle) subtitle.textContent = slug ? `Cardápio: ${slug}` : "Informe o slug na URL.";
 
-  const authForm = ownerPage.querySelector("#owner-auth-form");
+  const authForm = ownerPage.querySelector("#owner-auth-form-legacy");
   const editForm = ownerPage.querySelector("#owner-edit-form");
   const ownerProdutosSection = ownerPage.querySelector("#owner-produtos-section");
   const ownerProdutoForm = ownerPage.querySelector("#owner-produto-form");
