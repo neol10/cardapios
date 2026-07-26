@@ -77,7 +77,7 @@
                 <input type="hidden" name="templates_json" />
               </label>
 
-              <label>
+              <label style="display:none;">
                 Tipo de cardápio
                 <select name="modo">
                   <option value="catalogo">Apenas catálogo (sem pedidos)</option>
@@ -333,17 +333,17 @@
               <input type="text" id="input-nome-loja" placeholder="Ex: Barbearia do João" />
             </label>
             <label>Link da sua loja (slug)
-              <div style="display:flex; align-items:center; gap:8px;">
+              <div style="display:flex; align-items:center; flex-wrap:wrap; gap:8px;">
                 <span style="color:#a1a1aa; font-size:0.9rem; white-space:nowrap;">cardapios.newneo.com.br/c/</span>
-                <input type="text" id="input-slug-loja" placeholder="barbearia-joao" style="flex:1;" />
+                <input type="text" id="input-slug-loja" placeholder="barbearia-joao" style="flex:1; min-width:150px;" />
               </div>
               <small style="color:#a1a1aa;">Apenas letras minúsculas, números e hifens.</small>
             </label>
             <label>WhatsApp (com DDD, só números)
               <input type="text" id="input-whatsapp-loja" placeholder="5511999999999" inputmode="tel" />
             </label>
-            <label>Tipo de loja
-              <select id="select-modo-loja">
+            <label id="label-tipo-loja" style="display:none;">Tipo de loja
+              <select id="select-modo-loja" disabled>
                 <option value="catalogo">Catálogo Digital (sem pedidos)</option>
                 <option value="agendamento">Agendamento de Serviços</option>
               </select>
@@ -408,7 +408,11 @@
 
           if (error) throw error;
 
-          if (data === true) {
+          if (data && data.sucesso === true) {
+            // Seleciona automaticamente o plano que a pessoa comprou
+            if (data.plano) {
+              document.getElementById('select-modo-loja').value = data.plano;
+            }
             stepEmail.style.display = 'none';
             stepDados.style.display = '';
           } else {
