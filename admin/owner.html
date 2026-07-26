@@ -369,7 +369,7 @@
     <script type="module" src="/admin/script.js?v=41"></script>
     <script type="module">
       // Lógica de onboarding (Kiwify → criar loja)
-      import { getSupabaseClient } from '/shared/supabase.js';
+      import { supabase } from '/shared/supabase.js';
 
       const modal = document.getElementById('modal-criar-loja');
       const btnAbrir = document.getElementById('btn-criar-loja');
@@ -404,7 +404,6 @@
         msgEl.textContent = ''; msgEl.style.color = '';
 
         try {
-          const supabase = getSupabaseClient();
           const { data, error } = await supabase.rpc('kiwify_email_tem_credito', { p_email: email });
 
           if (error) throw error;
@@ -443,9 +442,6 @@
         msgEl.textContent = ''; msgEl.style.color = '';
 
         try {
-          // Gera hash do PIN no cliente usando a API do Supabase
-          const supabase = getSupabaseClient();
-
           // Chama a função segura no banco para criar a loja
           const { data, error } = await supabase.rpc('kiwify_criar_loja_cliente', {
             p_email: email,
