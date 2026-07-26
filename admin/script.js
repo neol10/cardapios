@@ -3071,54 +3071,7 @@ async function initOwnerPage() {
 
   await tryAuto();
 
-  authForm.addEventListener("submit", async (event) => {
-    event.preventDefault();
 
-    const fd = new FormData(authForm);
-    const email = String(fd.get("email") || "").trim().toLowerCase();
-    const pin = onlyDigits(String(fd.get("pin") || "").trim());
-
-    if (!email || !email.includes("@")) {
-      setOwnerMessage("Informe um e-mail válido.", "error");
-      return;
-    }
-    if (!pin) {
-      setOwnerMessage("Informe o PIN.", "error");
-      return;
-    }
-
-    setOwnerMessage("Validando...");
-    const { data, error } = await supabase.rpc("owner_login_by_email", { p_email: email, p_pin: pin });
-    if (error) {
-      setOwnerMessage("Não foi possível validar. Tente novamente.", "error");
-      return;
-    }
-
-    if (!data?.sucesso) {
-      setOwnerMessage(data?.erro || "E-mail ou PIN incorretos.", "error");
-      return;
-    }
-
-    const foundSlug = String(data.slug || "");
-    // Injeta o slug na URL invisivelmente para o restante do sistema funcionar
-    window.history.replaceState(null, "", `?slug=${encodeURIComponent(foundSlug)}`);
-
-    setOwnerVerified(foundSlug);
-    setOwnerPinCache(foundSlug, pin);
-    ownerValidatedPin = pin;
-    showEdit(true);
-
-    setOwnerMessage("");
-    // Recarrega a variável slug local
-    const slugInput = ownerPage.querySelector("#owner-edit-form input[name='slug']");
-    if (slugInput) slugInput.value = foundSlug;
-
-    await loadAndFill();
-    setupPriceInputs(editForm);
-    setupPriceInputs(ownerProdutoForm);
-    setupHexInputs(ownerPage);
-    setupOwnerDashboardHandlers(ownerPage);
-  });
 
   function setupOwnerDashboardHandlers(root) {
     const qrBtn = root.querySelector("#btn-owner-qrcode");
@@ -3257,9 +3210,7 @@ async function initOwnerPage() {
     event.preventDefault();
     if (!slug) return;
 
-    const pinInput = authForm.querySelector('input[name="pin"]');
-    const pinFromInput = pinInput instanceof HTMLInputElement ? String(pinInput.value || "").trim() : "";
-    const pin = onlyDigits(pinFromInput || getOwnerPinCache(slug));
+    const pin = onlyDigits(ownerValidatedPin || getOwnerPinCache(slug));
 
     if (!pin) {
       setOwnerMessage("Digite o PIN para continuar.", "error");
