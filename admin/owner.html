@@ -39,6 +39,13 @@
           <button type="submit" class="btn btn-primary btn-lg">Entrar</button>
         </form>
 
+        <div style="text-align: center; margin-top: 24px; padding-top: 24px; border-top: 1px solid var(--border);">
+          <p class="muted" style="margin-bottom: 12px; font-size: 0.9rem;">Acabou de comprar e quer criar sua loja?</p>
+          <button type="button" id="btn-criar-loja" class="btn" style="display: inline-flex; align-items: center; gap: 8px; background: linear-gradient(135deg, #ff7b00, #ff9900); color: #fff; font-weight: 800; border: none; padding: 12px 24px; border-radius: 12px; font-size: 1rem; cursor: pointer; transition: transform 0.2s;">
+            🎉 Criar minha loja agora
+          </button>
+        </div>
+
         <form id="owner-edit-form" class="stack-gap is-hidden">
           <input type="hidden" name="slug" />
 
@@ -297,6 +304,179 @@
       </div>
     </div>
 
-    <script type="module" src="/admin/script.js?v=40"></script>
+    <!-- Modal de Criação de Loja (Onboarding Kiwify) -->
+    <div id="modal-criar-loja" style="display:none; position:fixed; inset:0; z-index:9999; background:rgba(0,0,0,0.75); backdrop-filter:blur(6px); justify-content:center; align-items:center; padding:16px;">
+      <div style="background:#1a1a1a; border:1px solid rgba(255,123,0,0.3); border-radius:24px; padding:32px; max-width:480px; width:100%; position:relative; box-shadow:0 30px 60px rgba(0,0,0,0.7);">
+        <button id="btn-fechar-modal-loja" type="button" style="position:absolute; top:16px; right:16px; background:none; border:none; color:#aaa; font-size:1.5rem; cursor:pointer; line-height:1;">×</button>
+
+        <!-- Etapa 1: E-mail -->
+        <div id="step-email">
+          <div style="font-size:2.5rem; margin-bottom:12px;">🎉</div>
+          <h2 style="margin:0 0 8px; font-size:1.5rem; font-weight:800;">Criar minha loja digital</h2>
+          <p style="color:#a1a1aa; margin:0 0 24px; font-size:0.95rem;">Digite o e-mail que você usou na compra para validarmos o seu acesso.</p>
+          <div class="stack-gap">
+            <label>E-mail da compra
+              <input type="email" id="input-email-compra" placeholder="seu@email.com" autocomplete="email" style="width:100%;" />
+            </label>
+            <button type="button" id="btn-validar-email" class="btn btn-primary btn-lg">Validar e-mail →</button>
+            <p id="msg-step-email" class="message" aria-live="polite"></p>
+          </div>
+        </div>
+
+        <!-- Etapa 2: Dados da loja -->
+        <div id="step-dados" style="display:none;">
+          <div style="font-size:2.5rem; margin-bottom:12px;">🏪</div>
+          <h2 style="margin:0 0 8px; font-size:1.5rem; font-weight:800;">Configure sua loja</h2>
+          <p style="color:#a1a1aa; margin:0 0 24px; font-size:0.95rem;">Preencha os dados abaixo. Você poderá alterar tudo depois.</p>
+          <div class="stack-gap">
+            <label>Nome da sua loja
+              <input type="text" id="input-nome-loja" placeholder="Ex: Barbearia do João" />
+            </label>
+            <label>Link da sua loja (slug)
+              <div style="display:flex; align-items:center; gap:8px;">
+                <span style="color:#a1a1aa; font-size:0.9rem; white-space:nowrap;">cardapios.newneo.com.br/c/</span>
+                <input type="text" id="input-slug-loja" placeholder="barbearia-joao" style="flex:1;" />
+              </div>
+              <small style="color:#a1a1aa;">Apenas letras minúsculas, números e hifens.</small>
+            </label>
+            <label>WhatsApp (com DDD, só números)
+              <input type="text" id="input-whatsapp-loja" placeholder="5511999999999" inputmode="tel" />
+            </label>
+            <label>Tipo de loja
+              <select id="select-modo-loja">
+                <option value="catalogo">Catálogo Digital (sem pedidos)</option>
+                <option value="agendamento">Agendamento de Serviços</option>
+              </select>
+            </label>
+            <label>Crie uma senha (PIN) para acessar seu painel
+              <input type="password" id="input-pin-loja" placeholder="Mínimo 4 caracteres" />
+            </label>
+            <button type="button" id="btn-criar-loja-final" class="btn btn-primary btn-lg">🚀 Criar minha loja!</button>
+            <p id="msg-step-dados" class="message" aria-live="polite"></p>
+          </div>
+        </div>
+
+        <!-- Etapa 3: Sucesso -->
+        <div id="step-sucesso" style="display:none; text-align:center;">
+          <div style="font-size:3.5rem; margin-bottom:16px;">✅</div>
+          <h2 style="margin:0 0 8px; font-size:1.8rem; font-weight:800; color:#4ade80;">Loja criada!</h2>
+          <p style="color:#a1a1aa; margin:0 0 24px;">Sua loja digital está pronta. Use o PIN que você criou para acessar o painel toda vez que quiser editar.</p>
+          <a id="link-acessar-loja" href="#" class="btn btn-primary btn-lg" style="text-decoration:none; display:block; text-align:center;">Acessar meu painel agora →</a>
+        </div>
+      </div>
+    </div>
+
+    <script type="module" src="/admin/script.js?v=41"></script>
+    <script type="module">
+      // Lógica de onboarding (Kiwify → criar loja)
+      import { getSupabaseClient } from '/shared/supabase.js';
+
+      const modal = document.getElementById('modal-criar-loja');
+      const btnAbrir = document.getElementById('btn-criar-loja');
+      const btnFechar = document.getElementById('btn-fechar-modal-loja');
+      const stepEmail = document.getElementById('step-email');
+      const stepDados = document.getElementById('step-dados');
+      const stepSucesso = document.getElementById('step-sucesso');
+
+      function showModal() { modal.style.display = 'flex'; }
+      function hideModal() { modal.style.display = 'none'; resetModal(); }
+      function resetModal() {
+        stepEmail.style.display = ''; stepDados.style.display = 'none'; stepSucesso.style.display = 'none';
+        document.getElementById('msg-step-email').textContent = '';
+        document.getElementById('msg-step-dados').textContent = '';
+      }
+
+      btnAbrir?.addEventListener('click', showModal);
+      btnFechar?.addEventListener('click', hideModal);
+      modal?.addEventListener('click', (e) => { if (e.target === modal) hideModal(); });
+
+      // Etapa 1: Validar e-mail
+      document.getElementById('btn-validar-email')?.addEventListener('click', async () => {
+        const email = document.getElementById('input-email-compra').value.trim();
+        const msgEl = document.getElementById('msg-step-email');
+        const btn = document.getElementById('btn-validar-email');
+
+        if (!email || !email.includes('@')) {
+          msgEl.textContent = 'Por favor, informe um e-mail válido.'; msgEl.style.color = '#f87171'; return;
+        }
+
+        btn.disabled = true; btn.textContent = 'Verificando...';
+        msgEl.textContent = ''; msgEl.style.color = '';
+
+        try {
+          const supabase = getSupabaseClient();
+          const { data, error } = await supabase.rpc('kiwify_email_tem_credito', { p_email: email });
+
+          if (error) throw error;
+
+          if (data === true) {
+            stepEmail.style.display = 'none';
+            stepDados.style.display = '';
+          } else {
+            msgEl.textContent = '❌ E-mail não encontrado ou loja já criada. Verifique o e-mail da compra.';
+            msgEl.style.color = '#f87171';
+          }
+        } catch (err) {
+          msgEl.textContent = 'Erro ao verificar. Tente novamente.'; msgEl.style.color = '#f87171';
+        } finally {
+          btn.disabled = false; btn.textContent = 'Validar e-mail →';
+        }
+      });
+
+      // Etapa 2: Criar loja
+      document.getElementById('btn-criar-loja-final')?.addEventListener('click', async () => {
+        const email = document.getElementById('input-email-compra').value.trim();
+        const nome = document.getElementById('input-nome-loja').value.trim();
+        const rawSlug = document.getElementById('input-slug-loja').value.trim().toLowerCase().replace(/[^a-z0-9-]/g, '-');
+        const whatsapp = document.getElementById('input-whatsapp-loja').value.trim().replace(/\D/g, '');
+        const modo = document.getElementById('select-modo-loja').value;
+        const pin = document.getElementById('input-pin-loja').value.trim();
+        const msgEl = document.getElementById('msg-step-dados');
+        const btn = document.getElementById('btn-criar-loja-final');
+
+        if (!nome) { msgEl.textContent = 'Informe o nome da loja.'; msgEl.style.color = '#f87171'; return; }
+        if (!rawSlug || rawSlug.length < 3) { msgEl.textContent = 'O link deve ter ao menos 3 caracteres.'; msgEl.style.color = '#f87171'; return; }
+        if (!whatsapp || whatsapp.length < 10) { msgEl.textContent = 'Informe um WhatsApp válido.'; msgEl.style.color = '#f87171'; return; }
+        if (!pin || pin.length < 4) { msgEl.textContent = 'O PIN deve ter ao menos 4 caracteres.'; msgEl.style.color = '#f87171'; return; }
+
+        btn.disabled = true; btn.textContent = 'Criando sua loja...';
+        msgEl.textContent = ''; msgEl.style.color = '';
+
+        try {
+          // Gera hash do PIN no cliente usando a API do Supabase
+          const supabase = getSupabaseClient();
+
+          // Chama a função segura no banco para criar a loja
+          const { data, error } = await supabase.rpc('kiwify_criar_loja_cliente', {
+            p_email: email,
+            p_nome: nome,
+            p_slug: rawSlug,
+            p_whatsapp: whatsapp,
+            p_pin_hash: pin, // O banco fará o hash via pgcrypto
+            p_modo: modo
+          });
+
+          if (error) throw error;
+
+          if (data?.sucesso) {
+            stepDados.style.display = 'none';
+            stepSucesso.style.display = '';
+            document.getElementById('link-acessar-loja').href = `/admin/owner?slug=${encodeURIComponent(rawSlug)}`;
+          } else {
+            msgEl.textContent = '❌ ' + (data?.erro || 'Erro desconhecido.');
+            msgEl.style.color = '#f87171';
+          }
+        } catch (err) {
+          msgEl.textContent = 'Erro ao criar loja: ' + (err.message || 'Tente novamente.'); msgEl.style.color = '#f87171';
+        } finally {
+          btn.disabled = false; btn.textContent = '🚀 Criar minha loja!';
+        }
+      });
+
+      // Formata slug em tempo real
+      document.getElementById('input-slug-loja')?.addEventListener('input', function() {
+        this.value = this.value.toLowerCase().replace(/[^a-z0-9-]/g, '-');
+      });
+    </script>
   </body>
 </html>
