@@ -80,8 +80,8 @@
               </div>
               <small class="muted">Apenas letras minúsculas, números e hifens.</small>
             </label>
-            <label>WhatsApp (só números com DDD)
-              <input type="tel" id="criar-whatsapp-loja" placeholder="5511999999999" inputmode="tel" />
+            <label>WhatsApp
+              <input type="tel" id="criar-whatsapp-loja" placeholder="(55) 11 99999-9999" inputmode="tel" maxlength="20" />
             </label>
             <input type="hidden" id="criar-modo-loja" value="catalogo" />
             <button type="submit" class="btn btn-primary btn-lg">🚀 Criar minha loja!</button>
@@ -587,6 +587,18 @@
       // Formata slug em tempo real
       document.getElementById('criar-slug-loja')?.addEventListener('input', function() {
         this.value = this.value.toLowerCase().replace(/[^a-z0-9-]/g, '-');
+      });
+
+      // Máscara de WhatsApp: (55) 11 99999-9999
+      document.getElementById('criar-whatsapp-loja')?.addEventListener('input', function() {
+        let v = this.value.replace(/\D/g, '').slice(0, 13);
+        if (v.length > 12)      v = `(${v.slice(0,2)}) ${v.slice(2,4)} ${v.slice(4,9)}-${v.slice(9)}`;
+        else if (v.length > 9)  v = `(${v.slice(0,2)}) ${v.slice(2,4)} ${v.slice(4,9)}-${v.slice(9)}`;
+        else if (v.length > 6)  v = `(${v.slice(0,2)}) ${v.slice(2,4)} ${v.slice(4)}`;
+        else if (v.length > 4)  v = `(${v.slice(0,2)}) ${v.slice(2)}`;
+        else if (v.length > 2)  v = `(${v.slice(0,2)}) ${v.slice(2)}`;
+        else if (v.length > 0)  v = `(${v}`;
+        this.value = v;
       });
     </script>
   </body>
