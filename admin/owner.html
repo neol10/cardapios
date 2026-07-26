@@ -28,26 +28,65 @@
   <body class="admin-body">
     <main class="auth-layout" id="owner-page">
       <section class="auth-card">
-        <h1>Gerenciar Minha Loja</h1>
-        <p class="muted" style="margin-bottom: 8px;">Entre com o e-mail e PIN que você definiu ao criar sua loja.</p>
-        <p id="owner-slug-info" style="display:none;"></p>
-        <form id="owner-auth-form" class="stack-gap">
-          <label>
-            E-mail
-            <input type="email" name="email" placeholder="seuemail@exemplo.com" autocomplete="email" inputmode="email" />
-          </label>
-          <label>
-            PIN de Acesso
-            <input type="password" name="pin" placeholder="••••" inputmode="numeric" autocomplete="one-time-code" />
-          </label>
-          <button type="submit" class="btn btn-primary btn-lg">Entrar</button>
-        </form>
 
-        <div id="onboarding-kiwify-container" style="text-align: center; margin-top: 24px; padding-top: 24px; border-top: 1px solid var(--border);">
-          <p class="muted" style="margin-bottom: 12px; font-size: 0.9rem;">Acabou de comprar e quer criar sua loja?</p>
-          <button type="button" id="btn-criar-loja" class="btn" style="display: inline-flex; align-items: center; gap: 8px; background: linear-gradient(135deg, #ff7b00, #ff9900); color: #fff; font-weight: 800; border: none; padding: 12px 24px; border-radius: 12px; font-size: 1rem; cursor: pointer; transition: transform 0.2s;">
-            🎉 Criar minha loja agora
-          </button>
+        <!-- ESTADO 1: Login normal -->
+        <div id="owner-auth-section">
+          <h1>Gerenciar Minha Loja</h1>
+          <p class="muted" style="margin-bottom: 16px;">Entre com o e-mail e senha da sua conta.</p>
+          <form id="owner-auth-form" class="stack-gap">
+            <label>
+              E-mail
+              <input type="email" name="email" placeholder="seuemail@exemplo.com" autocomplete="email" />
+            </label>
+            <label>
+              Senha
+              <input type="password" name="password" placeholder="••••••••" autocomplete="current-password" />
+            </label>
+            <button type="submit" class="btn btn-primary btn-lg">Entrar</button>
+            <p id="owner-auth-message" style="text-align:center; margin:0;"></p>
+          </form>
+        </div>
+
+        <!-- ESTADO 2: Definir senha (primeiro acesso via link do e-mail) -->
+        <div id="owner-set-password-section" style="display:none;">
+          <h1>Defina sua senha</h1>
+          <p class="muted" style="margin-bottom: 16px;">Crie uma senha para acessar sua loja sempre que quiser.</p>
+          <form id="owner-set-password-form" class="stack-gap">
+            <label>
+              Nova senha
+              <input type="password" name="password" placeholder="Mínimo 6 caracteres" autocomplete="new-password" />
+            </label>
+            <label>
+              Confirmar senha
+              <input type="password" name="password_confirm" placeholder="Repita a senha" autocomplete="new-password" />
+            </label>
+            <button type="submit" class="btn btn-primary btn-lg">Salvar e continuar →</button>
+            <p id="owner-set-password-message" style="text-align:center; margin:0;"></p>
+          </form>
+        </div>
+
+        <!-- ESTADO 3: Criar loja (após definir senha, se loja ainda não existe) -->
+        <div id="owner-criar-loja-section" style="display:none;">
+          <h1>✨ Crie sua loja</h1>
+          <p class="muted" style="margin-bottom: 16px;">Preencha os dados abaixo. Você poderá alterar tudo depois.</p>
+          <form id="owner-criar-loja-form" class="stack-gap">
+            <label>Nome da sua loja
+              <input type="text" id="criar-nome-loja" placeholder="Ex: Barbearia do João" />
+            </label>
+            <label>Link da sua loja
+              <div style="display:flex; align-items:center; flex-wrap:wrap; gap:6px;">
+                <span style="color:#a1a1aa; font-size:0.85rem; white-space:nowrap;">cardapios.newneo.com.br/c/</span>
+                <input type="text" id="criar-slug-loja" placeholder="barbearia-joao" style="flex:1; min-width:140px;" />
+              </div>
+              <small class="muted">Apenas letras minúsculas, números e hifens.</small>
+            </label>
+            <label>WhatsApp (só números com DDD)
+              <input type="tel" id="criar-whatsapp-loja" placeholder="5511999999999" inputmode="tel" />
+            </label>
+            <input type="hidden" id="criar-modo-loja" value="catalogo" />
+            <button type="submit" class="btn btn-primary btn-lg">🚀 Criar minha loja!</button>
+            <p id="owner-criar-loja-message" style="text-align:center; margin:0;"></p>
+          </form>
         </div>
 
         <form id="owner-edit-form" class="stack-gap is-hidden">
@@ -372,115 +411,184 @@
 
     <script type="module" src="/admin/script.js?v=41"></script>
     <script type="module">
-      // Lógica de onboarding (Kiwify → criar loja)
       import { supabase } from '/shared/supabase.js';
 
-      const modal = document.getElementById('modal-criar-loja');
-      const btnAbrir = document.getElementById('btn-criar-loja');
-      const btnFechar = document.getElementById('btn-fechar-modal-loja');
-      const stepEmail = document.getElementById('step-email');
-      const stepDados = document.getElementById('step-dados');
-      const stepSucesso = document.getElementById('step-sucesso');
-
-      function showModal() { modal.style.display = 'flex'; }
-      function hideModal() { modal.style.display = 'none'; resetModal(); }
-      function resetModal() {
-        stepEmail.style.display = ''; stepDados.style.display = 'none'; stepSucesso.style.display = 'none';
-        document.getElementById('msg-step-email').textContent = '';
-        document.getElementById('msg-step-dados').textContent = '';
+      // ─── Helpers de UI ───────────────────────────────────────────────
+      function show(id) { const el = document.getElementById(id); if (el) el.style.display = ''; }
+      function hide(id) { const el = document.getElementById(id); if (el) el.style.display = 'none'; }
+      function setMsg(id, txt, isError = false) {
+        const el = document.getElementById(id);
+        if (!el) return;
+        el.textContent = txt;
+        el.style.color = isError ? '#f87171' : '#4ade80';
       }
 
-      btnAbrir?.addEventListener('click', showModal);
-      btnFechar?.addEventListener('click', hideModal);
-      modal?.addEventListener('click', (e) => { if (e.target === modal) hideModal(); });
+      // ─── Roteador de estados da tela ─────────────────────────────────
+      function showState(state) {
+        // 'auth' | 'set-password' | 'criar-loja' | 'dashboard'
+        hide('owner-auth-section');
+        hide('owner-set-password-section');
+        hide('owner-criar-loja-section');
+        const editForm = document.getElementById('owner-edit-form');
+        if (editForm) editForm.classList.add('is-hidden');
 
-      // Etapa 1: Validar e-mail
-      document.getElementById('btn-validar-email')?.addEventListener('click', async () => {
-        const email = document.getElementById('input-email-compra').value.trim();
-        const msgEl = document.getElementById('msg-step-email');
-        const btn = document.getElementById('btn-validar-email');
+        if (state === 'auth')          show('owner-auth-section');
+        if (state === 'set-password')  show('owner-set-password-section');
+        if (state === 'criar-loja')    show('owner-criar-loja-section');
+        // 'dashboard' é controlado pelo script.js principal
+      }
 
-        if (!email || !email.includes('@')) {
-          msgEl.textContent = 'Por favor, informe um e-mail válido.'; msgEl.style.color = '#f87171'; return;
+      // ─── 1. Detectar token de convite na URL ─────────────────────────
+      async function checkInviteToken() {
+        const hash = window.location.hash;
+        // Supabase coloca access_token no hash quando vem de invite
+        if (hash.includes('access_token') || hash.includes('type=invite') || hash.includes('type=recovery')) {
+          // Deixa o Supabase processar automaticamente
+          const { data: { session }, error } = await supabase.auth.getSession();
+          if (session) {
+            // Token válido! Mostrar tela de definir senha
+            showState('set-password');
+            return true;
+          }
+        }
+        return false;
+      }
+
+      // ─── 2. Verificar sessão ativa ────────────────────────────────────
+      async function checkSession() {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (!session) return false;
+
+        const email = session.user.email;
+        // Verifica se já tem loja
+        const { data } = await supabase.rpc('owner_get_by_email', { p_email: email });
+
+        if (data?.sucesso && data?.slug) {
+          // Tem loja! Redireciona para o dashboard injetando o slug
+          window.location.href = '/login?slug=' + encodeURIComponent(data.slug);
+          return true;
+        } else {
+          // Autenticado mas sem loja → criar loja
+          // Pré-carrega o plano se disponível
+          const { data: credito } = await supabase.rpc('kiwify_email_tem_credito', { p_email: email });
+          if (credito?.plano) {
+            document.getElementById('criar-modo-loja').value = credito.plano;
+          }
+          showState('criar-loja');
+          return true;
+        }
+      }
+
+      // ─── 3. Init ──────────────────────────────────────────────────────
+      async function init() {
+        const fromInvite = await checkInviteToken();
+        if (!fromInvite) {
+          // Verifica se o script.js principal já fez login (via slug na URL)
+          const urlSlug = new URLSearchParams(window.location.search).get('slug');
+          if (!urlSlug) {
+            await checkSession();
+          }
+        }
+      }
+
+      init();
+
+      // ─── 4. Login normal ──────────────────────────────────────────────
+      document.getElementById('owner-auth-form')?.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const fd = new FormData(e.target);
+        const email = fd.get('email').trim();
+        const password = fd.get('password');
+        setMsg('owner-auth-message', 'Entrando...', false);
+
+        const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+        if (error || !data.session) {
+          setMsg('owner-auth-message', 'E-mail ou senha incorretos.', true);
+          return;
         }
 
-        btn.disabled = true; btn.textContent = 'Verificando...';
-        msgEl.textContent = ''; msgEl.style.color = '';
+        setMsg('owner-auth-message', 'Verificando sua loja...', false);
+        const { data: lojaData } = await supabase.rpc('owner_get_by_email', { p_email: email });
 
-        try {
-          const { data, error } = await supabase.rpc('kiwify_email_tem_credito', { p_email: email });
-
-          if (error) throw error;
-
-          if (data && data.sucesso === true) {
-            // Seleciona automaticamente o plano que a pessoa comprou
-            if (data.plano) {
-              document.getElementById('select-modo-loja').value = data.plano;
-            }
-            stepEmail.style.display = 'none';
-            stepDados.style.display = '';
-          } else {
-            msgEl.textContent = '❌ E-mail não encontrado ou loja já criada. Verifique o e-mail da compra.';
-            msgEl.style.color = '#f87171';
-          }
-        } catch (err) {
-          msgEl.textContent = 'Erro ao verificar. Tente novamente.'; msgEl.style.color = '#f87171';
-        } finally {
-          btn.disabled = false; btn.textContent = 'Validar e-mail →';
+        if (lojaData?.sucesso && lojaData?.slug) {
+          window.history.replaceState(null, '', `?slug=${encodeURIComponent(lojaData.slug)}`);
+          window.location.reload(); // Recarrega para o script.js pegar o slug
+        } else {
+          const { data: credito } = await supabase.rpc('kiwify_email_tem_credito', { p_email: email });
+          if (credito?.plano) document.getElementById('criar-modo-loja').value = credito.plano;
+          showState('criar-loja');
         }
       });
 
-      // Etapa 2: Criar loja
-      document.getElementById('btn-criar-loja-final')?.addEventListener('click', async () => {
-        const email = document.getElementById('input-email-compra').value.trim();
-        const nome = document.getElementById('input-nome-loja').value.trim();
-        const rawSlug = document.getElementById('input-slug-loja').value.trim().toLowerCase().replace(/[^a-z0-9-]/g, '-');
-        const whatsapp = document.getElementById('input-whatsapp-loja').value.trim().replace(/\D/g, '');
-        const modo = document.getElementById('select-modo-loja').value;
-        const pin = document.getElementById('input-pin-loja').value.trim();
-        const msgEl = document.getElementById('msg-step-dados');
-        const btn = document.getElementById('btn-criar-loja-final');
+      // ─── 5. Definir senha (primeiro acesso) ───────────────────────────
+      document.getElementById('owner-set-password-form')?.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const fd = new FormData(e.target);
+        const password = fd.get('password');
+        const confirm = fd.get('password_confirm');
 
-        if (!nome) { msgEl.textContent = 'Informe o nome da loja.'; msgEl.style.color = '#f87171'; return; }
-        if (!rawSlug || rawSlug.length < 3) { msgEl.textContent = 'O link deve ter ao menos 3 caracteres.'; msgEl.style.color = '#f87171'; return; }
-        if (!whatsapp || whatsapp.length < 10) { msgEl.textContent = 'Informe um WhatsApp válido.'; msgEl.style.color = '#f87171'; return; }
-        if (!pin || pin.length < 4) { msgEl.textContent = 'O PIN deve ter ao menos 4 caracteres.'; msgEl.style.color = '#f87171'; return; }
+        if (password.length < 6) { setMsg('owner-set-password-message', 'A senha deve ter ao menos 6 caracteres.', true); return; }
+        if (password !== confirm) { setMsg('owner-set-password-message', 'As senhas não coincidem.', true); return; }
 
-        btn.disabled = true; btn.textContent = 'Criando sua loja...';
-        msgEl.textContent = ''; msgEl.style.color = '';
+        setMsg('owner-set-password-message', 'Salvando senha...');
+        const { error } = await supabase.auth.updateUser({ password });
+        if (error) { setMsg('owner-set-password-message', 'Erro ao salvar senha: ' + error.message, true); return; }
 
-        try {
-          // Chama a função segura no banco para criar a loja
-          const { data, error } = await supabase.rpc('kiwify_criar_loja_cliente', {
-            p_email: email,
-            p_nome: nome,
-            p_slug: rawSlug,
-            p_whatsapp: whatsapp,
-            p_pin_hash: pin, // O banco fará o hash via pgcrypto
-            p_modo: modo
-          });
+        setMsg('owner-set-password-message', '✅ Senha salva!');
 
-          if (error) throw error;
+        // Verifica se já tem loja ou precisa criar
+        const { data: { user } } = await supabase.auth.getUser();
+        const { data: credito } = await supabase.rpc('kiwify_email_tem_credito', { p_email: user.email });
 
-          if (data?.sucesso) {
-            stepDados.style.display = 'none';
-            stepSucesso.style.display = '';
-            document.getElementById('link-acessar-loja').href = `/admin/owner?slug=${encodeURIComponent(rawSlug)}`;
-          } else {
-            msgEl.textContent = '❌ ' + (data?.erro || 'Erro desconhecido.');
-            msgEl.style.color = '#f87171';
-          }
-        } catch (err) {
-          msgEl.textContent = 'Erro ao criar loja: ' + (err.message || 'Tente novamente.'); msgEl.style.color = '#f87171';
-        } finally {
-          btn.disabled = false; btn.textContent = '🚀 Criar minha loja!';
+        setTimeout(() => {
+          if (credito?.plano) document.getElementById('criar-modo-loja').value = credito.plano;
+          showState('criar-loja');
+        }, 800);
+      });
+
+      // ─── 6. Criar loja ─────────────────────────────────────────────────
+      document.getElementById('owner-criar-loja-form')?.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) { showState('auth'); return; }
+
+        const nome = document.getElementById('criar-nome-loja').value.trim();
+        const rawSlug = document.getElementById('criar-slug-loja').value.trim().toLowerCase().replace(/[^a-z0-9-]/g, '-');
+        const whatsapp = document.getElementById('criar-whatsapp-loja').value.trim().replace(/\D/g, '');
+        const modo = document.getElementById('criar-modo-loja').value;
+        const msgEl = document.getElementById('owner-criar-loja-message');
+
+        if (!nome) { setMsg('owner-criar-loja-message', 'Informe o nome da loja.', true); return; }
+        if (!rawSlug || rawSlug.length < 3) { setMsg('owner-criar-loja-message', 'O link deve ter ao menos 3 caracteres.', true); return; }
+        if (!whatsapp || whatsapp.length < 10) { setMsg('owner-criar-loja-message', 'Informe um WhatsApp válido.', true); return; }
+
+        setMsg('owner-criar-loja-message', 'Criando sua loja...', false);
+
+        const { data, error } = await supabase.rpc('kiwify_criar_loja_cliente', {
+          p_email: user.email,
+          p_nome: nome,
+          p_slug: rawSlug,
+          p_whatsapp: whatsapp,
+          p_modo: modo
+        });
+
+        if (error || !data?.sucesso) {
+          setMsg('owner-criar-loja-message', '❌ ' + (data?.erro || error?.message || 'Erro desconhecido.'), true);
+          return;
         }
+
+        setMsg('owner-criar-loja-message', '🎉 Loja criada! Abrindo o painel...', false);
+        setTimeout(() => {
+          window.history.replaceState(null, '', `?slug=${encodeURIComponent(rawSlug)}`);
+          window.location.reload();
+        }, 1000);
       });
 
       // Formata slug em tempo real
-      document.getElementById('input-slug-loja')?.addEventListener('input', function() {
+      document.getElementById('criar-slug-loja')?.addEventListener('input', function() {
         this.value = this.value.toLowerCase().replace(/[^a-z0-9-]/g, '-');
       });
     </script>
   </body>
 </html>
+
