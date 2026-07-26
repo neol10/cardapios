@@ -2939,23 +2939,24 @@ async function initOwnerPage() {
   const message = ownerPage.querySelector("#owner-message");
   const logoutBtn = ownerPage.querySelector("#owner-logout");
 
-  if (!(authForm instanceof HTMLFormElement) || !(editForm instanceof HTMLFormElement)) return;
-  if (authForm.slug && slug) authForm.slug.value = slug;
+  if (!(editForm instanceof HTMLFormElement)) return;
 
   const setOwnerMessage = (text, type = "") => setMessage(message, text, type);
-  let ownerValidatedPin = getOwnerPinCache(slug);
+  let ownerValidatedPin = getOwnerPinCache(slug) || "__auth__";
 
-  const getOwnerPinValue = () => {
-    const input = authForm.querySelector('input[name="pin"]');
-    const val = input instanceof HTMLInputElement ? input.value : "";
-    return onlyDigits(val || ownerValidatedPin || getOwnerPinCache(slug));
-  };
-
-
+  const getOwnerPinValue = () => ownerValidatedPin;
 
   const showEdit = (show) => {
     editForm.classList.toggle("is-hidden", !show);
-    authForm.classList.toggle("is-hidden", show);
+    // Esconde todos os estados de auth quando mostrando o dashboard
+    const authSection = ownerPage.querySelector("#owner-auth-section");
+    const setPassSection = ownerPage.querySelector("#owner-set-password-section");
+    const criarLojaSection = ownerPage.querySelector("#owner-criar-loja-section");
+    if (show) {
+      if (authSection) authSection.style.display = "none";
+      if (setPassSection) setPassSection.style.display = "none";
+      if (criarLojaSection) criarLojaSection.style.display = "none";
+    }
     if (ownerProdutosSection instanceof HTMLElement) {
       ownerProdutosSection.classList.toggle("is-hidden", !show);
     }
@@ -3038,12 +3039,32 @@ async function initOwnerPage() {
 
   const tryAuto = async () => {
     if (!slug) return;
+
+    // 1. Tenta via Supabase Auth (novo sistema)
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session?.user?.email) {
+        const { data: lojaData } = await supabase.rpc("owner_get_by_email", { p_email: session.user.email });
+        if (lojaData?.sucesso && lojaData?.slug === slug) {
+          ownerValidatedPin = "__auth__";
+          setOwnerVerified(slug);
+          showEdit(true);
+          setOwnerMessage("");
+          await loadAndFill();
+          setupPriceInputs(editForm);
+          setupPriceInputs(ownerProdutoForm);
+          setupHexInputs(ownerPage);
+          setupOwnerDashboardHandlers(ownerPage);
+          return;
+        }
+      }
+    } catch (_) {}
+
+    // 2. Fallback: PIN em cache (sistema legado)
     if (!isOwnerVerified(slug)) return;
-    const pinInput = authForm.querySelector('input[name="pin"]');
     const cachedPin = getOwnerPinCache(slug);
-    if (pinInput instanceof HTMLInputElement && cachedPin) {
-      pinInput.value = cachedPin;
-    }
+    if (!cachedPin) return;
+    ownerValidatedPin = cachedPin;
     showEdit(true);
     await loadAndFill();
   };

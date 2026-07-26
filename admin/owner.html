@@ -483,11 +483,13 @@
       async function init() {
         const fromInvite = await checkInviteToken();
         if (!fromInvite) {
-          // Verifica se o script.js principal já fez login (via slug na URL)
+          // Sempre verifica sessão (o script.js cuida do dashboard se o slug estiver na URL)
           const urlSlug = new URLSearchParams(window.location.search).get('slug');
           if (!urlSlug) {
+            // Sem slug na URL: verifica sessão e redireciona
             await checkSession();
           }
+          // Com slug na URL: o script.js (tryAuto via Supabase Auth) vai carregar o dashboard
         }
       }
 
