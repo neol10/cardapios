@@ -3,10 +3,13 @@
 // URL para configurar no Kiwify: https://<seu-projeto>.supabase.co/functions/v1/kiwify-webhook
 
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { Resend } from "https://esm.sh/resend@3.2.0";
 
 const KIWIFY_SECRET = Deno.env.get("KIWIFY_WEBHOOK_SECRET") ?? "";
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL") ?? "";
 const SUPABASE_SERVICE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "";
+const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY") ?? "";
+const resend = new Resend(RESEND_API_KEY);
 
 Deno.serve(async (req) => {
   // Apenas aceita POST
@@ -82,6 +85,45 @@ Deno.serve(async (req) => {
     }
 
     console.log(`✅ Venda aprovada salva: ${email} | plano: ${plano}`);
+
+    // Dispara o e-mail de acesso usando o Resend
+    if (RESEND_API_KEY) {
+      const emailHtml = `
+        <div style="font-family: Arial, sans-serif; color: #333; max-width: 600px; margin: 0 auto; border: 1px solid #eee; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.05);">
+          <div style="background-color: #ff7b00; padding: 24px; text-align: center;">
+            <h1 style="color: #fff; margin: 0; font-size: 24px;">Acesso Liberado! 🎉</h1>
+          </div>
+          <div style="padding: 32px;">
+            <p style="font-size: 16px; line-height: 1.5; margin-bottom: 24px;">Olá,</p>
+            <p style="font-size: 16px; line-height: 1.5; margin-bottom: 24px;">Seu pagamento foi confirmado com sucesso. O seu acesso para configurar o seu <strong>${plano === 'agendamento' ? 'Agendamento de Serviços' : 'Catálogo Digital'}</strong> está pronto!</p>
+            <p style="font-size: 16px; line-height: 1.5; margin-bottom: 32px;">Clique no botão abaixo e informe exatamente este e-mail da compra (<strong>${email}</strong>) para criar sua loja e definir o seu PIN de acesso.</p>
+            
+            <div style="text-align: center; margin-bottom: 32px;">
+              <a href="https://cardapios.newneo.com.br/admin/owner" style="background: linear-gradient(135deg, #ff7b00, #ff9900); color: #fff; padding: 16px 32px; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 18px; display: inline-block;">Criar Minha Loja Agora</a>
+            </div>
+            
+            <p style="font-size: 14px; color: #666; text-align: center; margin-top: 24px; padding-top: 24px; border-top: 1px solid #eee;">
+              Se tiver alguma dúvida, basta responder este e-mail.
+            </p>
+          </div>
+        </div>
+      `;
+
+      const { error: emailError } = await resend.emails.send({
+        from: 'NewNeo <contato@newneo.com.br>',
+        to: email,
+        subject: 'SEU ACESSO: Crie sua loja digital (NewNeo)',
+        html: emailHtml
+      });
+
+      if (emailError) {
+        console.error("Erro ao enviar email:", emailError);
+      } else {
+        console.log(`✉️ Email enviado com sucesso para ${email}`);
+      }
+    } else {
+      console.warn("⚠️ RESEND_API_KEY não configurada. Email não enviado.");
+    }
   } else {
     // Atualiza o status de compras existentes (reembolso/cancelamento)
     const { error } = await supabase
