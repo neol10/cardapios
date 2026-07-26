@@ -3052,46 +3052,46 @@ async function initOwnerPage() {
 
   authForm.addEventListener("submit", async (event) => {
     event.preventDefault();
-    
-    const fd = new FormData(authForm);
-    const inputSlug = String(fd.get("slug") || "").trim().toLowerCase();
-    const currentSlug = inputSlug || slug;
 
-    if (!currentSlug) {
-      setOwnerMessage("Informe o link da sua loja.", "error");
+    const fd = new FormData(authForm);
+    const email = String(fd.get("email") || "").trim().toLowerCase();
+    const pin = onlyDigits(String(fd.get("pin") || "").trim());
+
+    if (!email || !email.includes("@")) {
+      setOwnerMessage("Informe um e-mail válido.", "error");
       return;
     }
-
-    // Se informou um slug novo, atualiza a barra de endereços
-    if (inputSlug && inputSlug !== slug) {
-      window.history.replaceState(null, "", `?slug=${encodeURIComponent(inputSlug)}`);
-    }
-
-    const pin = onlyDigits(String(fd.get("pin") || "").trim());
     if (!pin) {
       setOwnerMessage("Informe o PIN.", "error");
       return;
     }
 
     setOwnerMessage("Validando...");
-    const { data, error } = await supabase.rpc("owner_verify_pin", { p_slug: currentSlug, p_pin: pin });
+    const { data, error } = await supabase.rpc("owner_login_by_email", { p_email: email, p_pin: pin });
     if (error) {
-      setOwnerMessage("Não foi possível validar. Verifique o schema no Supabase.", "error");
+      setOwnerMessage("Não foi possível validar. Tente novamente.", "error");
       return;
     }
 
-    if (data !== true) {
-      setOwnerPinCache(slug, "");
-      setOwnerMessage("PIN incorreto ou acesso desabilitado.", "error");
+    if (!data?.sucesso) {
+      setOwnerMessage(data?.erro || "E-mail ou PIN incorretos.", "error");
       return;
     }
 
-    setOwnerVerified(slug);
-    setOwnerPinCache(slug, pin);
+    const foundSlug = String(data.slug || "");
+    // Injeta o slug na URL invisivelmente para o restante do sistema funcionar
+    window.history.replaceState(null, "", `?slug=${encodeURIComponent(foundSlug)}`);
+
+    setOwnerVerified(foundSlug);
+    setOwnerPinCache(foundSlug, pin);
     ownerValidatedPin = pin;
     showEdit(true);
 
     setOwnerMessage("");
+    // Recarrega a variável slug local
+    const slugInput = ownerPage.querySelector("#owner-edit-form input[name='slug']");
+    if (slugInput) slugInput.value = foundSlug;
+
     await loadAndFill();
     setupPriceInputs(editForm);
     setupPriceInputs(ownerProdutoForm);

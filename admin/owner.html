@@ -28,20 +28,17 @@
   <body class="admin-body">
     <main class="auth-layout" id="owner-page">
       <section class="auth-card">
-        <h1>Editar Cardápio</h1>
-        <p id="owner-subtitle">Acesse com o PIN do proprietário para editar cardápio, imagens e produtos.</p>
-        <p class="muted" id="owner-slug-info" style="margin-bottom: 16px;"></p>
+        <h1>Gerenciar Minha Loja</h1>
+        <p class="muted" style="margin-bottom: 8px;">Entre com o e-mail e PIN que você definiu ao criar sua loja.</p>
+        <p id="owner-slug-info" style="display:none;"></p>
         <form id="owner-auth-form" class="stack-gap">
           <label>
-            Link da sua loja
-            <div style="display:flex; align-items:center; flex-wrap:wrap; gap:8px;">
-              <span style="color:#a1a1aa; font-size:0.9rem; white-space:nowrap;">cardapios.newneo.com.br/c/</span>
-              <input type="text" name="slug" placeholder="minhaloja" style="flex:1; min-width:150px;" autocomplete="off" />
-            </div>
+            E-mail
+            <input type="email" name="email" placeholder="seuemail@exemplo.com" autocomplete="email" inputmode="email" />
           </label>
           <label>
             PIN de Acesso
-            <input type="password" name="pin" inputmode="numeric" autocomplete="one-time-code" />
+            <input type="password" name="pin" placeholder="••••" inputmode="numeric" autocomplete="one-time-code" />
           </label>
           <button type="submit" class="btn btn-primary btn-lg">Entrar</button>
         </form>
