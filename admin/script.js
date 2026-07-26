@@ -2940,6 +2940,7 @@ async function initOwnerPage() {
   const logoutBtn = ownerPage.querySelector("#owner-logout");
 
   if (!(authForm instanceof HTMLFormElement) || !(editForm instanceof HTMLFormElement)) return;
+  if (authForm.slug && slug) authForm.slug.value = slug;
 
   const setOwnerMessage = (text, type = "") => setMessage(message, text, type);
   let ownerValidatedPin = getOwnerPinCache(slug);
@@ -3051,12 +3052,21 @@ async function initOwnerPage() {
 
   authForm.addEventListener("submit", async (event) => {
     event.preventDefault();
-    if (!slug) {
-      setOwnerMessage("URL inválida: faltou o slug.", "error");
+    
+    const fd = new FormData(authForm);
+    const inputSlug = String(fd.get("slug") || "").trim().toLowerCase();
+    const currentSlug = inputSlug || slug;
+
+    if (!currentSlug) {
+      setOwnerMessage("Informe o link da sua loja.", "error");
       return;
     }
 
-    const fd = new FormData(authForm);
+    // Se informou um slug novo, atualiza a barra de endereços
+    if (inputSlug && inputSlug !== slug) {
+      window.history.replaceState(null, "", `?slug=${encodeURIComponent(inputSlug)}`);
+    }
+
     const pin = onlyDigits(String(fd.get("pin") || "").trim());
     if (!pin) {
       setOwnerMessage("Informe o PIN.", "error");
@@ -3064,7 +3074,7 @@ async function initOwnerPage() {
     }
 
     setOwnerMessage("Validando...");
-    const { data, error } = await supabase.rpc("owner_verify_pin", { p_slug: slug, p_pin: pin });
+    const { data, error } = await supabase.rpc("owner_verify_pin", { p_slug: currentSlug, p_pin: pin });
     if (error) {
       setOwnerMessage("Não foi possível validar. Verifique o schema no Supabase.", "error");
       return;
