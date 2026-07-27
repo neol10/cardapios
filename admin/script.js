@@ -3120,11 +3120,11 @@ async function initOwnerPage() {
         marmitaWrap.style.display = "block";
       }
     }
-    editForm.horario_funcionamento.value = data.horario_funcionamento || "";
-    editForm.abre_em.value = data.abre_em ? String(data.abre_em).slice(0, 5) : "";
-    editForm.fecha_em.value = data.fecha_em ? String(data.fecha_em).slice(0, 5) : "";
-    editForm.endereco.value = data.endereco || "";
-    editForm.instagram_url.value = data.instagram_url || "";
+    if (editForm.horario_funcionamento) editForm.horario_funcionamento.value = data.horario_funcionamento || "";
+    if (editForm.abre_em) editForm.abre_em.value = data.abre_em ? String(data.abre_em).slice(0, 5) : "";
+    if (editForm.fecha_em) editForm.fecha_em.value = data.fecha_em ? String(data.fecha_em).slice(0, 5) : "";
+    if (editForm.endereco) editForm.endereco.value = data.endereco || "";
+    if (editForm.instagram_url) editForm.instagram_url.value = data.instagram_url || "";
     if (editForm.foto_url) editForm.foto_url.value = data.foto_url || "";
     if (editForm.banner_url) editForm.banner_url.value = data.banner_url || "";
     if (editForm.cor_tema) editForm.cor_tema.value = data.cor_tema || "#ff6a00";
@@ -3171,7 +3171,9 @@ async function initOwnerPage() {
           return;
         }
       }
-    } catch (_) {}
+    } catch (err) {
+      console.error("Erro no tryAuto Auth:", err);
+    }
 
     // 2. Fallback: PIN em cache (sistema legado)
     if (!isOwnerVerified(slug) || !getOwnerPinCache(slug)) {
