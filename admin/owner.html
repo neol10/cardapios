@@ -29,8 +29,15 @@
     <main class="auth-layout" id="owner-page">
       <section class="auth-card">
 
+        <!-- ESTADO 0: Carregando -->
+        <div id="owner-loading-section" style="text-align:center; padding: 60px 20px;">
+          <div style="display:inline-block; width: 40px; height: 40px; border: 3px solid rgba(255, 123, 0, 0.3); border-radius: 50%; border-top-color: #ff7b00; animation: spin 1s ease-in-out infinite;"></div>
+          <p class="muted" style="margin-top: 16px;">Verificando acesso...</p>
+          <style>@keyframes spin { to { transform: rotate(360deg); } }</style>
+        </div>
+
         <!-- ESTADO 1: Login normal -->
-        <div id="owner-auth-section">
+        <div id="owner-auth-section" style="display:none;">
           <h1>Gerenciar Minha Loja</h1>
           <p class="muted" style="margin-bottom: 16px;">Entre com o e-mail e senha da sua conta.</p>
           <form id="owner-auth-form" class="stack-gap">
@@ -409,7 +416,7 @@
       </div>
     </div>
 
-    <script type="module" src="/admin/script.js?v=42"></script>
+    <script type="module" src="/admin/script.js?v=43"></script>
     <script type="module">
       import { supabase } from '/shared/supabase.js';
 
@@ -425,13 +432,15 @@
 
       // ─── Roteador de estados da tela ─────────────────────────────────
       function showState(state) {
-        // 'auth' | 'set-password' | 'criar-loja' | 'dashboard'
+        // 'loading' | 'auth' | 'set-password' | 'criar-loja'
+        hide('owner-loading-section');
         hide('owner-auth-section');
         hide('owner-set-password-section');
         hide('owner-criar-loja-section');
         const editForm = document.getElementById('owner-edit-form');
         if (editForm) editForm.classList.add('is-hidden');
 
+        if (state === 'loading')       show('owner-loading-section');
         if (state === 'auth')          show('owner-auth-section');
         if (state === 'set-password')  show('owner-set-password-section');
         if (state === 'criar-loja')    show('owner-criar-loja-section');
@@ -483,13 +492,19 @@
       async function init() {
         const fromInvite = await checkInviteToken();
         if (!fromInvite) {
-          // Sempre verifica sessão (o script.js cuida do dashboard se o slug estiver na URL)
           const urlSlug = new URLSearchParams(window.location.search).get('slug');
           if (!urlSlug) {
-            // Sem slug na URL: verifica sessão e redireciona
-            await checkSession();
+            // Sem slug na URL: verifica sessão e redireciona (ou mostra auth)
+            const hasSession = await checkSession();
+            if (!hasSession) showState('auth');
+          } else {
+            // Com slug na URL: checa se tem sessão localmente para evitar a tela de carregamento presa
+            const { data: { session } } = await supabase.auth.getSession();
+            if (!session) {
+              showState('auth');
+            }
+            // Se tiver sessão, não faz nada: deixa o script.js principal assumir e esconder o loading
           }
-          // Com slug na URL: o script.js (tryAuto via Supabase Auth) vai carregar o dashboard
         }
       }
 

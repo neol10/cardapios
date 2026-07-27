@@ -2948,15 +2948,23 @@ async function initOwnerPage() {
 
   const showEdit = (show) => {
     editForm.classList.toggle("is-hidden", !show);
-    // Esconde todos os estados de auth quando mostrando o dashboard
+    // Controla os estados de auth na home do owner
+    const loadingSection = ownerPage.querySelector("#owner-loading-section");
     const authSection = ownerPage.querySelector("#owner-auth-section");
     const setPassSection = ownerPage.querySelector("#owner-set-password-section");
     const criarLojaSection = ownerPage.querySelector("#owner-criar-loja-section");
+    
     if (show) {
+      if (loadingSection) loadingSection.style.display = "none";
       if (authSection) authSection.style.display = "none";
       if (setPassSection) setPassSection.style.display = "none";
       if (criarLojaSection) criarLojaSection.style.display = "none";
+    } else {
+      // Se não mostrou o editForm, mostra a seção de auth para o dono fazer login
+      if (loadingSection) loadingSection.style.display = "none";
+      if (authSection) authSection.style.display = "";
     }
+    
     if (ownerProdutosSection instanceof HTMLElement) {
       ownerProdutosSection.classList.toggle("is-hidden", !show);
     }
@@ -3061,10 +3069,11 @@ async function initOwnerPage() {
     } catch (_) {}
 
     // 2. Fallback: PIN em cache (sistema legado)
-    if (!isOwnerVerified(slug)) return;
-    const cachedPin = getOwnerPinCache(slug);
-    if (!cachedPin) return;
-    ownerValidatedPin = cachedPin;
+    if (!isOwnerVerified(slug) || !getOwnerPinCache(slug)) {
+       showEdit(false);
+       return;
+    }
+    ownerValidatedPin = getOwnerPinCache(slug);
     showEdit(true);
     await loadAndFill();
   };
