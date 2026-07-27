@@ -219,7 +219,7 @@
             </div>
           </details>
 
-          <details class="details details-sub" id="agendamento-config">
+          <details class="details details-sub" id="agendamento-config" style="display:none;">
             <summary>Configurações de Agendamento (Serviços)</summary>
             <div class="two-cols">
               <label>Intervalo (min) <input type="number" name="agendamento_intervalo" /></label>
@@ -308,11 +308,11 @@
                 <input type="number" name="estoque_diario" placeholder="Ex: 50" />
               </label>
 
-              <div class="field">
-                <label>Acompanhamentos / Personalização</label>
+              <details class="details details-sub">
+                <summary>Acompanhamentos / Personalização</summary>
                 <div id="product-options-container" class="stack-gap" style="margin-top: 8px;"></div>
                 
-                <div class="presets-container">
+                <div class="presets-container" style="margin-top:8px;">
                   <button type="button" class="btn btn-preset" data-preset-group="Arroz">+ Arroz</button>
                   <button type="button" class="btn btn-preset" data-preset-group="Feijão">+ Feijão</button>
                   <button type="button" class="btn btn-preset" data-preset-group="Mistura">+ Mistura</button>
@@ -320,7 +320,7 @@
                 </div>
                 
                 <input type="hidden" name="opcoes_json" />
-              </div>
+              </details>
 
               <div class="topbar-actions" style="margin-top:10px;">
                 <button type="submit" class="btn btn-primary btn-lg" style="flex:1;">Salvar Produto</button>
@@ -411,7 +411,7 @@
       </div>
     </div>
 
-    <script type="module" src="/admin/script.js?v=44"></script>
+    <script type="module" src="/admin/script.js?v=45"></script>
     <script type="module">
       import { supabase } from '/shared/supabase.js';
 

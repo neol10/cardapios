@@ -3032,7 +3032,9 @@ async function initOwnerPage() {
   if (!(editForm instanceof HTMLFormElement)) return;
 
   const setOwnerMessage = (text, type = "") => setMessage(message, text, type);
-  let ownerValidatedPin = getOwnerPinCache(slug) || "__auth__";
+  // ownerValidatedPin = '__auth__' quando logado via Supabase Auth (novo sistema)
+  // ownerValidatedPin = PIN quando legado
+  let ownerValidatedPin = "__auth__";
 
   const getOwnerPinValue = () => ownerValidatedPin;
 
@@ -3146,6 +3148,8 @@ async function initOwnerPage() {
         if (lojaData?.sucesso && lojaData?.slug === slug) {
           ownerValidatedPin = "__auth__";
           setOwnerVerified(slug);
+          // Limpa PIN antigo do localStorage para evitar conflito
+          try { localStorage.removeItem(`owner_pin_${slug}`); } catch(_) {}
           showEdit(true);
           setOwnerMessage("");
           await loadAndFill();
@@ -3467,14 +3471,9 @@ async function initOwnerPage() {
     });
 
 
-    if (error) {
-      setOwnerMessage("Não foi possível salvar o produto. Verifique o schema no Supabase.", "error");
-      return;
-    }
-
-    if (data !== true) {
-      console.error("Erro de validação no RPC owner_upsert_produto", { slug, pinSent: pin ? "****" : "vazio" });
-      setOwnerMessage("PIN inválido ou acesso desabilitado.", "error");
+    if (error || data !== true) {
+      setOwnerMessage("Não foi possível salvar o produto. Tente novamente.", "error");
+      console.error("owner_upsert_produto:", error || 'data !== true');
       return;
     }
 
