@@ -45,9 +45,18 @@ function setAdminPinVerified() {
 function updateAgendamentoVisibility(form) {
   if (!form) return;
   const modo = String(form.modo?.value || "pedido");
+  const isAgendamento = modo === "agendamento";
+
+  // Mostra/oculta configurações de agendamento no editForm
   const config = document.getElementById("agendamento-config");
-  if (config) {
-    config.style.display = modo === "agendamento" ? "block" : "none";
+  if (config) config.style.display = isAgendamento ? "block" : "none";
+
+  // Mostra/oculta seção de Acompanhamentos no formulário de produto
+  // (só faz sentido para agendamento/marmita; em catálogo/pedido é desnecessário)
+  const ownerProdutoForm = document.querySelector("#owner-produto-form");
+  if (ownerProdutoForm) {
+    const acompDetails = ownerProdutoForm.querySelector("details.details-sub");
+    if (acompDetails) acompDetails.style.display = isAgendamento ? "" : "none";
   }
 }
 
@@ -3132,6 +3141,8 @@ async function initOwnerPage() {
     refreshAllColorPreviews(editForm); // Garante que as cores apareçam nos previews
 
     ownerCardapio = data;
+    // Atualiza visibilidade das seções baseada no modo do cardápio
+    updateAgendamentoVisibility(editForm);
     await loadOwnerDashboard();
     await loadOwnerProdutos();
     return true;
