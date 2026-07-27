@@ -1570,9 +1570,8 @@ function fillCardapioForm(item) {
   if (form.fonte_key) form.fonte_key.value = item.fonte_key || "sora";
   if (form.fonte_peso_texto) form.fonte_peso_texto.value = String(item.fonte_peso_texto ?? 400);
   if (form.fonte_peso_titulo) form.fonte_peso_titulo.value = String(item.fonte_peso_titulo ?? 800);
-  if (form.horario_funcionamento) form.horario_funcionamento.value = item.horario_funcionamento || "";
-  if (form.abre_em) form.abre_em.value = item.abre_em ? String(item.abre_em).slice(0, 5) : "";
-  if (form.fecha_em) form.fecha_em.value = item.fecha_em ? String(item.fecha_em).slice(0, 5) : "";
+  // Horários de funcionamento por dia da semana
+  initHorariosDiasGrid(form, item.horario_funcionamento || null);
   if (form.endereco) form.endereco.value = item.endereco || "";
   if (form.instagram_url) form.instagram_url.value = item.instagram_url || "";
   if (form.foto_url) form.foto_url.value = item.foto_url || "";
@@ -1765,6 +1764,97 @@ function resetForms() {
     renderGaleriaPreview(cardapioForm);
   }
 }
+
+// ─── Grade de Horários de Funcionamento por Dia ───────────────────────────
+const DIAS_SEMANA = [
+  { dia: 0, nome: 'Dom' },
+  { dia: 1, nome: 'Seg' },
+  { dia: 2, nome: 'Ter' },
+  { dia: 3, nome: 'Qua' },
+  { dia: 4, nome: 'Qui' },
+  { dia: 5, nome: 'Sex' },
+  { dia: 6, nome: 'Sáb' },
+];
+
+function parseHorariosJson(raw) {
+  if (!raw) return null;
+  try {
+    const parsed = JSON.parse(raw);
+    if (Array.isArray(parsed) && parsed[0]?.dia !== undefined) return parsed;
+  } catch (_) {}
+  return null;
+}
+
+function defaultHorarios() {
+  return DIAS_SEMANA.map(d => ({
+    dia: d.dia,
+    nome: d.nome,
+    aberto: d.dia >= 1 && d.dia <= 5, // Seg-Sex abertos por padrão
+    abre: '08:00',
+    fecha: '18:00'
+  }));
+}
+
+function initHorariosDiasGrid(form, rawJson) {
+  const grid = form.closest('#owner-page')?.querySelector('#horarios-dias-grid')
+            || document.querySelector('#horarios-dias-grid');
+  const hiddenInput = form.elements['horario_funcionamento']
+                   || document.getElementById('horario_funcionamento_json');
+  if (!grid || !hiddenInput) return;
+
+  let horarios = parseHorariosJson(rawJson) || defaultHorarios();
+
+  // Garante que todos os 7 dias existam
+  DIAS_SEMANA.forEach(d => {
+    if (!horarios.find(h => h.dia === d.dia)) {
+      horarios.push({ dia: d.dia, nome: d.nome, aberto: false, abre: '08:00', fecha: '18:00' });
+    }
+  });
+  horarios.sort((a, b) => a.dia - b.dia);
+
+  function syncJson() {
+    hiddenInput.value = JSON.stringify(horarios);
+  }
+
+  function renderGrid() {
+    grid.innerHTML = horarios.map((h, i) => `
+      <div style="display:flex; align-items:center; gap:10px; background:rgba(255,255,255,0.04); border-radius:10px; padding:8px 12px;">
+        <label style="display:flex; align-items:center; gap:6px; min-width:54px; cursor:pointer; font-weight:600;">
+          <input type="checkbox" data-idx="${i}" data-field="aberto" ${h.aberto ? 'checked' : ''} style="width:18px;height:18px;accent-color:#ff7b00;cursor:pointer;" />
+          ${h.nome}
+        </label>
+        <input type="time" data-idx="${i}" data-field="abre" value="${h.abre || ''}"
+          ${!h.aberto ? 'disabled' : ''}
+          style="flex:1; padding:6px; border-radius:8px; background:#1a1a1a; border:1px solid #333; color:#fff; font-size:0.9rem; ${!h.aberto ? 'opacity:0.35;' : ''}" />
+        <span style="color:#888; font-size:0.8rem;">às</span>
+        <input type="time" data-idx="${i}" data-field="fecha" value="${h.fecha || ''}"
+          ${!h.aberto ? 'disabled' : ''}
+          style="flex:1; padding:6px; border-radius:8px; background:#1a1a1a; border:1px solid #333; color:#fff; font-size:0.9rem; ${!h.aberto ? 'opacity:0.35;' : ''}" />
+      </div>
+    `).join('');
+
+    // Eventos
+    grid.querySelectorAll('input[data-idx]').forEach(el => {
+      el.addEventListener('change', () => {
+        const idx = parseInt(el.dataset.idx);
+        const field = el.dataset.field;
+        if (field === 'aberto') {
+          horarios[idx].aberto = el.checked;
+          renderGrid(); // re-render para habilitar/desabilitar horários
+        } else {
+          horarios[idx][field] = el.value;
+        }
+        syncJson();
+      });
+    });
+
+    syncJson();
+  }
+
+  renderGrid();
+}
+
+// ──────────────────────────────────────────────────────────────────────────────
 
 async function uploadProductImage(cardapioId, file) {
   const safeName = file.name.replace(/\s+/g, "-").toLowerCase();
@@ -3145,17 +3235,17 @@ async function initOwnerPage() {
 
     statsContainer.innerHTML = `<p class="muted">Carregando estatísticas...</p>`;
 
+    let history = [], top = [];
     try {
-      const [{ data: history }, { data: top }] = await Promise.all([
-        supabase.rpc("get_sales_history", { p_cardapio_id: ownerCardapio.id }),
-        supabase.rpc("get_top_products", { p_cardapio_id: ownerCardapio.id })
-      ]);
+      const r1 = await supabase.rpc("get_sales_history", { p_cardapio_id: ownerCardapio.id });
+      if (!r1.error) history = r1.data || [];
+    } catch (_) {}
+    try {
+      const r2 = await supabase.rpc("get_top_products", { p_cardapio_id: ownerCardapio.id });
+      if (!r2.error) top = r2.data || [];
+    } catch (_) {}
 
-      renderOwnerDashboard(statsContainer, history || [], top || []);
-    } catch (e) {
-      console.warn("Erro ao carregar dashboard:", e);
-      statsContainer.innerHTML = "";
-    }
+    renderOwnerDashboard(statsContainer, history, top);
   }
 
   function renderOwnerDashboard(container, history, top) {
@@ -3250,26 +3340,51 @@ async function initOwnerPage() {
     }
 
     const patch = getOwnerCardapioEditPayload(editForm);
+    // Quando o usuário está autenticado via Supabase Auth, o PIN é irrelevante.
+    // Enviamos null para o RPC e a função no banco usa a sessão.
+    const pinParaRpc = ownerValidatedPin === "__auth__" ? null : onlyDigits(ownerValidatedPin || getOwnerPinCache(slug));
     const { data, error } = await supabase.rpc("owner_update_cardapio", {
       p_slug: slug,
-      p_pin: pin,
+      p_pin: pinParaRpc,
       p_patch: patch
     });
 
     if (error) {
       setOwnerMessage("Não foi possível salvar. Verifique o schema no Supabase.", "error");
+      console.error("owner_update_cardapio error:", error);
       return;
     }
 
     if (data !== true) {
-      setOwnerPinCache(slug, "");
-      setOwnerMessage("PIN inválido ou acesso desabilitado.", "error");
+      // Tenta sem PIN (novo fluxo de autenticação)
+      if (ownerValidatedPin === "__auth__") {
+        setOwnerMessage("Erro ao salvar. Tente sair e entrar novamente.", "error");
+      } else {
+        setOwnerPinCache(slug, "");
+        setOwnerMessage("PIN inválido ou acesso desabilitado.", "error");
+      }
       return;
     }
 
-    setOwnerPinCache(slug, pin);
-    ownerValidatedPin = pin;
-    setOwnerMessage("Salvo com sucesso.", "success");
+    setOwnerMessage("Salvo com sucesso! ✅", "success");
+
+    // Mostrar banner com link para o cardápio do cliente
+    const cardapioUrl = `${window.location.origin}/cardapio/${slug}`;
+    const linkBanner = ownerPage.querySelector("#owner-cardapio-link-banner");
+    const linkBtn = ownerPage.querySelector("#owner-cardapio-link-btn");
+    const copyBtn = ownerPage.querySelector("#owner-copy-link-btn");
+    if (linkBanner && linkBtn) {
+      linkBtn.href = cardapioUrl;
+      linkBanner.style.display = "block";
+    }
+    if (copyBtn) {
+      copyBtn.onclick = () => {
+        navigator.clipboard.writeText(cardapioUrl).then(() => {
+          copyBtn.textContent = "✅ Link copiado!";
+          setTimeout(() => { copyBtn.textContent = "📋 Copiar link"; }, 2500);
+        });
+      };
+    }
 
     await loadAndFill();
   });
@@ -3294,11 +3409,7 @@ async function initOwnerPage() {
     }
 
     const pin = getOwnerPinValue();
-
-    if (!pin) {
-      setOwnerMessage("Digite o PIN para continuar.", "error");
-      return;
-    }
+    const pinParaRpc = ownerValidatedPin === "__auth__" ? null : onlyDigits(pin);
 
     const payload = getOwnerProdutoPayload(ownerProdutoForm);
     if (!payload.nome || !payload.preco) {
@@ -3341,7 +3452,7 @@ async function initOwnerPage() {
 
     const { data, error } = await supabase.rpc("owner_upsert_produto", {
       p_slug: slug,
-      p_pin: pin,
+      p_pin: ownerValidatedPin === "__auth__" ? null : onlyDigits(ownerValidatedPin || getOwnerPinCache(slug)),
       p_patch: {
         id: payload.id || null,
         nome: payload.nome,
@@ -3403,31 +3514,22 @@ async function initOwnerPage() {
       const confirmed = confirm(`Excluir ${produto.nome}?`);
       if (!confirmed) return;
 
-      const pin = getOwnerPinValue();
-
-      if (!pin) {
-        setOwnerMessage("Digite o PIN para continuar.", "error");
-        return;
-      }
-
       const { data, error } = await supabase.rpc("owner_delete_produto", {
         p_slug: slug,
-        p_pin: pin,
+        p_pin: ownerValidatedPin === "__auth__" ? null : onlyDigits(getOwnerPinValue()),
         p_produto_id: produto.id
       });
 
       if (error) {
-        setOwnerMessage("Não foi possível excluir o produto. Verifique o schema no Supabase.", "error");
+        setOwnerMessage("Não foi possível excluir o produto.", "error");
         return;
       }
 
       if (data !== true) {
-        setOwnerPinCache(slug, "");
-        setOwnerMessage("PIN inválido ou acesso desabilitado.", "error");
+        setOwnerMessage("Acesso negado. Tente sair e entrar novamente.", "error");
         return;
       }
 
-      setOwnerPinCache(slug, pin);
       await loadOwnerProdutos();
       setOwnerMessage("Produto excluído.", "success");
     }

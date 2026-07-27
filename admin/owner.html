@@ -157,23 +157,14 @@
             </div>
           </details>
 
-          <details class="details details-sub">
+          <details class="details details-sub" id="horarios-funcionamento-section">
             <summary>⏰ Horários de Funcionamento</summary>
-            <div class="stack-gap" style="padding: 12px 0;">
-              <label>
-                Horário (texto)
-                <input type="text" name="horario_funcionamento" placeholder="Ex.: Seg-Sex 18h às 23h" />
-              </label>
-
-              <div class="two-cols">
-                <label>
-                  Abre às
-                  <input type="time" name="abre_em" />
-                </label>
-                <label>
-                  Fecha às
-                  <input type="time" name="fecha_em" />
-                </label>
+            <!-- Campo hidden guarda o JSON com os horários por dia -->
+            <input type="hidden" name="horario_funcionamento" id="horario_funcionamento_json" />
+            <div style="padding: 12px 0;">
+              <p class="muted" style="font-size: 0.82rem; margin-bottom: 12px;">Marque os dias em que a loja abre e defina o horário:</p>
+              <div id="horarios-dias-grid" style="display: flex; flex-direction: column; gap: 10px;">
+                <!-- Gerado pelo JS -->
               </div>
             </div>
           </details>
@@ -242,6 +233,10 @@
         </details>
 
           <button type="submit" class="btn btn-primary btn-lg">Salvar</button>
+          <div id="owner-cardapio-link-banner" style="display:none; margin-top: 8px;">
+            <a id="owner-cardapio-link-btn" href="#" target="_blank" rel="noopener" class="btn btn-primary btn-lg" style="text-decoration:none; display:block; text-align:center;">🔗 Ver meu cardápio</a>
+            <button type="button" id="owner-copy-link-btn" class="btn" style="width:100%; margin-top:6px;">📋 Copiar link</button>
+          </div>
           <button type="button" class="btn" id="owner-logout">Sair</button>
         </form>
 
@@ -416,7 +411,7 @@
       </div>
     </div>
 
-    <script type="module" src="/admin/script.js?v=43"></script>
+    <script type="module" src="/admin/script.js?v=44"></script>
     <script type="module">
       import { supabase } from '/shared/supabase.js';
 
