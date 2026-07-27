@@ -3254,11 +3254,11 @@ async function initOwnerPage() {
 
     let history = [], top = [];
     try {
-      const r1 = await supabase.rpc("get_sales_history", { p_cardapio_id: ownerCardapio.id });
+      const r1 = await supabase.rpc("get_sales_history", { p_cardapio_id: ownerCardapio.id, p_days: 7 });
       if (!r1.error) history = r1.data || [];
     } catch (_) {}
     try {
-      const r2 = await supabase.rpc("get_top_products", { p_cardapio_id: ownerCardapio.id });
+      const r2 = await supabase.rpc("get_top_products", { p_cardapio_id: ownerCardapio.id, p_limit: 5 });
       if (!r2.error) top = r2.data || [];
     } catch (_) {}
 
